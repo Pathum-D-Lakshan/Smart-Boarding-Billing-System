@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Register | Smart Boarding & Billing System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+
+<body>
+    <main class="auth-card">
+
+        <div class="brand">
+            <svg class="brand-icon"
+                 viewBox="0 0 64 64"
+                 fill="none"
+                 aria-hidden="true">
+                <path
+                    d="M10 28L32 8L54 28V56H39V38H25V56H10V28Z"
+                    stroke="currentColor"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+                </path>
+            </svg>
+
+            <p class="brand-name">Smart Boarding</p>
+            <p class="brand-subtitle">&amp; Billing System</p>
+        </div>
+
+        <header class="auth-header">
+            <h1>Create an account</h1>
+            <p>Join our boarding community.</p>
+        </header>
+
+        <form method="post">
+
+            <div class="form-group">
+                <label for="role">Account Type</label>
+
+                <select id="role" name="role" required>
+                    <option value="" disabled selected>
+                        Select account type
+                    </option>
+                    <option value="student">Student</option>
+                    <option value="owner">Boarding Owner</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+
+                <input
+                    type="text"
+                    id="full_name"
+                    name="full_name"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+
+                <input
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    placeholder="Enter your password again"
+                    autocomplete="new-password"
+                    required>
+            </div>
+
+            <button type="submit" class="login-button">
+                Create Account
+            </button>
+
+        </form>
+
+        <p class="auth-footer">
+            Already have an account?
+            <a href="{{ url_for('login') }}" class="register-text">
+                Log in
+            </a>
+        </p>
+
+    </main>
+</body>
+</html>

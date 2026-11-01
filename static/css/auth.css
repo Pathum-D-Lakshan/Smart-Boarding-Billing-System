@@ -267,3 +267,66 @@ body {
         transition: none;
     }
 }
+
+/*----------------------------------------------------------*/
+
+/* Account type dropdown */
+.form-group select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 15px 16px;
+
+    font: inherit;
+    font-size: 16px;
+    line-height: 1.4;
+
+    color: #f8fafc;
+    background-color: #0b1120;
+    color-scheme: dark;
+
+    border: 1px solid #64748b;
+    border-radius: 11px;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.form-group select:invalid {
+    color: #94a3b8;
+}
+
+.form-group select option {
+    color: #f8fafc;
+    background-color: #0b1120;
+}
+
+.form-group select:focus {
+    border-color: #22d3ee;
+    outline: 2px solid #22d3ee;
+    outline-offset: 2px;
+    box-shadow: 0 0 16px rgba(34, 211, 238, 0.1);
+}
+
+/* Links between login and registration */
+.auth-footer a {
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.auth-footer a:focus-visible {
+    outline: 2px solid #22d3ee;
+    outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .form-group select {
+        transition: none;
+    }
+}
