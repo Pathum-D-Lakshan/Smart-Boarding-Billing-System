@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | Smart Boarding & Billing System</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/auth.css') }}"
+    >
+</head>
+<body>
+
+    <main class="auth-card">
+
+        <div class="brand">
+            <svg
+                class="brand-icon"
+                viewBox="0 0 64 64"
+                fill="none"
+                aria-hidden="true"
+            >
+                <path
+                    d="M10 28L32 8L54 28V56H39V38H25V56H10V28Z"
+                    stroke="currentColor"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+            </svg>
+
+            <p class="brand-name">Smart Boarding</p>
+            <p class="brand-subtitle">&amp; Billing System</p>
+        </div>
+
+        <header class="auth-header">
+            <h1>Welcome back</h1>
+            <p>Log in to your boarding account.</p>
+        </header>
+
+        <form method="post">
+
+            <div class="form-group">
+                <label for="email">Email</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="login-button">
+                Log In
+            </button>
+
+        </form>
+
+        <p class="auth-footer">
+            New here?
+            <span class="register-text">Create an account</span>
+        </p>
+
+    </main>
+
+</body>
+</html>
