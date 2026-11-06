@@ -1,0 +1,233 @@
+{% macro password_field(id, label, new=false, help=false) %}
+<div class="form-group">
+    <label for="{{ id }}">{{ label }}</label>
+    <input type="password" id="{{ id }}" name="{{ id }}"
+           autocomplete="{{ 'new-password' if new else 'current-password' }}"
+           {% if new %}minlength="8" maxlength="128"{% endif %}
+           {% if help %}
+           pattern="(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E]).{8,128}"
+           title="Use 8–128 characters and at least one symbol."
+           aria-describedby="password-help"
+           {% endif %} required>
+    {% if help %}
+    <p id="password-help" class="auth-message">
+        Use at least 8 characters and a symbol like !, @ or #.
+    </p>
+    {% endif %}
+</div>
+{% endmacro %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default(title) }} | Smart Boarding &amp; Billing System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+    <main class="auth-card">
+        <div class="brand">
+            {% if show_icon %}
+            <svg class="brand-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M10 28L32 8L54 28V56H39V38H25V56H10V28Z"
+                      stroke="currentColor" stroke-width="4"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {% endif %}
+            <p class="brand-name">Smart Boarding</p>
+            <p class="brand-subtitle">&amp; Billing System</p>
+        </div>
+
+        <header class="auth-header">
+            <h1>{{ title }}</h1>
+            <p>{{ subtitle }}</p>
+        </header>
+
+        {% if error %}
+        <p class="auth-message auth-error" role="alert">{{ error }}</p>
+        {% endif %}
+
+        {% for message in get_flashed_messages() %}
+        <p class="auth-message auth-success" role="status">{{ message }}</p>
+        {% endfor %}
+
+        {% block content %}
+        {% if mode == "dashboard" %}
+        <form method="post" action="{{ url_for('logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="login-button">Log Out</button>
+        </form>
+
+        {% elif mode == "forgot" %}
+        <form method="post" action="{{ url_for('forgot_password') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" autocomplete="email"
+                       maxlength="254" value="{{ email|default('') }}" required>
+            </div>
+            <button type="submit" class="login-button">Send reset code</button>
+        </form>
+
+        {% elif mode == "code" %}
+        <!-- Registration and reset both use this OTP screen. -->
+        <p id="otp-countdown" class="otp-countdown" data-seconds="{{ remaining }}" role="timer">
+            Time left
+            <strong id="otp-time">{{ '%d:%02d'|format(remaining // 60, remaining % 60) }}</strong>
+        </p>
+
+        <p id="otp-expired" class="auth-message auth-error" role="status" {% if remaining %}hidden{% endif %}>
+            The code expired. Select Resend code to get a new one.
+        </p>
+
+        <form method="post" action="{{ url_for(endpoint) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label for="code">8-digit code</label>
+                <input type="text" id="code" name="code" inputmode="numeric"
+                       autocomplete="one-time-code" pattern="[0-9]{8}" maxlength="8" required>
+            </div>
+            <button id="verify-code" type="submit" class="login-button" {% if not remaining %}disabled{% endif %}>
+                {{ "Verify and create account" if endpoint == "verify_email" else "Verify code" }}
+            </button>
+        </form>
+
+        <!-- A separate form lets Resend work with an empty code field. -->
+        <form class="resend-form" method="post" action="{{ url_for(endpoint) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="resend">
+            <button id="resend-code" type="submit" class="resend-button" {% if remaining %}disabled{% endif %}>
+                Resend code
+            </button>
+        </form>
+
+        <p class="auth-footer"><a href="{{ url_for(restart) }}">Use another email address</a></p>
+        <noscript><p class="auth-message">Reload this page after one minute to enable Resend code.</p></noscript>
+
+        {% elif mode == "new_password" %}
+        <!-- Flask renders this form only after checking a verified reset grant. -->
+        <form method="post" action="{{ url_for('new_password') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {{ password_field('password', 'New Password', new=true, help=true) }}
+            {{ password_field('confirm_password', 'Confirm Password', new=true) }}
+            <button type="submit" class="login-button">Change Password</button>
+        </form>
+        {% endif %}
+
+        {% if mode != "dashboard" %}
+        <p class="auth-footer"><a href="{{ url_for('login') }}">Back to Log In</a></p>
+        {% endif %}
+        {% endblock %}
+    </main>
+
+    <script>
+        // Add a Show/Hide eye button to each password field.
+        for (const field of document.querySelectorAll('input[type="password"]')) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "password-field";
+            field.before(wrapper);
+            wrapper.append(field);
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "password-toggle";
+            button.setAttribute("aria-controls", field.id);
+            button.setAttribute("aria-label", "Show " + field.labels[0].textContent.trim().toLowerCase());
+            button.setAttribute("aria-pressed", "false");
+            button.title = "Show password";
+            button.innerHTML =
+                '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">' +
+                '<path d="M2 12c2.5-4 6-6 10-6s7.5 2 10 6c-2.5 4-6 6-10 6S4.5 16 2 12Z"/>' +
+                '<circle cx="12" cy="12" r="2.5"/>' +
+                '<path class="eye-slash" d="M3 3l18 18" stroke-linecap="round"/>' +
+                '</svg>';
+            wrapper.append(button);
+
+            button.addEventListener("click", () => {
+                const show = field.type === "password";
+                field.type = show ? "text" : "password";
+                button.setAttribute("aria-pressed", String(show));
+                button.title = show ? "Hide password" : "Show password";
+            });
+        }
+
+        // Count down from the remaining time supplied by Flask.
+        const countdown = document.getElementById("otp-countdown");
+        if (countdown) {
+            const deadline = Date.now() + Number(countdown.dataset.seconds) * 1000;
+            const display = document.getElementById("otp-time");
+            const expiredMessage = document.getElementById("otp-expired");
+            const verify = document.getElementById("verify-code");
+            const resend = document.getElementById("resend-code");
+
+            function updateCountdown() {
+                const seconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+                display.textContent = Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
+                verify.disabled = seconds === 0;
+                resend.disabled = seconds > 0;
+                expiredMessage.hidden = seconds > 0;
+
+                if (seconds === 0) clearInterval(timer);
+            }
+
+            const timer = setInterval(updateCountdown, 250);
+            updateCountdown();
+        }
+
+        // Keep the live duplicate-Gmail check on the registration form.
+        const registerForm = document.querySelector("[data-email-check]");
+        if (registerForm) {
+            const email = registerForm.elements.email;
+            const feedback = document.getElementById("email-feedback");
+            const gmail = /^[a-z0-9]+(?:\.[a-z0-9]+)*(?:\+[a-z0-9._-]+)?@gmail\.com$/i;
+            let timer;
+            let revision = 0;
+
+            function showEmailError(message) {
+                feedback.textContent = message;
+                email.setCustomValidity(message);
+                email.setAttribute("aria-invalid", String(Boolean(message)));
+            }
+
+            email.addEventListener("input", () => {
+                clearTimeout(timer);
+                const current = ++revision;
+                const address = email.value.trim();
+
+                showEmailError("");
+
+                if (!gmail.test(address)) return;
+
+                timer = setTimeout(async () => {
+                    try {
+                        const response = await fetch(registerForm.dataset.emailCheck, {
+                            method: "POST",
+                            body: new URLSearchParams({
+                                email: address,
+                                csrf_token: registerForm.elements.csrf_token.value
+                            })
+                        });
+
+                        if (!response.ok) return;
+
+                        const result = await response.json();
+                        if (current === revision && result.registered) {
+                            showEmailError("That Gmail is already registered.");
+                        }
+                    } catch {
+                        // The server checks the Gmail again when the form is submitted.
+                    }
+                }, 350);
+            });
+
+            email.addEventListener("blur", () => {
+                const address = email.value.trim();
+                if (address && !gmail.test(address)) {
+                    showEmailError("Enter a valid @gmail.com address.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

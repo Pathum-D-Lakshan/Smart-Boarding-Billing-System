@@ -1,87 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "auth_step.html" %}
+{% set page_title = "Login" %}
+{% set title = "Welcome back" %}
+{% set subtitle = "Log in to your boarding account." %}
+{% set show_icon = true %}
 
-    <title>Login | Smart Boarding & Billing System</title>
+{% block content %}
+<form method="post" action="{{ url_for('login') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/auth.css') }}"
-    >
-</head>
-<body>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com"
+               autocomplete="username" required>
+    </div>
 
-    <main class="auth-card">
+    <!-- The shared template adds the Show/Hide eye button. -->
+    {{ password_field('password', 'Password') }}
+    <button type="submit" class="login-button">Log In</button>
+</form>
 
-        <div class="brand">
-            <svg
-                class="brand-icon"
-                viewBox="0 0 64 64"
-                fill="none"
-                aria-hidden="true"
-            >
-                <path
-                    d="M10 28L32 8L54 28V56H39V38H25V56H10V28Z"
-                    stroke="currentColor"
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                />
-            </svg>
-
-            <p class="brand-name">Smart Boarding</p>
-            <p class="brand-subtitle">&amp; Billing System</p>
-        </div>
-
-        <header class="auth-header">
-            <h1>Welcome back</h1>
-            <p>Log in to your boarding account.</p>
-        </header>
-
-        <form method="post">
-
-            <div class="form-group">
-                <label for="email">Email</label>
-
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="you@example.com"
-                    autocomplete="username"
-                    required
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    autocomplete="current-password"
-                    required
-                >
-            </div>
-
-            <button type="submit" class="login-button">
-                Log In
-            </button>
-
-        </form>
-
-        <p class="auth-footer">
-           New here?
-          <a href="{{ url_for('register') }}" class="register-text">
-             Create an account
-         </a>
-       </p>  
-
-    </main>
-
-</body>
-</html>
+<p class="auth-footer"><a href="{{ url_for('forgot_password') }}">Forgot password?</a></p>
+<p class="auth-footer">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+{% endblock %}
