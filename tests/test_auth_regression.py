@@ -29,6 +29,8 @@ class AuthRegressionTests(unittest.TestCase):
         self.cursor = self.connection.cursor.return_value.__enter__.return_value
         self.cursor.fetchone.side_effect = lambda: self.user.copy() if self.user else None
         self.start_patch("auth_access.get_db_connection", return_value=self.connection)
+        self.start_patch("app.get_room_summary", return_value={"total_rooms": 0, "total_beds": 0, "shared_rooms": 0, "private_rooms": 0})
+        self.start_patch("owner_rooms.get_db_connection", side_effect=AssertionError("Unexpected live rooms database access"))
         for target in ("auth_email.get_db_connection", "owner_boarding.get_db_connection", "auth_email.send_code"):
             self.start_patch(target, side_effect=AssertionError("Unexpected live database or SMTP access"))
 

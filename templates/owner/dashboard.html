@@ -11,7 +11,7 @@
 
             <!-- An em dash shows that a metric is awaiting its feature integration. -->
             {% set metrics = [
-                ('Total Rooms', 'bed', 'Available after Rooms & Beds setup.'),
+                ('Total Rooms', 'bed', 'Rooms registered in your boarding.' if room_summary is not none else 'Room count is temporarily unavailable.'),
                 ('Occupied Beds', 'users', 'Available when tenancy is connected.'),
                 ('Pending Join Requests', 'request', 'Available when join requests are connected.'),
                 ('Pending Payments', 'payment', 'Available when payments are connected.')
@@ -23,7 +23,9 @@
                         <span class="metric-icon">{{ icon(glyph) }}</span>
                         <div>
                             <h3>{{ label }}</h3>
-                            <p class="metric-value" aria-hidden="true">&mdash;</p>
+                            {% if label == 'Total Rooms' and room_summary is not none %}
+                            <p class="metric-value">{{ room_summary.total_rooms }}</p>
+                            {% else %}<p class="metric-value" aria-hidden="true">&mdash;</p>{% endif %}
                         </div>
                     </div>
                     <p class="metric-note">{{ description }}</p>
@@ -37,6 +39,14 @@
                     <h2 id="setup-title">Boarding Profile</h2>
                     <p>View your boarding details and profile status.</p>
                     <a class="owner-link" href="{{ url_for('owner_boarding.profile') }}">View Boarding Profile &rarr;</a>
+                </div>
+            </section>
+            <section class="setup-card" aria-labelledby="rooms-setup-title">
+                <span class="metric-icon">{{ icon('bed') }}</span>
+                <div>
+                    <h2 id="rooms-setup-title">Rooms &amp; Beds</h2>
+                    <p>View your registered rooms, beds and rental information.</p>
+                    <a class="owner-link" href="{{ url_for('owner_rooms.overview') }}">Manage Rooms &amp; Beds &rarr;</a>
                 </div>
             </section>
 {% endblock %}

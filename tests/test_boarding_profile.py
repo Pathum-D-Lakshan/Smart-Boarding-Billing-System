@@ -66,6 +66,8 @@ class BoardingProfileTests(unittest.TestCase):
         self.account_db = self.start_patch("auth_access.get_db_connection", return_value=self.account_connection)
         self.boarding_db = self.start_patch("owner_boarding.get_db_connection", return_value=self.boarding_connection)
         self.start_patch("auth_email.get_db_connection", side_effect=AssertionError("Unexpected live database access"))
+        self.start_patch("app.get_room_summary", return_value={"total_rooms": 0, "total_beds": 0, "shared_rooms": 0, "private_rooms": 0})
+        self.start_patch("owner_rooms.get_db_connection", side_effect=AssertionError("Unexpected live rooms database access"))
         self.sign_in()
 
     def start_patch(self, target, **kwargs):
@@ -233,7 +235,8 @@ class BoardingProfileTests(unittest.TestCase):
                     self.assertEqual(response.text.count(f'id="{element_id}"'), 1)
                 self.assertIn('name="csrf_token"', response.text)
                 self.assertIn('form="owner-logout"', response.text)
-                self.assertEqual(response.text.count('<span class="nav-status">Coming soon</span>'), 10)
+                self.assertEqual(response.text.count('<span class="nav-status">Coming soon</span>'), 9)
+                self.assertIn('href="/owner/rooms"', response.text)
                 self.assertIn('href="/owner/boarding"', response.text)
 
     def test_profile_styles_only_loaded_on_profile(self):

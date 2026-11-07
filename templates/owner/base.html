@@ -65,7 +65,7 @@
 
     <!-- Preserve the sidebar order while connecting Owner features. -->
     {% set planned_items = [
-        ('Rooms & Beds', 'bed'), ('Listings', 'layers'),
+        ('Listings', 'layers'),
         ('Join Requests', 'request'), ('Tenants', 'users'), ('Monthly Bills', 'bill'),
         ('Payments', 'payment'), ('Income & Expenses', 'finance'), ('Maintenance', 'tool'),
         ('Reports', 'report'), ('Settings', 'settings')
@@ -91,6 +91,13 @@
                        href="{{ url_for('owner_boarding.profile') }}"
                        {% if active_page == 'boarding' %}aria-current="page"{% endif %} title="Boarding Profile">
                         {{ icon('user') }}<span class="nav-label">Boarding Profile</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-row{% if active_page == 'rooms' %} nav-current{% endif %}"
+                       href="{{ url_for('owner_rooms.overview') }}"
+                       {% if active_page == 'rooms' %}aria-current="page"{% endif %} title="Rooms &amp; Beds">
+                        {{ icon('bed') }}<span class="nav-label">Rooms &amp; Beds</span>
                     </a>
                 </li>
                 {% for label, glyph in planned_items %}

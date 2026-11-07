@@ -18,11 +18,13 @@ from auth_email import (
 from auth_access import load_current_account
 from owner_boarding import owner_boarding
 from boarding_images import MAX_COVER_BYTES
+from owner_rooms import get_room_summary, owner_rooms
 
 # db.py already loads the project's .env file.
 app = Flask(__name__)
 app.config.update(SECRET_KEY=os.environ["SECRET_KEY"], SESSION_COOKIE_SAMESITE="Lax")
 app.register_blueprint(owner_boarding)
+app.register_blueprint(owner_rooms)
 
 AUTH_POSTS = {
     "login", "logout", "register", "check_email", "verify_email",
@@ -48,7 +50,7 @@ def check_form_token():
         # Bound multipart parsing before CSRF reads request.form; auth routes keep their limits.
         request.max_content_length = MAX_COVER_BYTES + 1024 * 1024
     if request.method == "POST" and (
-        request.endpoint in AUTH_POSTS or request.blueprint == "owner_boarding"
+        request.endpoint in AUTH_POSTS or request.blueprint in ("owner_boarding", "owner_rooms")
     ):
         expected = session.get("csrf_token", "")
         submitted = request.form.get("csrf_token", "")
@@ -116,8 +118,13 @@ def dashboard(role=None):
 
     # Render the owner workspace after the session and database role checks.
     if role == "owner":
+        try:
+            room_summary = get_room_summary(user["user_id"])
+        except Error as error:
+            app.logger.error("Dashboard room summary failed (%s).", error.errno)
+            room_summary = None
         response = make_response(render_template(
-            "owner/dashboard.html", owner_name=user["full_name"],
+            "owner/dashboard.html", owner_name=user["full_name"], room_summary=room_summary,
         ))
         response.headers["Cache-Control"] = "no-store"
         return response

@@ -1,0 +1,24 @@
+{% extends "owner/base.html" %}
+{% set page_title = "Room Details" %}
+{% set active_page = "rooms" %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/owner-rooms-beds.css') }}">{% endblock %}
+{% block owner_content %}
+<nav class="rooms-breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('owner_rooms.overview') }}">Rooms &amp; Beds</a><span aria-hidden="true">/</span><span>{{ room.room_number }}</span></nav>
+<div class="rooms-page-heading"><div><p class="rooms-eyebrow">Room information</p><h2>{{ room.room_number }} <span class="rooms-badge rooms-type-{{ room.room_type }}">{{ room.room_type|capitalize }}</span></h2></div><a class="rooms-button rooms-outline" href="{{ url_for('owner_rooms.overview') }}">← All Rooms</a></div>
+<article class="rooms-panel rooms-details">
+    <div class="rooms-details-heading"><span class="rooms-room-icon rooms-accent-blue" aria-hidden="true">{{ '🛏️' if room.room_type == 'shared' else '🏠' }}</span><div>
+        {% if room.room_type == 'private' %}<p class="rooms-price">{% if room.room_rent is not none %}LKR {{ '{:,.2f}'.format(room.room_rent) }} <span>/ room / month</span>{% else %}Room rent not set{% endif %}</p>
+        {% else %}<p class="rooms-price">LKR {{ '{:,.2f}'.format(room.default_bed_rent) }} <span>/ new bed / month</span></p><p class="rooms-muted">Default for new beds; existing bed rents appear below.</p>{% endif %}
+    </div><span class="rooms-badge rooms-condition-{{ room.operational_status }}">{{ room.operational_status|capitalize }}</span></div>
+    {% if room.room_type == 'private' %}<p class="rooms-notice">This room is rented as one unit. Physical beds are included in the room rent and are not individually rentable.</p>{% endif %}
+    <dl class="rooms-detail-grid"><div><dt>Capacity</dt><dd>{{ room.capacity }} beds</dd></div><div><dt>Registered Beds</dt><dd>{{ room.bed_count }}</dd></div><div><dt>Floor</dt><dd>{{ room.floor or 'Not provided' }}</dd></div><div><dt>Tenant Occupancy</dt><dd>Not yet tracked</dd></div></dl>
+    <section class="rooms-description"><h3>Description</h3><p>{{ room.description or 'Not provided' }}</p></section>
+    <dl class="rooms-detail-grid rooms-timestamps"><div><dt>Created</dt><dd>{{ room.created_at.strftime('%d %b %Y') }}</dd></div><div><dt>Last Updated</dt><dd>{{ room.updated_at.strftime('%d %b %Y') }}</dd></div></dl>
+</article>
+<section class="rooms-panel rooms-beds-section" aria-labelledby="room-beds-heading">
+    <h3 id="room-beds-heading"><span aria-hidden="true">🛏️</span> Beds in This Room</h3>
+    {% if beds %}<div class="rooms-table-scroll" tabindex="0" role="region" aria-label="Registered beds"><table class="rooms-table"><thead><tr><th scope="col">Bed Label</th><th scope="col">Condition</th><th scope="col">Monthly Rent</th><th scope="col">Tenancy</th></tr></thead><tbody>
+    {% for bed in beds %}<tr><th scope="row">{{ bed.bed_label }}</th><td><span class="rooms-badge rooms-condition-{{ bed.operational_status }}">{{ bed.operational_status|capitalize }}</span></td><td>{% if room.room_type == 'private' %}Included in room rent{% elif bed.monthly_rent is not none %}LKR {{ '{:,.2f}'.format(bed.monthly_rent) }} / bed{% else %}Not set{% endif %}</td><td class="rooms-muted">Not yet tracked</td></tr>{% endfor %}
+    </tbody></table></div>{% else %}<div class="rooms-empty rooms-empty-small"><span class="rooms-empty-icon" aria-hidden="true">🛌</span><h4>No beds registered yet</h4><p class="rooms-muted">This room currently has {{ room.bed_count }} registered beds and a capacity of {{ room.capacity }}.</p></div>{% endif %}
+</section>
+{% endblock %}
