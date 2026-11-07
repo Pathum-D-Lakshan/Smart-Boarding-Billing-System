@@ -1,0 +1,99 @@
+{% extends "owner/base.html" %}
+{% set page_title = "Boarding Profile" %}
+{% set active_page = "boarding" %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner-boarding-profile.css') }}">
+{% endblock %}
+
+{% block owner_content %}
+<nav class="boarding-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('dashboard', role='owner') }}">Owner Portal</a>
+    <span aria-hidden="true">/</span><span>Boarding Profile</span>
+</nav>
+
+{% if error %}
+<p class="owner-message owner-message-error" role="alert">{{ error }}</p>
+<a class="owner-link" href="{{ url_for('owner_boarding.profile') }}">Try again</a>
+{% elif not boarding %}
+<section class="boarding-empty boarding-panel" aria-labelledby="empty-title">
+    <span class="boarding-empty-icon" aria-hidden="true">🏡</span>
+    <h2 id="empty-title">No boarding profile yet</h2>
+    <p>Create your boarding profile to keep your details, amenities and house rules together.</p>
+    <a class="boarding-button boarding-button-primary" href="{{ url_for('owner_boarding.create') }}"><span aria-hidden="true">＋</span> Create Boarding</a>
+</section>
+{% else %}
+{% if publish_errors %}
+<div class="boarding-error-summary" role="alert" aria-labelledby="publish-error-title">
+    <h3 id="publish-error-title">Update these details before publishing</h3>
+    <ul>{% for message in publish_errors.values() %}<li>{{ message }}</li>{% endfor %}</ul>
+    <a class="owner-link" href="{{ url_for('owner_boarding.edit') }}">Edit Boarding</a>
+</div>
+{% endif %}
+<article class="boarding-panel boarding-profile-card" aria-labelledby="boarding-name">
+    <div class="boarding-profile-hero">
+        {% if boarding.cover_image_filename %}
+        <img class="boarding-cover-photo" src="{{ url_for('owner_boarding.cover') }}" alt="Cover photo of {{ boarding.boarding_name }}">
+        {% else %}
+        <div class="boarding-cover-placeholder" role="img" aria-label="No cover photo added">
+            <span class="boarding-cover-symbol" aria-hidden="true">{{ icon('home') }}</span>
+            <span>No cover photo</span>
+        </div>
+        {% endif %}
+        <div class="boarding-profile-summary">
+            <header class="boarding-profile-heading">
+                <span class="boarding-status boarding-status-{{ boarding.status }}">
+                    {{ 'Published' if boarding.status == 'published' else 'Draft' }}
+                </span>
+                <h2 id="boarding-name">{{ boarding.boarding_name }}</h2>
+                {% if boarding.status == 'draft' %}<p class="boarding-draft-note">Saved and unpublished</p>{% endif %}
+                {% if boarding.status == 'published' %}<p class="boarding-draft-note">Marked as Published. Public student search is not available yet.</p>{% endif %}
+            </header>
+            <p class="boarding-text boarding-profile-description">{{ boarding.description }}</p>
+
+            <dl class="boarding-profile-contact">
+                <div><dt><span aria-hidden="true">📍</span><span class="boarding-sr-only">Address</span></dt>
+                    <dd><span class="boarding-text">{{ boarding.address }}</span><span class="boarding-address-locality">{{ boarding.city }} &middot; {{ boarding.district }}</span></dd></div>
+                <div><dt><span aria-hidden="true">📞</span><span class="boarding-sr-only">Contact Phone</span></dt><dd>{{ boarding.contact_phone }}</dd></div>
+                <div><dt><span aria-hidden="true">✉️</span><span class="boarding-sr-only">Contact Email</span></dt><dd>{{ boarding.contact_email or 'Not provided' }}</dd></div>
+            </dl>
+        </div>
+    </div>
+
+    <section class="boarding-section" aria-labelledby="facilities-title">
+        <h3 id="facilities-title"><span aria-hidden="true">🎨</span> Facilities / Amenities</h3>
+        {% if boarding.facilities %}
+        <ul class="boarding-facilities">
+            {% for facility in boarding.facilities %}
+            <li>{% if facility_icons.get(facility) %}<span aria-hidden="true">{{ facility_icons[facility] }}</span> {% endif %}{{ facility }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}<p class="boarding-muted">None selected</p>{% endif %}
+    </section>
+
+    <section class="boarding-section" aria-labelledby="rules-title">
+        <h3 id="rules-title"><span aria-hidden="true">📋</span> House Rules</h3>
+        <p class="boarding-text">{{ boarding.house_rules or 'Not provided' }}</p>
+    </section>
+
+    <dl class="boarding-details boarding-timestamps">
+        <div><dt>Created</dt><dd>{{ boarding.created_at.strftime('%d %b %Y') }}</dd></div>
+        <div><dt>Last Updated</dt><dd>{{ boarding.updated_at.strftime('%d %b %Y') }}</dd></div>
+    </dl>
+    <div class="boarding-profile-actions" aria-label="Boarding profile actions">
+        <a class="boarding-button boarding-button-edit" href="{{ url_for('owner_boarding.edit') }}"><span aria-hidden="true">✏️</span> Edit</a>
+        {% if boarding.status == 'draft' %}
+        <form method="post" action="{{ url_for('owner_boarding.publish') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="boarding-button boarding-button-publish" type="submit"><span aria-hidden="true">🚀</span> Publish</button>
+        </form>
+        {% elif boarding.status == 'published' %}
+        <form method="post" action="{{ url_for('owner_boarding.unpublish') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="boarding-button boarding-button-unpublish" type="submit"><span aria-hidden="true">⏸</span> Unpublish</button>
+        </form>
+        {% endif %}
+    </div>
+</article>
+{% endif %}
+{% endblock %}

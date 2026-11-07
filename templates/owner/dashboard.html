@@ -1,0 +1,42 @@
+{% extends "owner/base.html" %}
+{% set page_title = "Owner Dashboard" %}
+{% set active_page = "dashboard" %}
+
+{% block owner_content %}
+            <section class="welcome" aria-labelledby="welcome-title">
+                <p class="eyebrow">Owner workspace</p>
+                <h2 id="welcome-title">Welcome back, {{ owner_name }}</h2>
+                <p>Here's an overview of your boarding and billing operations.</p>
+            </section>
+
+            <!-- An em dash shows that a metric is awaiting its feature integration. -->
+            {% set metrics = [
+                ('Total Rooms', 'bed', 'Available after Rooms & Beds setup.'),
+                ('Occupied Beds', 'users', 'Available when tenancy is connected.'),
+                ('Pending Join Requests', 'request', 'Available when join requests are connected.'),
+                ('Pending Payments', 'payment', 'Available when payments are connected.')
+            ] %}
+            <section class="metric-grid" aria-label="Boarding summary">
+                {% for label, glyph, description in metrics %}
+                <article class="metric-card">
+                    <div class="metric-top">
+                        <span class="metric-icon">{{ icon(glyph) }}</span>
+                        <div>
+                            <h3>{{ label }}</h3>
+                            <p class="metric-value" aria-hidden="true">&mdash;</p>
+                        </div>
+                    </div>
+                    <p class="metric-note">{{ description }}</p>
+                </article>
+                {% endfor %}
+            </section>
+
+            <section class="setup-card" aria-labelledby="setup-title">
+                <span class="metric-icon">{{ icon('home') }}</span>
+                <div>
+                    <h2 id="setup-title">Boarding Profile</h2>
+                    <p>View your boarding details and profile status.</p>
+                    <a class="owner-link" href="{{ url_for('owner_boarding.profile') }}">View Boarding Profile &rarr;</a>
+                </div>
+            </section>
+{% endblock %}

@@ -15,11 +15,14 @@ from auth_email import (
     issue_code, mail_is_configured, normalize_email, password_error, password_stamp,
     reset_request_id, seconds_left, valid_email, verify_code,
 )
-from db import get_db_connection
+from auth_access import load_current_account
+from owner_boarding import owner_boarding
+from boarding_images import MAX_COVER_BYTES
 
 # db.py already loads the project's .env file.
 app = Flask(__name__)
 app.config.update(SECRET_KEY=os.environ["SECRET_KEY"], SESSION_COOKIE_SAMESITE="Lax")
+app.register_blueprint(owner_boarding)
 
 AUTH_POSTS = {
     "login", "logout", "register", "check_email", "verify_email",
@@ -41,7 +44,12 @@ def csrf_token():
 
 @app.before_request
 def check_form_token():
-    if request.method == "POST" and request.endpoint in AUTH_POSTS:
+    if request.blueprint == "owner_boarding":
+        # Bound multipart parsing before CSRF reads request.form; auth routes keep their limits.
+        request.max_content_length = MAX_COVER_BYTES + 1024 * 1024
+    if request.method == "POST" and (
+        request.endpoint in AUTH_POSTS or request.blueprint == "owner_boarding"
+    ):
         expected = session.get("csrf_token", "")
         submitted = request.form.get("csrf_token", "")
         if not expected or not secrets.compare_digest(expected.encode(), submitted.encode()):
@@ -94,24 +102,25 @@ def dashboard(role=None):
         return redirect(url_for("login"))
 
     try:
-        with get_db_connection() as connection, connection.cursor(dictionary=True) as cursor:
-            cursor.execute(
-                """SELECT full_name, role, password_hash FROM users
-                   WHERE user_id = %s AND is_active = TRUE""",
-                (session["user_id"],),
-            )
-            user = cursor.fetchone()
+        user = load_current_account()
     except Error as error:
         app.logger.error("Dashboard database error (%s).", error.errno)
         return "Could not load your dashboard.", 500
 
-    if not user or session.get("password_stamp") != password_stamp(user["password_hash"]):
-        session.clear()
+    if not user:
         return redirect(url_for("login"))
     if role is None:
         return redirect(url_for("dashboard", role=user["role"]))
     if role != user["role"] or role not in DASHBOARD_TITLES:
         abort(403)
+
+    # Render the owner workspace after the session and database role checks.
+    if role == "owner":
+        response = make_response(render_template(
+            "owner/dashboard.html", owner_name=user["full_name"],
+        ))
+        response.headers["Cache-Control"] = "no-store"
+        return response
 
     return auth_step("dashboard", DASHBOARD_TITLES[role], f"Welcome, {user['full_name']}.")
 
@@ -326,7 +335,6 @@ def handle_code(purpose):
         return code_screen(purpose, pending, remaining, error="The code is incorrect, expired, or already used.", status=400)
 
     session.pop(pending_key, None)
-
     if registering:
         flash("Gmail verified. Your account is ready. Log in to continue.")
         return redirect(url_for("login"), code=303)
@@ -351,7 +359,6 @@ def new_password():
     title = "Choose a new password"
     subtitle = "Code verified. Enter your new password."
     grant = session.get("verified_reset")
-
     if not grant:
         return redirect(url_for("reset_password"))
 

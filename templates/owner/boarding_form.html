@@ -1,0 +1,162 @@
+{% extends "owner/base.html" %}
+{% set page_title = "Boarding Profile" %}
+{% set active_page = "boarding" %}
+{% set editing = form_mode == 'edit' %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner-boarding-profile.css') }}">
+{% endblock %}
+
+{% block page_scripts %}
+{% if editing %}<script src="{{ url_for('static', filename='js/owner-boarding-confirm.js') }}" defer></script>{% endif %}
+{% endblock %}
+
+{% macro field_error(name) -%}
+{% if errors.get(name) %}<p class="boarding-field-error" id="{{ name }}-error">{{ errors[name] }}</p>{% endif %}
+{%- endmacro %}
+
+{% macro input_field(name, label, required=false, input_type='text', autocomplete='off', hint='') %}
+<div class="boarding-field">
+    <label for="{{ name }}">{{ label }} {% if required %}<span class="boarding-required" aria-hidden="true">*</span>{% else %}<span class="boarding-optional">(Optional)</span>{% endif %}</label>
+    <input id="{{ name }}" name="{{ name }}" type="{{ input_type }}" value="{{ values.get(name, '') }}"
+           maxlength="{{ field_limits[name] }}" autocomplete="{{ autocomplete }}" {% if required %}required{% endif %}
+           aria-invalid="{{ 'true' if errors.get(name) else 'false' }}"
+           {% if hint or errors.get(name) %}aria-describedby="{% if hint %}{{ name }}-hint {% endif %}{% if errors.get(name) %}{{ name }}-error{% endif %}"{% endif %}
+           {% if input_type == 'tel' %}pattern="(?:0|\+94)[\u0020\u002D]*[1-9](?:[\u0020\u002D]*[0-9]){8}"
+           title="Use a Sri Lankan local or +94 number. Spaces and hyphens are allowed."{% endif %}
+           {% if input_type == 'email' %}pattern="[^@\s]+@[^@\s]+\.[^@\s]+"{% endif %}>
+    {% if hint %}<p class="boarding-hint" id="{{ name }}-hint">{{ hint }}</p>{% endif %}
+    {{ field_error(name) }}
+</div>
+{% endmacro %}
+
+{% block owner_content %}
+<div class="boarding-breadcrumb"><a href="{{ url_for('owner_boarding.profile') }}">Boarding Profile</a><span aria-hidden="true">/</span><span>{{ 'Edit Boarding' if editing else 'Create Boarding' }}</span></div>
+<section class="welcome" aria-labelledby="create-heading">
+    <p class="eyebrow">{{ 'Keep your details up to date' if editing else 'Your boarding starts here' }}</p>
+    <h2 id="create-heading"><span aria-hidden="true">{{ '✏️' if editing else '🏠' }}</span> {{ 'Edit Boarding' if editing else 'Create Boarding' }}</h2>
+    <p>{{ 'Update your boarding details and confirm with your current password.' if editing else 'Add your boarding details. Your profile will be saved as a Draft.' }}</p>
+</section>
+
+{% if error %}<p class="owner-message owner-message-error" role="alert">{{ error }}</p>{% endif %}
+{% if errors %}
+<div class="boarding-error-summary" role="alert" aria-labelledby="form-error-title">
+    <h3 id="form-error-title">Please check the highlighted fields</h3>
+    <ul>{% for name, message in errors.items() %}<li><a href="#{{ name }}">{{ message }}</a></li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<form class="boarding-form boarding-panel" {% if editing %}id="boarding-edit-form"{% endif %} method="post" enctype="multipart/form-data" action="{{ url_for('owner_boarding.edit' if editing else 'owner_boarding.create') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="boarding-form-intro">
+        {% if boarding_status %}<span class="boarding-status boarding-status-{{ boarding_status }}">{{ 'Published' if boarding_status == 'published' else 'Draft' }}</span>{% endif %}
+        <p>Fields marked <span class="boarding-required">*</span> are required.</p>
+    </div>
+
+    <fieldset class="boarding-form-section">
+        <legend><span aria-hidden="true">🏠</span> Basic Boarding Information</legend>
+        {{ input_field('boarding_name', 'Boarding Name', required=true) }}
+        <div class="boarding-field">
+            <label for="description">Description <span class="boarding-required" aria-hidden="true">*</span></label>
+            <textarea id="description" name="description" rows="5" required maxlength="{{ text_byte_limit }}"
+                      aria-invalid="{{ 'true' if errors.get('description') else 'false' }}"
+                      aria-describedby="description-hint{% if errors.get('description') %} description-error{% endif %}">{{ values.get('description', '') }}</textarea>
+            <p class="boarding-hint" id="description-hint">Describe your boarding and what residents can expect.</p>
+            {{ field_error('description') }}
+        </div>
+    </fieldset>
+
+    <fieldset class="boarding-form-section" id="cover_photo-section">
+        <legend><span aria-hidden="true">📷</span> Cover Photo <span class="boarding-optional">(Optional)</span></legend>
+        <div class="boarding-cover-upload">
+            {% if editing and has_cover %}
+            <img class="boarding-cover-preview" src="{{ url_for('owner_boarding.cover') }}" alt="Current boarding cover photo">
+            {% else %}<span class="boarding-upload-icon" aria-hidden="true">📷</span>{% endif %}
+            <div class="boarding-field">
+                <label for="cover_photo">{{ 'Replace cover photo' if editing and has_cover else 'Choose a cover photo' }}</label>
+                <input id="cover_photo" name="cover_photo" type="file" accept="image/jpeg,image/png,image/webp"
+                       aria-invalid="{{ 'true' if errors.get('cover_photo') else 'false' }}"
+                       aria-describedby="cover_photo-hint{% if errors.get('cover_photo') %} cover_photo-error{% endif %}">
+                <p class="boarding-hint" id="cover_photo-hint">JPEG, PNG or WebP, up to 5 MB, 6,000 pixels per side and 20 megapixels. Any aspect ratio fits automatically.{% if editing %} Leave empty to keep your current photo.{% endif %} After a failed save, select the photo again.</p>
+                {{ field_error('cover_photo') }}
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="boarding-form-section">
+        <legend><span aria-hidden="true">📍</span> Location</legend>
+        {{ input_field('address', 'Address', required=true, autocomplete='street-address') }}
+        <div class="boarding-form-grid">
+            {{ input_field('city', 'City/Town', required=true, autocomplete='address-level2') }}
+            {{ input_field('district', 'District', required=true, autocomplete='address-level1') }}
+        </div>
+    </fieldset>
+
+    <fieldset class="boarding-form-section">
+        <legend><span aria-hidden="true">📞</span> Contact Information</legend>
+        <div class="boarding-form-grid">
+            {{ input_field('contact_phone', 'Contact Phone', required=true, input_type='tel', autocomplete='tel', hint='Use a local or +94 number. Spaces and hyphens are allowed.') }}
+            {{ input_field('contact_email', 'Contact Email', input_type='email', autocomplete='email') }}
+        </div>
+    </fieldset>
+
+    <fieldset class="boarding-form-section" id="facilities" tabindex="-1"
+              {% if errors.get('facilities') %}aria-describedby="facilities-error"{% endif %}>
+        <legend><span aria-hidden="true">🎨</span> Facilities &amp; Amenities <span class="boarding-optional">(Optional)</span></legend>
+        <p class="boarding-hint">Select the facilities available at your boarding.</p>
+        <div class="boarding-facility-options">
+            {% for label, emoji in facility_options %}
+            <label class="boarding-facility-option" for="facility-{{ loop.index }}">
+                <input type="checkbox" id="facility-{{ loop.index }}" name="facilities" value="{{ label }}"
+                       {% if label in values.get('facilities', []) %}checked{% endif %}>
+                <span aria-hidden="true">{{ emoji }}</span><span>{{ label }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        {{ field_error('facilities') }}
+    </fieldset>
+
+    <fieldset class="boarding-form-section">
+        <legend><span aria-hidden="true">📋</span> House Rules <span class="boarding-optional">(Optional)</span></legend>
+        <div class="boarding-field">
+            <label class="boarding-rules-label" for="house_rules">House Rules</label>
+            <textarea id="house_rules" name="house_rules" rows="5" maxlength="{{ text_byte_limit }}"
+                      aria-invalid="{{ 'true' if errors.get('house_rules') else 'false' }}"
+                      aria-describedby="house_rules-hint{% if errors.get('house_rules') %} house_rules-error{% endif %}">{{ values.get('house_rules', '') }}</textarea>
+            <p class="boarding-hint" id="house_rules-hint">Add rules on separate lines so they are easy to read.</p>
+            {{ field_error('house_rules') }}
+        </div>
+    </fieldset>
+
+    {% if editing %}
+    <!-- Open inline without JS; enhancement moves confirmation into a modal. -->
+    <dialog class="boarding-password-dialog" id="boarding-password-dialog" open
+            aria-labelledby="password-dialog-title" aria-describedby="password-dialog-description"
+            data-password-error="{{ 'true' if errors.get('current_password') and errors|length == 1 else 'false' }}">
+        <div class="boarding-dialog-heading">
+            <span class="boarding-dialog-icon" aria-hidden="true">{{ icon('user') }}</span>
+            <h3 id="password-dialog-title">Confirm your changes</h3>
+            <button class="boarding-dialog-close" type="button" data-password-cancel aria-label="Close password confirmation" hidden>&times;</button>
+        </div>
+        <p class="boarding-hint" id="password-dialog-description">Enter your current login password to save the changes to your boarding profile.</p>
+        <div class="boarding-field">
+            <label for="current_password">Current Password <span class="boarding-required" aria-hidden="true">*</span></label>
+            <input id="current_password" name="current_password" type="password" autocomplete="current-password"
+                   required maxlength="128" aria-invalid="{{ 'true' if errors.get('current_password') else 'false' }}"
+                   aria-describedby="current_password-hint{% if errors.get('current_password') %} current_password-error{% endif %}">
+            <p class="boarding-hint" id="current_password-hint">Your password is used only to confirm this update.</p>
+            {{ field_error('current_password') }}
+        </div>
+        <div class="boarding-dialog-actions">
+            <button class="boarding-button boarding-button-secondary" type="button" data-password-cancel hidden>Cancel</button>
+            <button class="boarding-button boarding-button-primary" type="submit" id="boarding-confirm-save" hidden>Confirm &amp; Save</button>
+        </div>
+    </dialog>
+    {% endif %}
+
+    <div class="boarding-form-actions">
+        <a class="boarding-button boarding-button-secondary" href="{{ url_for('owner_boarding.profile') }}">Cancel</a>
+        <button class="boarding-button boarding-button-primary" {% if editing %}id="boarding-save-changes"{% endif %} type="submit"><span aria-hidden="true">💾</span> {{ 'Save Changes' if editing else 'Save as Draft' }}</button>
+    </div>
+</form>
+{% endblock %}
