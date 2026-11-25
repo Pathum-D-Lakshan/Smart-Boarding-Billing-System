@@ -1,0 +1,9 @@
+{% extends 'student/base.html' %}
+{% from 'owner/_settings_password.html' import password_field %}{% from 'owner/_settings_icons.html' import settings_icon %}
+{% set page_title='Settings' %}{% set active_page='settings' %}
+{% block page_styles %}{{ stylesheet('owner-settings.css') }}{{ stylesheet('student-settings.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/owner-settings.js',v='student-settings-20261110-1') }}" defer></script>{% endblock %}
+{% block student_content %}<div class="settings-gate-wrap"><section class="settings-gate" data-settings-gate data-cancel-url="{{ url_for('dashboard',role='student') }}" aria-labelledby="settings-gate-title">
+<span class="settings-gate-icon" aria-hidden="true">{{ settings_icon('lock') }}</span><h2 id="settings-gate-title">Access Settings</h2><p>Enter your current password to continue.</p>
+<form method="post" action="{{ url_for('student_settings.unlock') }}" data-settings-post><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{{ password_field('current_password','Current Password',errors) }}<div class="settings-actions"><a class="settings-button" href="{{ url_for('dashboard',role='student') }}">Cancel</a><button class="settings-button settings-primary" type="submit">Continue →</button></div></form>
+<p class="settings-help">Access lasts five minutes. Saving changes requires your current password again.</p></section></div>{% endblock %}

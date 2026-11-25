@@ -1,7 +1,7 @@
 {% extends "owner/base.html" %}
 {% set page_title = "Rooms & Beds" %}
 {% set active_page = "rooms" %}
-{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/owner-rooms-beds.css') }}">{% endblock %}
+{% block page_styles %}{{ stylesheet('owner-rooms-beds.css') }}{% endblock %}
 {% block owner_content %}
 <nav class="rooms-breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('dashboard', role='owner') }}">Owner Portal</a><span aria-hidden="true">/</span><span>Rooms &amp; Beds</span></nav>
 <div class="rooms-page-heading">
@@ -15,8 +15,8 @@
 <section class="rooms-panel rooms-empty"><span class="rooms-empty-icon" aria-hidden="true">🏠</span><h3>Create your boarding first</h3><p class="rooms-muted">Add a Boarding Profile before registering its rooms and beds.</p><a class="rooms-button rooms-primary" href="{{ url_for('owner_boarding.create') }}">Create Boarding</a></section>
 {% else %}
 <section class="rooms-summary" aria-label="Boarding room totals">
-    {% for label, key, emoji, color in [('Total Rooms','total_rooms','🚪','purple'),('Registered Beds','total_beds','🛏️','blue'),('Shared Rooms','shared_rooms','🏘️','green'),('Private Rooms','private_rooms','🏠','amber')] %}
-    <article class="rooms-stat rooms-panel"><span class="rooms-stat-icon rooms-accent-{{ color }}" aria-hidden="true">{{ emoji }}</span><div><strong>{{ summary[key] }}</strong><h3>{{ label }}</h3></div></article>
+    {% for label, key, glyph, color in [('Total Rooms','total_rooms','building','purple'),('Registered Beds','total_beds','bed','blue'),('Shared Rooms','shared_rooms','users','green'),('Private Rooms','private_rooms','home','amber')] %}
+    <article class="rooms-stat rooms-panel"><span class="rooms-stat-icon rooms-accent-{{ color }}" aria-hidden="true">{{ icon(glyph) }}</span><div><strong>{{ summary[key] }}</strong><h3>{{ label }}</h3></div></article>
     {% endfor %}
 </section>
 <form class="rooms-filters" method="get" action="{{ url_for('owner_rooms.overview') }}" role="search">
@@ -25,21 +25,21 @@
     <button class="rooms-button rooms-outline" type="submit">Search</button>
     {% if search or room_type %}<a class="rooms-text-link" href="{{ url_for('owner_rooms.overview') }}">Clear Search</a>{% endif %}
 </form>
-<p class="rooms-notice"><span aria-hidden="true">ℹ️</span> Tenant occupancy: Not yet tracked. Registered bed counts show physical beds, including beds under maintenance.</p>
+<p class="rooms-notice"><span aria-hidden="true">ℹ️</span> Tenant assignments: View Room Details for active agreements and future reservations. Registered bed counts show physical beds, including beds under maintenance.</p>
 {% if rooms %}
 <section class="rooms-list" aria-label="Your rooms">
     {% for room in rooms %}
     <article class="rooms-panel rooms-row">
-        <span class="rooms-room-icon rooms-accent-{{ 'blue' if room.room_type == 'shared' else 'purple' }}" aria-hidden="true">{{ '🛏️' if room.room_type == 'shared' else '🏠' }}</span>
+        <span class="rooms-room-icon rooms-accent-{{ 'blue' if room.room_type == 'shared' else 'purple' }}" aria-hidden="true">{{ icon('bed' if room.room_type == 'shared' else 'home') }}</span>
         <div class="rooms-row-main">
             <div class="rooms-row-title"><h3>{{ room.room_number }}</h3><span class="rooms-badge rooms-type-{{ room.room_type }}">{{ room.room_type|capitalize }}</span></div>
-            <p class="rooms-muted">Capacity: {{ room.capacity }} &middot; Registered beds: {{ room.bed_count }}{% if room.floor %} &middot; Floor: {{ room.floor }}{% endif %}</p>
-            {% if room.room_type == 'shared' %}<p class="rooms-price">LKR {{ '{:,.2f}'.format(room.default_bed_rent) }} <span>/ new bed / month</span></p><small class="rooms-muted">Default for new beds</small>
-            {% elif room.room_rent is not none %}<p class="rooms-price">LKR {{ '{:,.2f}'.format(room.room_rent) }} <span>/ room / month</span></p>
+            <p class="rooms-muted">Registered beds: {{ room.bed_count }} / {{ room.capacity }} &middot; Floor: {{ room.floor|room_floor_label }}</p>
+            {% if room.room_type == 'shared' %}<p class="rooms-price">LKR {{ '{:,.2f}'.format(room.default_bed_rent) }} <span>/ new bed / month</span></p><small class="rooms-muted">Default Monthly Rent per New Bed (LKR)</small>
+            {% elif room.room_rent is not none %}<p class="rooms-price">LKR {{ '{:,.2f}'.format(room.room_rent) }} <span>/ room / month</span></p><small class="rooms-muted">Monthly Rent for the Entire Room (LKR)</small>
             {% else %}<p class="rooms-muted">Room rent not set</p>{% endif %}
         </div>
         <span class="rooms-badge rooms-condition-{{ room.operational_status }}">{{ room.operational_status|capitalize }}</span>
-        <a class="rooms-button rooms-outline" href="{{ url_for('owner_rooms.details', room_id=room.room_id) }}">View Details <span aria-hidden="true">→</span></a>
+        <div class="rooms-row-actions"><a class="rooms-button rooms-outline" href="{{ url_for('owner_rooms.details', room_id=room.room_id) }}">View Details <span aria-hidden="true">→</span></a>{% if not room.get('has_open_tenancy') %}<a class="rooms-button rooms-outline" href="{{ url_for('owner_rooms.edit', room_id=room.room_id) }}"><span aria-hidden="true">✏️</span> Edit Room</a>{% endif %}</div>
     </article>
     {% endfor %}
 </section>

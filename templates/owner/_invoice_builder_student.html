@@ -1,0 +1,2 @@
+<p class="invoice-selection-summary">Agreed rent: <strong>LKR {{ '{:,.2f}'.format(data.student.agreed_monthly_rent) }} / {{ 'bed' if data.student.rent_unit=='bed' else 'entire room' }}</strong> · Tenancy begins {{ data.student.start_date.strftime('%d %B %Y') }}{% if data.student.end_date %} · Checkout {{ data.student.end_date.strftime('%d %B %Y') }}{% endif %}</p>
+{% if data.issued_bill %}<a class="bill-button" href="{{ url_for('owner_bills.details',bill_id=data.issued_bill.bill_id) }}">View Issued Invoice</a>{% endif %}

@@ -63,9 +63,12 @@ def password_stamp(password_hash):
 
 
 def find_account(email):
+    from admin_security import admin_enabled, reactivation_enabled
+    active = '(is_active AND NOT admin_suspended) AS is_active' if admin_enabled() else 'is_active'
+    if reactivation_enabled(): active += ', admin_suspended, is_active AS base_is_active'
     with get_db_connection() as connection, connection.cursor(dictionary=True) as cursor:
         cursor.execute(
-            "SELECT user_id, role, password_hash, is_active FROM users WHERE email = %s",
+            "SELECT user_id, role, password_hash, " + active + " FROM users WHERE email = %s",
             (email,),
         )
         return cursor.fetchone()
@@ -275,7 +278,7 @@ def _clear_challenge(cursor, purpose, email):
     )
 
 
-def verify_code(purpose, pending, code):
+def verify_code(purpose, pending, code, *, admin_provisioning=False):
     """Create the account or exchange a valid reset code for a one-use grant."""
     email, challenge_id = pending["email"], pending.get("id")
     if not challenge_id:
@@ -308,11 +311,25 @@ def verify_code(purpose, pending, code):
             return None
 
         if purpose == "register":
+            # The legacy challenge ENUM supports only Student/Owner. NULL reserves a
+            # CLI-only challenge; normal web verification must never consume it.
+            from admin_security import admin_enabled
+            registration_role = row['pending_role']
+            if admin_provisioning:
+                if registration_role is not None or not admin_enabled(): return None
+                registration_role = 'admin'
+            elif registration_role not in ('student', 'owner'):
+                return None
             cursor.execute(
                 """INSERT INTO users (full_name, email, role, password_hash)
                    VALUES (%s, %s, %s, %s)""",
-                (row["pending_name"], email, row["pending_role"], row["pending_password_hash"]),
+                (row["pending_name"], email, registration_role, row["pending_password_hash"]),
             )
+            if registration_role == 'admin':
+                admin_id = cursor.lastrowid
+                cursor.execute('''INSERT INTO admin_events(actor_id,target_user_id,action,previous_state,new_state,revision,reason,created_at)
+                    VALUES(%s,%s,'admin_provisioned',NULL,'active',0,'Approved local provisioning with verified email OTP.',UTC_TIMESTAMP(6))''',
+                    (admin_id, admin_id))
             _clear_challenge(cursor, purpose, email)
         else:
             if row["reset_user_id"] is None:
@@ -361,9 +378,10 @@ def change_password(grant, password_hash):
         if row is None:
             return False
 
+        from admin_security import account_guard
         cursor.execute(
             """UPDATE users SET password_hash = %s
-               WHERE user_id = %s AND email = %s AND is_active = TRUE""",
+               WHERE user_id = %s AND email = %s AND is_active = TRUE""" + account_guard(),
             (password_hash, row["reset_user_id"], grant["email"]),
         )
         changed = cursor.rowcount == 1

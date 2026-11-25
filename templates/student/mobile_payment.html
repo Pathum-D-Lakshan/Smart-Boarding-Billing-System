@@ -1,0 +1,4 @@
+{% extends 'student/base.html' %}{% set page_title='Upload Bank Slip' %}{% set active_page='payments' %}
+{% block page_styles %}{{ stylesheet('payments.css') }}{{ stylesheet('student-finance.css') }}{{ stylesheet('student-payment-flow.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/payments.js',v='slip-preview-1') }}" defer></script>{% endblock %}
+{% block student_content %}<a class="pay-link" href="{{ url_for('student_payments.history') }}">Back to My Payments</a><section class="pay-card" data-payment-initial data-payment-title="Upload Bank Slip">{% include 'student/_mobile_payment.html' %}</section>{% endblock %}

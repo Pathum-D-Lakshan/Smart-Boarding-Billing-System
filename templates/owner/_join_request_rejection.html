@@ -1,0 +1,14 @@
+<!-- Keep real POST forms usable inline when scripting is unavailable. -->
+<section class="jr-decision-step jr-reject-dialog" id="jr-reject-dialog" aria-labelledby="jr-reject-title" aria-describedby="jr-reject-description" data-show-error="{{ 'true' if reason_error else 'false' }}" data-jr-step="reject" tabindex="-1">
+    <div class="jr-dialog-header"><span class="jr-dialog-icon" aria-hidden="true">{{ icon('close') }}</span><h3 id="jr-reject-title">Reject Join Request?</h3><button class="jr-close" id="jr-reject-close" type="button" aria-label="Back to request details" data-jr-back hidden>{{ icon('close') }}</button></div>
+    <p id="jr-reject-description">Reject the request from <strong>{{ selected.student_name }}</strong>? The request will remain in your history.</p>
+    <form method="post" action="{{ url_for('owner_join_requests.reject', request_id=selected.request_id) }}" id="jr-reject-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% for field, value in filter_params.items() %}<input type="hidden" name="{{ field }}" value="{{ value }}">{% endfor %}
+        <label for="jr-reject-reason">Rejection Reason (Optional)</label>
+        <textarea id="jr-reject-reason" name="reason" rows="4" maxlength="500" placeholder="Briefly explain why this request cannot be accepted." aria-describedby="jr-reason-help{% if reason_error %} jr-reason-error{% endif %}"{% if reason_error %} aria-invalid="true"{% endif %}>{{ reason }}</textarea>
+        <small id="jr-reason-help">Use up to 500 characters. This reason can be shared with the student.</small>
+        {% if reason_error %}<p class="jr-field-error" id="jr-reason-error" role="alert">{{ reason_error }}</p>{% endif %}
+        <div class="jr-dialog-actions"><a class="jr-button jr-clear" id="jr-reject-cancel" data-jr-back href="{{ url_for('owner_join_requests.details', request_id=selected.request_id, **filter_params) }}#request-details">Cancel</a><button class="jr-button jr-danger" id="jr-reject-submit" type="submit">Confirm Rejection</button></div>
+    </form>
+</section>

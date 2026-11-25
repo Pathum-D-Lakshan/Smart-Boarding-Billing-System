@@ -1,0 +1,4 @@
+{% extends 'student/base.html' %}{% set page_title='My Bill' %}{% set active_page='bills' %}
+{% block page_styles %}{{ stylesheet('invoice-paper.css') }}{{ stylesheet('payments.css') }}{{ stylesheet('student-finance.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/payments.js',v='slip-preview-1') }}" defer></script>{% endblock %}
+{% block student_content %}<nav class="pay-breadcrumb pay-no-print"><a href="{{ url_for('student_payments.bills') }}">My Bills</a><span>/</span><span>{{ bill.bill_reference }}</span></nav><section class="pay-card">{% include 'student/_bill_details.html' %}</section>{% endblock %}

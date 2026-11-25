@@ -1,0 +1,17 @@
+.boarding-photo { position: relative; min-width: 0; overflow: hidden; background: #0a1e30; }
+.boarding-photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.boarding-photo > .boarding-photo-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    background: #0a1e30;
+    color: #c5d8e8;
+    font-size: .875rem;
+    text-align: center;
+}
+.boarding-photo-empty .icon { width: 1.75rem; height: 1.75rem; color: #75c6db; }
+.boarding-photo [hidden] { display: none; }

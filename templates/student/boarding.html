@@ -1,0 +1,42 @@
+{% extends 'student/base.html' %}
+{% set page_title = listing.boarding_name %}
+{% set active_page = 'boardings' %}
+{% from 'listings/_boarding_details.html' import boarding_details, rent_panels with context %}
+{% block student_content %}
+<a class="student-back" href="{{ back_url }}">← Back to Results</a>
+<div class="student-page-heading"><h1>{{ listing.boarding_name }}</h1><p>Review the details, then send your request to the Owner.</p></div>
+{% set cover_url = url_for('student_requests.cover', boarding_id=listing.boarding_id) if listing.has_cover else none %}
+{% call boarding_details(listing, cover_url, 'Published · Accepting requests subject to availability and Owner approval.') %}
+    <section class="listing-section"><h3>Current Monthly Rent</h3>{{ rent_panels(listing) }}<p class="listing-inventory-note">Prices shown are current saved rates for available rental units. The Owner confirms your assigned unit, tenancy start date and agreed rent at approval. Sending a request does not reserve a unit.</p></section>
+    <section class="listing-section"><h3>Rooms &amp; Beds</h3><p class="student-help">Available options from {{ availability_date }} for an open-ended stay. Private rooms are rented as a whole; physical beds are not separate rentals.</p>
+        {% if room_options %}<div class="student-public-table"><table class="student-public-options"><thead><tr><th scope="col">Room</th><th scope="col">Room Type</th><th scope="col">Monthly Price</th><th scope="col">Available</th></tr></thead><tbody>
+            {% for room in room_options %}<tr><td>{{ room.room_number }}</td><td>{{ 'Shared' if room.room_type == 'shared' else 'Private' }}</td><td>LKR {{ '{:,.2f}'.format(room.minimum_rent) }}{% if room.minimum_rent != room.maximum_rent %}–{{ '{:,.2f}'.format(room.maximum_rent) }}{% endif %} / {{ 'bed' if room.room_type == 'shared' else 'entire room' }}</td><td>{{ room.available_count }} {{ 'beds' if room.room_type == 'shared' else 'room' }}</td></tr>{% endfor %}
+        </tbody></table></div>{% else %}<p class="student-notice">No rental options are available from this date. Try a different intended date.</p>{% endif %}
+    </section>
+{% endcall %}
+<section class="student-panel" aria-labelledby="request-heading">
+    <h2 id="request-heading">✉️ Request to Join</h2>
+    <form method="get" class="student-form-actions" action="{{ url_for('student_requests.boarding',boarding_id=listing.boarding_id) }}">
+        <div class="student-field"><label for="availability-date">Check Availability From</label><input id="availability-date" name="availability_date" type="date" min="{{ today }}" value="{{ availability_date }}" required></div>
+        <button class="listing-button listing-primary" type="submit">Check Date</button>
+    </form><p class="student-help">Availability is checked from this date. A checkout permits the next tenancy on that date. Only Owner approval creates a reservation.</p>
+    {% if error %}<p class="student-notice student-error" role="alert">{{ error }}</p>{% endif %}
+    {% if blocked %}<p class="student-notice" role="status">{{ blocked }}</p><a class="listing-button" href="{{ url_for('student_requests.history') }}">My Join Requests</a>
+    {% else %}
+    <p class="listing-muted">One pending request per Student. Fields marked <span class="student-required">*</span> are required.</p>
+    <form method="post" action="{{ url_for('student_requests.submit', boarding_id=listing.boarding_id) }}" class="student-request-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="student-field"><label for="preferred-room">Room Preference <span class="listing-muted">(Optional)</span></label>
+            <select id="preferred-room" name="preferred_room_id" aria-describedby="room-help{% if errors.preferred_room_id %} room-error{% endif %}" {% if errors.preferred_room_id %}aria-invalid="true"{% endif %}>
+                <option value="">Any available room</option>
+                {% for room in room_options %}<option value="{{ room.room_id }}" {% if values.get('preferred_room_id', '') == room.room_id|string %}selected{% endif %}>{{ room.room_number }} · {{ room.room_type|capitalize }} · LKR {{ '{:,.2f}'.format(room.minimum_rent) }}{% if room.maximum_rent != room.minimum_rent %}–{{ '{:,.2f}'.format(room.maximum_rent) }}{% endif %} / {{ 'bed' if room.room_type == 'shared' else 'entire room' }} / month</option>{% endfor %}
+            </select><p id="room-help" class="student-help">Shared: one registered Bed. Private: the entire Room; its physical beds are not individually rentable.</p>
+            {% if errors.preferred_room_id %}<p id="room-error" class="student-field-error" role="alert">{{ errors.preferred_room_id }}</p>{% endif %}
+        </div>
+        <div class="student-field"><label for="intended-start">Intended Start Date <span class="student-required">*</span></label><input id="intended-start" name="intended_start_date" type="date" min="{{ today }}" value="{{ values.get('intended_start_date', today) }}" required aria-describedby="date-help{% if errors.intended_start_date %} date-error{% endif %}" {% if errors.intended_start_date %}aria-invalid="true"{% endif %}><p id="date-help" class="student-help">Choose today or a future date. The Owner confirms the final tenancy start date.</p>{% if errors.intended_start_date %}<p id="date-error" class="student-field-error" role="alert">{{ errors.intended_start_date }}</p>{% endif %}</div>
+        <div class="student-field student-field-wide"><label for="request-message">Message to the Owner <span class="listing-muted">(Optional)</span></label><textarea id="request-message" name="message" maxlength="1000" rows="4" aria-describedby="message-help{% if errors.message %} message-error{% endif %}" {% if errors.message %}aria-invalid="true"{% endif %}>{{ values.get('message', '') }}</textarea><p id="message-help" class="student-help">Up to 1,000 characters. Do not include passwords or payment details.</p>{% if errors.message %}<p id="message-error" class="student-field-error" role="alert">{{ errors.message }}</p>{% endif %}</div>
+        <div class="student-form-actions student-field-wide"><a class="listing-button" href="{{ url_for('student_requests.boardings') }}">Cancel</a><button class="listing-button listing-primary" type="submit">Send Join Request →</button></div>
+    </form>
+    {% endif %}
+</section>
+{% endblock %}

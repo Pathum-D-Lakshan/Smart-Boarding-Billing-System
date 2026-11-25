@@ -1,0 +1,29 @@
+/* Read-only agreement page: use the existing shell, readable type and two palettes. */
+.mb-hero { display:grid; grid-template-columns:minmax(15rem,.85fr) minmax(0,1.4fr); gap:1.5rem; padding:.85rem; margin-bottom:1.4rem; border:1px solid var(--cyan); border-radius:1.2rem; background:linear-gradient(115deg,var(--panel),var(--card)); }
+.mb-cover { display:block; width:100%; height:100%; min-height:15rem; max-height:23rem; aspect-ratio:1.6; object-fit:cover; border-radius:.8rem; }
+.mb-cover-fallback { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:1rem; background:var(--theme-field); color:var(--muted); }
+.mb-cover-fallback .nav-icon { width:5rem; height:5rem; border-radius:1.3rem; }.mb-cover-fallback .nav-art { width:4rem; height:4rem; }
+.mb-hero-content { min-width:0; padding:1rem .5rem; }.mb-hero-title { display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; margin-bottom:.6rem; }
+.student-portal .mb-hero-title h2 { margin:0; font-size:var(--font-section-title); overflow-wrap:anywhere; }
+.mb-location { display:flex; align-items:flex-start; gap:.6rem; color:var(--muted); }.mb-location>.icon { color:var(--cyan); margin-top:.2rem; }
+.student-portal .mb-description { margin:1rem 0; white-space:pre-line; overflow-wrap:anywhere; }
+.mb-contact { display:flex; gap:1rem 2rem; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:1rem; margin:1rem 0 0; }
+.mb-contact dt { display:flex; align-items:center; gap:.5rem; color:var(--muted); font-size:var(--font-small); }.mb-contact dd { margin:.35rem 0 0; overflow-wrap:anywhere; }
+.mb-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border:1px solid var(--border); border-radius:.9rem; overflow:hidden; margin:1.4rem 0 1rem; background:var(--panel); }
+.student-portal .mb-tab { display:flex; justify-content:center; align-items:center; gap:.6rem; padding:1rem .7rem; color:var(--text); text-decoration:none; font-weight:600; text-align:center; border-right:1px solid var(--border); }
+.mb-tab:last-child { border-right:0; }.student-portal .mb-tab-current { background:#22d3ee; color:#061b26; }.mb-tab:hover { box-shadow:inset 0 -3px 0 var(--cyan); }
+.student-portal .mb-tab:focus-visible { outline-offset:-4px; }.student-portal .mb-tab-current:focus-visible { outline-color:#061b26; }
+.student-portal .mb-tab-panel { scroll-margin-top:1rem; padding:1.4rem; }
+.mb-summary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; margin:1rem 0; }
+.mb-summary-grid>div { display:grid; grid-template-columns:2.7rem 1fr; align-items:center; gap:.3rem .8rem; border:1px solid var(--border); background:var(--theme-field); border-radius:.9rem; padding:1rem; }
+.mb-summary-grid .nav-icon { grid-row:span 2; }.mb-summary-grid dt { font-weight:600; }.mb-summary-grid dd { margin:0; overflow-wrap:anywhere; }.mb-summary-grid small { display:block; color:var(--muted); font-size:var(--font-small); }
+.mb-state-note { padding:1rem; border:1px solid var(--border); border-radius:.9rem; background:var(--theme-field); }.mb-state-note>strong { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }.student-portal .mb-state-note p { margin:.65rem 0 0; }
+.mb-details-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.2rem; margin:1rem 0 1.5rem; }.mb-details-grid dt { color:var(--muted); font-size:var(--font-small); }.mb-details-grid dd { margin:.3rem 0 0; overflow-wrap:anywhere; }
+.mb-facilities { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.8rem; list-style:none; padding:0; margin:1rem 0; }.mb-facilities li { display:flex; align-items:center; gap:.7rem; padding:1rem; background:var(--theme-field); border:1px solid var(--border); border-radius:.8rem; }.mb-facilities li>span { font-size:1.5rem; }
+.mb-actions { display:flex; flex-wrap:wrap; align-items:center; gap:.75rem; }.mb-action-unavailable { color:var(--muted); font-size:var(--font-small); padding:.7rem 0; }
+.student-portal .mb-quick-actions { margin-top:1.2rem; }.mb-history { margin-bottom:1rem; padding:1rem; background:var(--panel); border:1px solid var(--border); border-radius:.9rem; }.mb-history form { display:flex; align-items:flex-end; gap:1rem; }.mb-history .student-field { flex:1; min-width:0; }.mb-history nav { display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:1rem; margin-top:.8rem; font-size:var(--font-small); }
+.mb-empty-icon>.nav-icon { width:4.5rem; height:4.5rem; margin:auto; }.mb-empty-icon .nav-art { width:3.3rem; height:3.3rem; }.student-portal .mb-empty h2 { margin:1.1rem 0 .8rem; }.mb-empty .mb-actions { justify-content:center; margin-top:1.2rem; }.mb-inline-empty { text-align:center; padding:1.5rem; }.mb-inline-empty>.icon { width:2.5rem; height:2.5rem; color:var(--cyan); }
+[data-theme="light"] .student-portal .mb-tab { color:var(--theme-text); }[data-theme="light"] .student-portal .mb-tab-current { color:#061b26; }[data-theme="light"] .mb-hero { background:var(--theme-card); }
+@media(min-width:801px) and (max-width:1200px) { .mb-hero { grid-template-columns:1fr; }.mb-cover { max-height:20rem; }.mb-facilities { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) { .mb-hero,.mb-summary-grid,.mb-details-grid { grid-template-columns:1fr; }.mb-hero { gap:.3rem; }.mb-cover { min-height:12rem; max-height:18rem; }.mb-tabs { grid-template-columns:repeat(2,minmax(0,1fr)); }.mb-tab { border-bottom:1px solid var(--border); }.mb-facilities { grid-template-columns:repeat(2,minmax(0,1fr)); }.mb-history form { flex-direction:column; align-items:stretch; }.mb-hero-content { padding:.8rem .4rem; }.student-portal .mb-tab-panel { padding:1rem; } }
+@media(max-width:390px) { .mb-facilities { grid-template-columns:1fr; }.student-portal .mb-tab { padding:.9rem .4rem; gap:.35rem; } }

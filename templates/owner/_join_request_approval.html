@@ -1,0 +1,27 @@
+<section class="jr-decision-step jr-reject-dialog jr-approve-dialog" id="jr-approve-dialog" aria-labelledby="jr-approve-title" aria-describedby="jr-approve-description" data-show-error="{{ 'true' if approval_errors else 'false' }}" data-jr-step="approve" tabindex="-1">
+    <div class="jr-dialog-header"><span class="jr-dialog-icon" aria-hidden="true">{{ icon('check') }}</span><h3 id="jr-approve-title">Approve &amp; Create Tenancy</h3><button class="jr-close" id="jr-approve-close" type="button" aria-label="Back to request details" data-jr-back hidden>{{ icon('close') }}</button></div>
+    <p id="jr-approve-description">Assign a rental unit to <strong>{{ selected.student_name }}</strong> at <strong>{{ selected.boarding_name }}</strong>.</p>
+    <form method="post" action="{{ url_for('owner_join_requests.approve', request_id=selected.request_id) }}" id="jr-approve-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% for field, value in filter_params.items() %}<input type="hidden" name="{{ field }}" value="{{ value }}">{% endfor %}
+        {% if approval_errors.get('approval') %}<p class="jr-field-error" role="alert">{{ approval_errors.approval }}</p>{% endif %}
+        <div class="jr-approval-fields"><div>
+            <label for="jr-approve-unit">Available Room / Bed <span aria-hidden="true">*</span></label>
+            <select id="jr-approve-unit" name="unit" required aria-describedby="jr-unit-help{% if approval_errors.get('unit') %} jr-unit-error{% endif %}"{% if approval_errors.get('unit') %} aria-invalid="true"{% endif %}>
+                <option value="">Choose an available rental unit</option>
+                {% for kind, label in [('bed', 'Shared Beds'), ('room', 'Private Rooms — Entire Room')] %}
+                {% set choices = approval.options|selectattr('kind', 'equalto', kind)|list %}{% if choices %}<optgroup label="{{ label }}">{% for option in choices %}<option value="{{ option.token }}" data-rent="{{ option.rent_label }}"{% if approval_values.get('unit') == option.token %} selected{% endif %}>{{ option.unit_label }} — {{ option.rent_label }}</option>{% endfor %}</optgroup>{% endif %}
+                {% endfor %}
+            </select><small id="jr-unit-help">Shared: rent one Bed. Private: rent the entire Room. Choices match the student's room preference.</small>
+            {% if approval_errors.get('unit') %}<p class="jr-field-error" id="jr-unit-error" role="alert">{{ approval_errors.unit }}</p>{% endif %}
+        </div><div>
+            <label for="jr-approve-date">Tenancy Start Date <span aria-hidden="true">*</span></label>
+            <input id="jr-approve-date" name="start_date" type="date" min="{{ approval.today }}" value="{{ approval_values.get('start_date', approval.default_start) }}" required aria-describedby="jr-date-help{% if approval_errors.get('start_date') %} jr-date-error{% endif %}"{% if approval_errors.get('start_date') %} aria-invalid="true"{% endif %}>
+            <small id="jr-date-help">Choose the agreed date: today or a future date. Future tenancies are Scheduled and reserve the unit immediately.</small>
+            {% if approval_errors.get('start_date') %}<p class="jr-field-error" id="jr-date-error" role="alert">{{ approval_errors.start_date }}</p>{% endif %}
+        </div></div>
+        <div class="jr-agreed-rent"><span>Agreed Monthly Rent</span><output id="jr-approve-rent" for="jr-approve-unit">{% set chosen = approval.options|selectattr('token','equalto',approval_values.get('unit',''))|list %}{{ chosen[0].rent_label if chosen else 'See the saved monthly rent beside each rental unit.' }}</output><small>The rate effective at approval is saved with this tenancy. If it changes before confirmation, review the new amount first.</small></div>
+        <p class="jr-footnote">Earlier eligible requests for the same Room take precedence. Availability is checked again when you confirm.</p>
+        <div class="jr-dialog-actions"><a class="jr-button jr-clear" id="jr-approve-cancel" data-jr-back href="{{ url_for('owner_join_requests.details', request_id=selected.request_id, **filter_params) }}#request-details">Cancel</a><button class="jr-button jr-approve" id="jr-approve-submit" type="submit">{{ icon('check') }} Approve &amp; Create Tenancy</button></div>
+    </form>
+</section>

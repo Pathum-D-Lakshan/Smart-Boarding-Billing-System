@@ -1,0 +1,37 @@
+{% extends 'student/base.html' %}
+{% set page_title = 'Find Boarding' %}
+{% set active_page = 'boardings' %}
+{% from 'shared/_boarding_photo.html' import boarding_photo %}
+{% set view = filters|default({'location':'','budget':'','room_type':'','facilities':[],'sort':'relevant'}) %}
+{% set problems = errors|default({}) %}
+{% block student_content %}
+<div class="student-page-heading student-heading-icon">{{ navigation_icon('search') }}<div><h1>Find Boarding</h1><p>Find a suitable boarding based on location, budget and facilities.</p></div></div>
+<form class="student-search" method="get" action="{{ url_for('student_requests.boardings') }}">
+    <div class="student-search-fields">
+        <div class="student-field"><label for="search-location">Location / Area</label><input id="search-location" name="location" type="search" maxlength="150" value="{{ view.location }}" placeholder="e.g. Kandy, Peradeniya, Gampola" {% if problems.location %}aria-invalid="true" aria-describedby="location-error"{% endif %}>{% if problems.location %}<p id="location-error" class="student-field-error">{{ problems.location }}</p>{% endif %}</div>
+        <div class="student-field"><label for="search-budget">Maximum Budget (LKR)</label><input id="search-budget" name="budget" type="number" min="0.01" max="99999999.99" step="0.01" value="{{ view.budget }}" placeholder="No maximum" aria-describedby="budget-help{% if problems.budget %} budget-error{% endif %}" {% if problems.budget %}aria-invalid="true"{% endif %}><p id="budget-help" class="student-help">Per bed for Shared; entire room for Private.</p>{% if problems.budget %}<p id="budget-error" class="student-field-error">{{ problems.budget }}</p>{% endif %}</div>
+        <div class="student-field"><label for="search-type">Room Type</label><select id="search-type" name="room_type" {% if problems.room_type %}aria-invalid="true" aria-describedby="type-error"{% endif %}><option value="">All Room Types</option><option value="shared" {% if view.room_type == 'shared' %}selected{% endif %}>Shared - Per Bed</option><option value="private" {% if view.room_type == 'private' %}selected{% endif %}>Private - Entire Room</option></select>{% if problems.room_type %}<p id="type-error" class="student-field-error">{{ problems.room_type }}</p>{% endif %}</div>
+    </div>
+    <fieldset class="student-search-facilities"><legend>Facilities</legend><div class="student-facility-options">{% for facility,glyph in facility_icons.items() %}<label class="student-facility-choice"><input type="checkbox" name="facility" value="{{ facility }}" {% if facility in view.facilities %}checked{% endif %}>{{ facility }}</label>{% endfor %}</div>{% if problems.facility %}<p class="student-field-error" role="alert">{{ problems.facility }}</p>{% endif %}</fieldset>
+    <div class="student-result-toolbar"><div class="student-field student-sort"><label for="search-sort">Sort by</label><select id="search-sort" name="sort">{% for key,label in [('relevant','Most Relevant'),('price_asc','Price: Low to High'),('price_desc','Price: High to Low'),('newest','Newest Listings')] %}<option value="{{ key }}" {% if view.sort == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>{% if problems.sort %}<p class="student-field-error" role="alert">{{ problems.sort }}</p>{% endif %}</div><div class="student-search-actions"><a class="listing-button" href="{{ url_for('student_requests.boardings') }}">Clear Filters</a><button class="listing-button listing-primary" type="submit">Search Boardings</button></div></div>
+</form>
+<div class="student-result-toolbar"><p role="status">{% if problems %}Check the highlighted filters.{% else %}Showing {{ listings|length }} of {{ total|default(listings|length) }} boardings{% endif %}</p></div>
+<p class="student-help">Availability is checked from today for an open-ended stay. Existing future reservations may exclude units. Check your intended date in View Details; final availability and rent are confirmed by the Owner.</p>
+<div class="student-boarding-grid">
+    {% for listing in listings %}
+    <article class="student-boarding-card">
+        <div class="student-card-visual">
+            {{ boarding_photo(url_for('student_requests.cover', boarding_id=listing.boarding_id) if listing.has_cover else none, listing.boarding_name, 'student-card-cover', lazy=true) }}
+            <span class="student-status {{ 'student-status-approved' if listing.available_beds|default(0) or listing.available_rooms|default(0) else 'student-status-cancelled' }}">{{ 'Available' if listing.available_beds|default(0) or listing.available_rooms|default(0) else 'Unavailable' }}</span>
+        </div>
+        <div class="student-card-body"><h2>{{ listing.boarding_name }}</h2><p class="listing-muted">{{ listing.city }}, {{ listing.district }}</p>
+            {% if listing.starting_rent|default(none) is not none %}<p class="student-price">From LKR {{ '{:,.2f}'.format(listing.starting_rent) }} <small>/ {{ listing.starting_unit }} / month</small></p>{% else %}<p class="student-help">No available rental options from today.</p>{% endif %}
+            <div class="student-card-types">{% if listing.available_beds|default(0) %}<span>Shared - Per Bed</span>{% endif %}{% if listing.available_rooms|default(0) %}<span>Private - Entire Room</span>{% endif %}</div>
+            <div class="student-card-facilities">{% for facility in listing.facilities[:3] %}<span>{{ facility }}</span>{% else %}<span>No facilities specified</span>{% endfor %}{% if listing.facilities|length > 3 %}<span>+{{ listing.facilities|length - 3 }} more</span>{% endif %}</div>
+            <div class="student-card-footer"><span class="student-help">{{ listing.available_beds|default(0) }} beds / {{ listing.available_rooms|default(0) }} rooms available</span><a class="listing-button listing-primary" href="{{ url_for('student_requests.boarding', boarding_id=listing.boarding_id, location=view.location, budget=view.budget, room_type=view.room_type, sort=view.sort, facility=view.facilities, page=page) }}">View Details &rarr;</a></div>
+        </div>
+    </article>
+    {% else %}<section class="student-empty">{{ icon('search') }}<h2>{{ 'Check your search filters' if problems else 'No matching boardings' }}</h2><p>{{ 'Correct the highlighted fields and search again.' if problems else 'Try another area, budget or facility selection. Only published boardings from active Owners appear here.' }}</p><a class="listing-button" href="{{ url_for('student_requests.boardings') }}">Clear Filters</a></section>{% endfor %}
+</div>
+{% include 'student/_pagination.html' %}
+{% endblock %}

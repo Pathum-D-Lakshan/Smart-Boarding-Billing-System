@@ -1,0 +1,58 @@
+{% extends 'student/base.html' %}
+{% set page_title = 'My Boarding' %}
+{% set active_page = 'my_boarding' %}
+{% from 'shared/_boarding_photo.html' import boarding_photo %}
+{% set stay = data.selected %}
+{% block page_styles %}{{ stylesheet('student-my-boarding.css') }}{% endblock %}
+{% block student_content %}
+<div class="student-page-heading student-heading-icon">{{ navigation_icon('bed') }}<div><h1>My Boarding</h1><p>View your boarding details, room information and tenancy.</p></div></div>
+{% if data.state.state == 'review' %}<p class="student-notice" role="status">Your saved tenancy needs review. Please contact the Owner. We cannot confirm a current boarding from these records.</p>{% endif %}
+{% if data.history and (data.history_total > 1 or not stay) %}
+<section class="mb-history" aria-label="Your boarding agreements"><form method="get" action="{{ url_for('student_requests.my_boarding') }}">
+    <input type="hidden" name="tab" value="{{ tab }}"><input type="hidden" name="history_page" value="{{ data.history_page }}">
+    <div class="student-field"><label for="boarding-agreement">Your Boarding Agreements</label><select id="boarding-agreement" name="tenancy_id">
+        {% if stay and stay.tenancy_id not in data.history|map(attribute='tenancy_id')|list %}<option value="{{ stay.tenancy_id }}" selected>{{ stay.boarding_name }} · {{ stay.start_date.strftime('%d %b %Y') }} · {{ stay.status_label }}</option>{% endif %}
+        {% for agreement in data.history %}<option value="{{ agreement.tenancy_id }}" {% if stay and stay.tenancy_id == agreement.tenancy_id %}selected{% endif %}>{{ agreement.boarding_name }} · {{ agreement.start_date.strftime('%d %b %Y') }} · {{ agreement.status_label }}</option>{% endfor %}
+    </select></div><button class="listing-button" type="submit">View Agreement</button>
+</form>{% if data.history_pages > 1 %}<nav aria-label="Boarding history pages">{% if data.history_page > 1 %}<a href="{{ url_for('student_requests.my_boarding',history_page=data.history_page-1,tab=tab,tenancy_id=stay.tenancy_id if stay else none) }}">Previous agreements</a>{% endif %}<span>Page {{ data.history_page }} of {{ data.history_pages }}</span>{% if data.history_page < data.history_pages %}<a href="{{ url_for('student_requests.my_boarding',history_page=data.history_page+1,tab=tab,tenancy_id=stay.tenancy_id if stay else none) }}">More agreements</a>{% endif %}</nav>{% endif %}</section>
+{% endif %}
+{% if stay %}
+{% set profile = stay.profile %}
+{% set status_class = 'student-status-approved' if stay.phase == 'active' else 'student-status-requested' if stay.phase == 'scheduled' else 'student-status-cancelled' %}
+<article class="mb-hero" aria-label="Boarding overview">
+    {{ boarding_photo(url_for('student_requests.my_boarding_cover', tenancy_id=stay.tenancy_id) if profile and profile.has_cover else none, stay.boarding_name, 'mb-cover') }}
+    <div class="mb-hero-content"><div class="mb-hero-title"><h2>{{ stay.boarding_name }}</h2><span class="student-status {{ status_class }}">{{ stay.status_label }}</span></div>
+        {% if profile %}<p class="mb-location">{{ icon('building') }} {{ profile.address }}{% if profile.city %}, {{ profile.city }}{% endif %}{% if profile.district %}, {{ profile.district }}{% endif %}</p>{% if profile.description %}<p class="mb-description">{{ profile.description|truncate(420, true) }}</p>{% endif %}
+        <dl class="mb-contact"><div><dt>{{ icon('user') }} Owner</dt><dd>{{ profile.owner_name or 'Not provided' }}</dd></div><div><dt>{{ icon('phone') }} Contact</dt><dd>{{ profile.contact_phone or 'Not provided' }}</dd></div>{% if profile.contact_email %}<div><dt>Boarding Contact Email</dt><dd>{{ profile.contact_email }}</dd></div>{% endif %}</dl>
+        {% else %}<p class="student-help">The Boarding profile is currently unavailable. Your saved room, rent and tenancy agreement remain available below.</p>{% endif %}
+        {% if stay.phase == 'moved_out' %}<p class="student-help">Previous boarding · This is a historical agreement, not your current residence.</p>{% elif stay.phase == 'scheduled' %}<p class="student-help">Scheduled Tenancy · Your stay begins on {{ stay.start_date.strftime('%d %b %Y') }}.</p>{% endif %}
+    </div>
+</article>
+{# Native GET tabs work with keyboard, browser history and disabled JavaScript. #}
+<nav class="mb-tabs" aria-label="My Boarding sections">
+    {% for key,label in tabs.items() %}<a class="mb-tab{% if tab == key %} mb-tab-current{% endif %}" href="{{ url_for('student_requests.my_boarding',tenancy_id=stay.tenancy_id,tab=key,history_page=data.history_page) }}#boarding-section" {% if tab == key %}aria-current="page"{% endif %}>{{ icon('home' if key == 'overview' else 'bed' if key == 'room' else 'layers' if key == 'facilities' else 'bill') }}{{ label }}</a>{% endfor %}
+</nav>
+<section class="student-panel mb-tab-panel" id="boarding-section" aria-labelledby="boarding-section-title" tabindex="-1" data-boarding-tab="{{ tab }}">
+    {% if tab == 'overview' %}<h2 id="boarding-section-title">{{ icon('home') }} Tenancy Summary</h2>
+        <dl class="mb-summary-grid">
+            <div>{{ navigation_icon('bed') }}<dt>Room</dt><dd>{{ stay.room_number }}</dd></div>
+            <div>{{ navigation_icon('bed') }}<dt>{{ 'Bed' if stay.rent_unit == 'bed' else 'Rental Unit' }}</dt><dd>{{ stay.bed_label if stay.rent_unit == 'bed' else 'Entire Private Room' }}</dd></div>
+            <div>{{ navigation_icon('finance') }}<dt>Monthly Rent</dt><dd><strong>LKR {{ '{:,.2f}'.format(stay.agreed_monthly_rent) }}</strong> / month<small>{{ 'Per Bed' if stay.rent_unit == 'bed' else 'Entire Room' }}</small></dd></div>
+            <div>{{ navigation_icon('bill') }}<dt>Start Date</dt><dd>{{ stay.start_date.strftime('%d %b %Y') }}</dd></div>
+        </dl><div class="mb-state-note"><strong>Current Status <span class="student-status {{ status_class }}">{{ stay.status_label }}</span></strong><p>{{ 'Your boarding stay is scheduled to begin on the agreed start date.' if stay.phase == 'scheduled' else 'Your tenancy is currently active.' if stay.phase == 'active' else 'This tenancy has ended. Your historical records remain available.' }}</p>{% if stay.end_date %}<p>Checkout Date: {{ stay.end_date.strftime('%d %b %Y') }}</p>{% endif %}</div>
+    {% elif tab == 'room' %}<h2 id="boarding-section-title">{{ icon('bed') }} Room &amp; Rent</h2><dl class="mb-details-grid">
+        <div><dt>Room Number / Name</dt><dd>{{ stay.room_number }}</dd></div><div><dt>Room Type</dt><dd>{{ 'Shared' if stay.rent_unit == 'bed' else 'Private · Entire Room' }}</dd></div>{% if stay.rent_unit == 'bed' %}<div><dt>Assigned Bed</dt><dd>{{ stay.bed_label }}</dd></div>{% endif %}<div><dt>Floor</dt><dd>{{ stay.floor|room_floor_label }}</dd></div><div><dt>Agreed Monthly Rent</dt><dd><strong>LKR {{ '{:,.2f}'.format(stay.agreed_monthly_rent) }}</strong> / month</dd></div><div><dt>Rent Unit</dt><dd>{{ 'Per Bed' if stay.rent_unit == 'bed' else 'Entire Private Room' }}</dd></div><div><dt>Tenancy Start Date</dt><dd>{{ stay.start_date.strftime('%d %b %Y') }}</dd></div>
+        </dl><p class="student-help">This is your saved agreed rent. Changes to advertised Room or Bed prices do not change this agreement. Room and Bed assignments are managed by the Owner.</p>
+    {% elif tab == 'facilities' %}<h2 id="boarding-section-title">{{ icon('layers') }} Boarding Facilities</h2>
+        {% if profile and profile.facilities %}<ul class="mb-facilities">{% for facility in profile.facilities %}<li><span aria-hidden="true">{{ facility_icons.get(facility,'') }}</span>{{ facility }}</li>{% endfor %}</ul><p class="student-help">Facilities reflect the current published Boarding Profile.</p>
+        {% else %}<div class="mb-inline-empty">{{ icon('layers') }}<h3>Facility information unavailable</h3><p>{{ 'No facilities have been recorded for this boarding.' if profile else 'Facilities are hidden while the Boarding profile is unavailable.' }}</p></div>{% endif %}
+    {% else %}<h2 id="boarding-section-title">{{ icon('bill') }} Tenancy Information</h2><dl class="mb-details-grid">
+        <div><dt>Boarding Name</dt><dd>{{ stay.boarding_name }}</dd></div><div><dt>Tenancy Status</dt><dd><span class="student-status {{ status_class }}">{{ stay.status_label }}</span></dd></div><div><dt>Tenancy Start Date</dt><dd>{{ stay.start_date.strftime('%d %b %Y') }}</dd></div>{% if stay.end_date %}<div><dt>End / Move-Out Date</dt><dd>{{ stay.end_date.strftime('%d %b %Y') }}</dd></div>{% endif %}<div><dt>Original Join Request</dt><dd><a href="{{ url_for('student_requests.details',request_id=stay.request_id) }}">Request #{{ stay.request_id }}</a></dd></div>{% if stay.approved_at %}<div><dt>Approval Date</dt><dd>{{ stay.approved_at|join_request_datetime }}</dd></div>{% endif %}<div><dt>Assigned Room{% if stay.rent_unit == 'bed' %} / Bed{% endif %}</dt><dd>{{ stay.room_number }}{% if stay.rent_unit == 'bed' %} / {{ stay.bed_label }}{% else %} · Entire Private Room{% endif %}</dd></div><div><dt>Agreed Monthly Rent</dt><dd>LKR {{ '{:,.2f}'.format(stay.agreed_monthly_rent) }} / {{ 'bed' if stay.rent_unit == 'bed' else 'entire room' }} / month</dd></div>
+        </dl><a class="listing-button" href="{{ url_for('student_requests.details',request_id=stay.request_id) }}">View My Join Request →</a>
+    {% endif %}
+</section>
+<section class="student-panel mb-quick-actions" aria-labelledby="boarding-actions-heading"><h2 id="boarding-actions-heading">Quick Actions</h2><div class="mb-actions"><a class="listing-button" href="{{ url_for('student_payments.bills') }}">View My Bills</a><a class="listing-button" href="{{ url_for('student_payments.history') }}">My Payments</a><a class="listing-button" href="{{ url_for('student_requests.details',request_id=stay.request_id) }}">View My Join Request</a>{% if data.can_report %}<a class="listing-button listing-primary" href="{{ url_for('student_maintenance.new_student') }}">Report an Issue</a>{% else %}<span class="mb-action-unavailable">Report an Issue · Available during your active stay</span>{% endif %}{% if stay.phase == 'moved_out' %}<a class="listing-button" href="{{ url_for('student_requests.boardings') }}">Find Boarding</a>{% endif %}</div></section>
+{% else %}
+<section class="student-empty mb-empty"><span class="mb-empty-icon">{{ navigation_icon('bed') }}</span><h2>{{ 'Your Join Request is Pending' if data.state.state == 'pending' else 'Your tenancy needs review' if data.state.state == 'review' else "You haven't joined a boarding yet." }}</h2><p>{{ "Awaiting the Owner's decision. A pending request is not an approved boarding stay." if data.state.state == 'pending' else 'Please contact the Owner and review your request history.' if data.state.state == 'review' else 'Find a boarding and send a join request to get started.' }}</p><div class="mb-actions"><a class="listing-button listing-primary" href="{{ url_for('student_requests.boardings') }}">Find Boarding</a>{% if data.state.pending_request %}<a class="listing-button" href="{{ url_for('student_requests.details',request_id=data.state.pending_request.request_id) }}">View My Join Request</a>{% elif data.state.state == 'review' %}<a class="listing-button" href="{{ url_for('student_requests.history') }}">My Join Requests</a>{% endif %}</div></section>
+{% endif %}
+{% endblock %}

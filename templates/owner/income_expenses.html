@@ -1,0 +1,10 @@
+{% extends 'owner/base.html' %}{% set page_title='Income & Expenses' %}{% set active_page='finance' %}
+{% block page_styles %}{{ stylesheet('owner-finance.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/owner-finance.js',v='accounting-month-2') }}" defer></script>{% endblock %}
+{% block owner_content %}
+<header class="finance-heading"><span class="finance-heading-icon">{{ icon('coins') }}</span><div><h2>Income &amp; Expenses</h2><p>Track money received and boarding expenses.</p></div></header>
+{% if error %}<p class="finance-notice finance-error" role="alert">{{ error }}</p>{% endif %}
+<div id="finance-live" class="finance-notice" role="status" aria-live="polite"{% if not notice %} hidden{% endif %}>{{ notice or '' }}</div>
+<div class="finance-recovery" id="finance-recovery" hidden><p>Could not confirm the operation. Read the saved records before trying again.</p><button class="finance-button" type="button" id="finance-refresh">Refresh Saved Records</button></div>
+<div id="finance-workspace">{% if data %}{% include 'owner/_finance_workspace.html' %}{% endif %}</div>
+{% endblock %}

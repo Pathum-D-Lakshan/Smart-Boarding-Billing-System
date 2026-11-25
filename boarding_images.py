@@ -32,6 +32,11 @@ def cover_image_path(filename):
     return root / filename
 
 
+def has_cover_image(filename):
+    path = cover_image_path(filename)
+    return path is not None and path.is_file()
+
+
 def remove_cover_image(filename):
     path = cover_image_path(filename)
     if path is not None:

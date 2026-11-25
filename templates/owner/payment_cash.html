@@ -1,0 +1,4 @@
+{% extends 'owner/base.html' %}{% set page_title='Record Cash Payment' %}{% set active_page='payments' %}
+{% block page_styles %}{{ stylesheet('payments.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/payments.js',v='payments-20261109-1') }}" defer></script>{% endblock %}
+{% block owner_content %}<nav class="pay-breadcrumb"><a href="{{ url_for('owner_payments.overview') }}">Payments</a><span>/</span><span>Record Cash</span></nav><section class="pay-card" data-payment-initial>{% include 'payments/_cash.html' %}</section>{% endblock %}

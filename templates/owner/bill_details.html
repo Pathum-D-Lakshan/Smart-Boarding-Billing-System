@@ -1,0 +1,4 @@
+{% extends 'owner/base.html' %}{% set page_title='Bill Details' %}{% set active_page='bills' %}
+{% block page_styles %}{{ stylesheet('invoice-paper.css') }}{{ stylesheet('owner-monthly-bills.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/owner-monthly-bills.js',v='billing-20261108-2') }}" defer></script>{% endblock %}
+{% block owner_content %}<nav class="bill-breadcrumb bill-no-print" aria-label="Breadcrumb"><a href="{{ url_for('owner_bills.history') }}">Generated Bills</a><span>/</span><span>{{ bill.bill_reference }}</span></nav><section class="bill-card bill-invoice-page"{% if not print_mode %} data-bill-initial-detail{% endif %}>{% include 'owner/_bill_details.html' %}</section>{% if print_mode %}<button class="bill-button bill-primary bill-no-print" type="button" data-bill-print>Print This Bill</button>{% endif %}{% endblock %}

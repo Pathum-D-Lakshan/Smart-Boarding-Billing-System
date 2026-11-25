@@ -1,0 +1,32 @@
+/* Shared confirmation styles keep Room and Boarding edits consistent. */
+.boarding-password-dialog { position: static; box-sizing: border-box; width: 100%; max-width: 30rem; margin: 0 0 1.5rem; padding: clamp(1.25rem, 4vw, 2rem); border: 1px solid #2b6179; border-radius: 1.1rem; background: linear-gradient(145deg, #10243b, #0b1627); color: var(--text); box-shadow: 0 1.5rem 5rem #0008; }
+.boarding-password-dialog:not([open]) { display: none; }
+.boarding-password-dialog:modal { position: fixed; inset: 0; width: calc(100% - 2rem); max-height: calc(100dvh - 2rem); margin: auto; overflow: auto; }
+.boarding-password-dialog::backdrop { background: #040b18b8; backdrop-filter: blur(5px); }
+.boarding-dialog-heading { display: flex; align-items: center; gap: .7rem; margin-bottom: .8rem; }
+.boarding-dialog-heading h3 { font-size: var(--font-section-title); }
+.boarding-dialog-icon { display: grid; place-items: center; flex: none; width: 2.7rem; height: 2.7rem; border: 1px solid #22d3ee38; border-radius: .8rem; background: #10374a; color: var(--cyan); }
+.boarding-dialog-close { flex: none; margin-left: auto; padding: .2rem .5rem; border: 0; border-radius: .4rem; background: transparent; color: var(--muted); font-size: 1.7rem !important; line-height: 1; }
+.boarding-dialog-close:hover { background: #203550; color: var(--text); }
+.boarding-password-dialog > .boarding-field { display: grid; gap: .4rem; margin-top: 1.2rem; }
+.boarding-password-dialog label { font-size: var(--font-body); font-weight: 600; }
+.boarding-password-dialog .boarding-required { color: #fda4af; }
+.boarding-password-dialog .boarding-hint { color: var(--muted); font-size: var(--font-small); line-height: 1.5; }
+.boarding-password-dialog .boarding-field-error, .boarding-password-dialog .rooms-field-error { color: #fecdd3; font-size: var(--font-small); }
+.owner-password-control { position: relative; min-width: 0; }
+.owner-password-control input { box-sizing: border-box; width: 100%; min-width: 0; min-height: 2.8rem; padding: .7rem 3.5rem .7rem .8rem; border: 1px solid var(--border); border-radius: .65rem; background: #0b1729; color: var(--text); font: inherit; font-size: var(--font-input); }
+.owner-password-control input[aria-invalid="true"] { border-color: #fb7185; }
+.owner-password-toggle { position: absolute; inset: 0 .25rem 0 auto; display: grid; place-items: center; width: 2.8rem; min-height: 2.8rem; padding: .5rem; border: 0; border-radius: .5rem; background: transparent; color: #67e8f9; cursor: pointer; }
+.owner-password-toggle:hover { background: #203550; }
+.owner-password-toggle:focus-visible { outline: 2px solid var(--cyan); outline-offset: -3px; }
+.owner-eye-slash { display: none; }
+.owner-password-toggle[aria-pressed="true"] .owner-eye-slash { display: block; }
+.boarding-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .65rem; margin-top: 1.4rem; }
+.boarding-dialog-actions .boarding-button { min-height: 2.8rem; padding: .65rem 1rem; border: 1px solid var(--border); border-radius: .65rem; font: inherit; font-size: var(--font-button); cursor: pointer; }
+.boarding-dialog-actions .boarding-button-primary { background: var(--cyan); color: #081726; }
+.boarding-dialog-actions .boarding-button-secondary { background: #172a40; color: var(--text); }
+.boarding-dialog-actions button:disabled { cursor: wait; opacity: .65; }
+@media (max-width: 600px) {
+    .boarding-dialog-actions { flex-direction: column-reverse; }
+    .boarding-dialog-actions .boarding-button { width: 100%; }
+}

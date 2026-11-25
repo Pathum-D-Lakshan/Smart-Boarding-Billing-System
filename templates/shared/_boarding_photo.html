@@ -1,0 +1,7 @@
+{% from "shared/_icons.html" import icon %}
+{% macro boarding_photo(url, name, css_class, lazy=false) -%}
+<div class="boarding-photo {{ css_class }}">
+    {% if url %}<img data-boarding-photo src="{{ url }}" alt="Cover photo of {{ name }}"{% if lazy %} loading="lazy"{% endif %}>{% endif %}
+    <div class="boarding-photo-empty"{% if url %} hidden{% endif %}>{{ icon('image') }}<span>No Image</span></div>
+</div>
+{%- endmacro %}

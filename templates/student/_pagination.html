@@ -1,0 +1,7 @@
+{% if page_count > 1 %}
+<nav class="student-pagination" aria-label="Pagination">
+    {% if page > 1 %}<a class="listing-button" href="{{ url_for(request.endpoint, page=page-1, location=filters.location, budget=filters.budget, room_type=filters.room_type, sort=filters.sort, facility=filters.facilities) if filters is defined else url_for(request.endpoint, page=page-1) }}">← Previous</a>{% endif %}
+    <span>Page {{ page }} of {{ page_count }}</span>
+    {% if page < page_count %}<a class="listing-button" href="{{ url_for(request.endpoint, page=page+1, location=filters.location, budget=filters.budget, room_type=filters.room_type, sort=filters.sort, facility=filters.facilities) if filters is defined else url_for(request.endpoint, page=page+1) }}">Next →</a>{% endif %}
+</nav>
+{% endif %}

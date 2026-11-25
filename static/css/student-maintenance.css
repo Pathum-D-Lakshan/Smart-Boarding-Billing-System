@@ -1,0 +1,65 @@
+/* Student-only workspace: visual hierarchy from the approved My Maintenance reference. */
+.student-maintenance { min-width:0; }
+.student-maint-head { display:flex;align-items:center;gap:1rem;margin:.5rem 0 1.4rem; }
+.student-maint-head h2 { margin:0 0 .25rem;font-size:var(--font-page-title);line-height:1.2; }
+.student-maint-head p { margin:0;color:var(--theme-muted); }
+.student-maint-heading-icon>.nav-icon { width:3.4rem;height:3.4rem;border-radius:.9rem; }
+.student-maint-heading-icon .nav-art { width:2.6rem;height:2.6rem; }
+.student-maint-overview { display:flex;align-items:center;justify-content:space-between;gap:1.4rem;margin:0 0 1.5rem; }
+.student-maintenance .student-maint-stats { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;flex:1;max-width:54rem;margin:0; }
+.student-maintenance .maint-stat { border:1px solid var(--theme-border);border-radius:.8rem;padding:1rem;gap:.9rem;background:var(--theme-card); }
+.student-maintenance .maint-stat h3 { font-size:var(--font-small);font-weight:600;margin:0; }
+.student-maintenance .maint-stat strong { font-size:1.7rem;line-height:1.2;margin-top:.3rem; }
+.student-maint-stat-icon { display:grid;place-items:center;flex:none;width:3rem;height:3rem;border-radius:.8rem;color:#fff;box-shadow:inset 0 1px 0 #ffffff3b,0 3px 10px #0002; }
+.student-maint-stat-icon .icon { width:1.9rem;height:1.9rem; }
+.student-maint-stat-total { background:linear-gradient(145deg,#9b6de5,#5832a9); }
+.student-maint-stat-in_progress { background:linear-gradient(145deg,#ffbf37,#cb7c00); }
+.student-maint-stat-resolved { background:linear-gradient(145deg,#28d98b,#07995c); }
+.student-maint-report-button { flex:none;white-space:nowrap; }
+.student-maint-eligibility { display:flex;align-items:center;gap:.85rem;border:1px solid var(--theme-border);border-radius:.8rem;background:var(--theme-field);padding:.85rem 1rem;margin-bottom:1.2rem;font-size:var(--font-small); }
+.student-maint-eligibility>span { color:var(--theme-link); }.student-maint-eligibility .icon { width:1.4rem;height:1.4rem; }
+.student-maint-eligibility>div { flex:1;min-width:0; }.student-maint-eligibility p { color:var(--theme-muted);margin:.2rem 0 0; }
+.student-maint-eligibility a { color:var(--theme-link);font-weight:600;white-space:nowrap; }
+.student-maint-tabs { display:flex;align-items:stretch;gap:.15rem;margin-bottom:-1px;position:relative;z-index:1; }
+.student-maint-tab { display:flex;align-items:center;justify-content:center;gap:.65rem;min-height:3rem;padding:.65rem 1.6rem;border:1px solid var(--theme-border);border-bottom:0;border-radius:.7rem .7rem 0 0;background:var(--theme-field);color:var(--theme-text);font-weight:600;text-decoration:none;font-size:var(--font-button); }
+.student-maint-tab .icon { width:1.2rem;height:1.2rem; }.student-maint-tab.is-active { background:var(--theme-accent);color:#052638;border-color:var(--theme-accent); }
+.student-maint-pending-count { display:grid;place-items:center;min-width:1.4rem;height:1.4rem;padding:0 .3rem;background:#ffce54;color:#402800;border-radius:1rem;font-size:var(--font-caption); }
+.student-maintenance .student-maint-requests { padding:.8rem;border-radius:0 .9rem .9rem .9rem;overflow:visible; }
+.student-maint-toolbar { display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;padding:0 0 .8rem; }
+.student-maint-toolbar :is(input,select,button) { min-height:2.7rem;font:inherit;font-size:var(--font-small);color:var(--theme-text);background:var(--theme-field);border:1px solid var(--theme-border);border-radius:.5rem; }
+.student-maint-select select { max-width:100%;padding:.5rem 1.9rem .5rem .7rem; }
+.student-maint-search { margin-left:auto;display:flex;align-items:center;gap:.5rem;flex:0 1 26rem;min-width:0;border:1px solid var(--theme-border);border-radius:.5rem;padding-left:.65rem;background:var(--theme-field); }
+.student-maint-search>.icon { width:1.2rem;height:1.2rem;color:var(--theme-muted);flex:none; }
+.student-maint-search input { width:100%;min-width:0;border:0;background:transparent;padding:.5rem 0; }
+.student-maint-search button { border:0;border-left:1px solid var(--theme-border);border-radius:0 .5rem .5rem 0;padding:.5rem .7rem;cursor:pointer;color:var(--theme-link);font-weight:600; }
+.student-maint-clear { color:var(--theme-link);font-size:var(--font-small); }.student-maint-history-help { color:var(--theme-muted);font-size:var(--font-small);margin:0 0 .7rem; }
+.student-maintenance .student-maint-table { table-layout:fixed; }
+.student-maint-table th:nth-child(1) { width:16%; }.student-maint-table th:nth-child(2) { width:25%; }.student-maint-table th:nth-child(3) { width:17%; }.student-maint-table th:nth-child(4) { width:18%; }.student-maint-table th:nth-child(5) { width:14%; }.student-maint-table th:nth-child(6) { width:10%; }
+.student-maintenance .student-maint-table :is(th,td) { padding:.85rem .6rem; }.student-maint-table thead th { font-size:var(--font-small);font-weight:600; }
+.student-maint-table td strong { font-weight:500; }.student-maint-reference { display:block;font-size:var(--font-caption);font-weight:600;overflow-wrap:anywhere; }
+.student-maint-location { display:inline-flex;gap:.4rem;align-items:center; }.student-maint-location .icon { width:1.1rem;height:1.1rem;flex:none;color:var(--theme-link); }
+.student-maint-status-dot { width:.4rem;height:.4rem;border-radius:50%;background:currentColor; }.student-maintenance .maint-badge { gap:.4rem;padding:.25rem .55rem; }
+.student-maintenance .student-maint-view { min-height:2.2rem;min-width:4.8rem;padding:.3rem .65rem;color:var(--theme-link);border-color:var(--theme-link);font-size:var(--font-small); }
+.student-maintenance .student-maint-footer { padding:.9rem .15rem .1rem; }.student-maint-footer .maint-button,.student-maint-page { min-height:2rem;min-width:2rem;padding:.2rem .5rem; }
+.student-maint-page { display:grid;place-items:center;border:1px solid var(--theme-accent);background:var(--theme-accent);color:#052638;border-radius:.4rem;font-weight:700; }
+.student-maint-empty-icon { display:block;margin-bottom:.8rem; }.student-maint-empty-icon>.nav-icon { width:3.2rem;height:3.2rem;margin-inline:auto; }.student-maint-empty-icon .nav-art { width:2.4rem;height:2.4rem; }
+.student-maintenance .maint-empty p { color:var(--theme-muted);margin:.6rem 0 0; }
+.student-maint-sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0; }
+.student-portal .maint-dialog:has(.student-maint-report) { width:min(43rem,calc(100vw - 2rem)); }
+.student-maint-form-heading { display:flex;align-items:flex-start;gap:.8rem; }.student-maint-form-heading .nav-icon { width:2.7rem;height:2.7rem; }.student-maint-form-heading .nav-art { width:2.1rem;height:2.1rem; }
+.student-maint-form-heading h2 { margin:0 0 .35rem; }.student-maint-form-heading p { color:var(--theme-muted);margin:0;font-size:var(--font-small); }
+.student-maint-report-context { display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin:1rem 0 0;font-weight:600; }.student-maint-report-context span { color:var(--theme-muted);font-size:var(--font-small);font-weight:400; }
+.student-maint-fields { border:0;padding:0;margin:0;min-width:0; }.student-maint-fields .maint-grid .maint-field { margin:0; }
+.student-maint-report .maint-field label { font-size:var(--font-small); }.student-maint-report textarea { min-height:8rem; }.student-maint-report [disabled] { cursor:not-allowed; }
+.student-maint-upload { position:relative;display:grid;justify-items:center;gap:.3rem;text-align:center;min-height:11rem;padding:1rem;border:1px dashed var(--theme-link);border-radius:.65rem;background:var(--theme-field);overflow-wrap:anywhere; }
+.student-maint-upload input[type=file] { position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer; }
+.student-maint-upload-art { width:3rem;height:3rem;color:var(--theme-link); }.student-maint-upload>strong { font-size:var(--font-small); }.student-maint-upload>span,.student-maint-upload small { font-size:var(--font-caption);color:var(--theme-muted); }
+.student-maint-upload.is-dragging,.student-maint-upload:focus-within { outline:2px solid var(--theme-accent);outline-offset:3px;background:var(--theme-hover); }
+.student-maint-upload.has-error { border-color:var(--theme-danger-ink); }.student-maint-form-actions { justify-content:space-between; }.student-maint-form-actions>.maint-primary { min-width:12rem; }
+.student-maint-preview-notice { margin:1rem 0;padding:.8rem;border-left:3px solid var(--theme-accent);border-radius:.5rem;background:var(--theme-field);font-size:var(--font-small); }.student-maint-preview-notice p { margin:.3rem 0;color:var(--theme-muted); }.student-maint-preview-notice a { color:var(--theme-link); }
+.student-maint-progress { list-style:none;padding:0;display:grid;gap:.9rem; }.student-maint-progress li { border-left:3px solid var(--theme-accent);padding:.3rem 0 .3rem 1rem; }.student-maint-progress strong,.student-maint-progress time { display:block; }.student-maint-progress time { color:var(--theme-muted);font-size:var(--font-small); }
+.student-maintenance :is(a,button,input,select):focus-visible { outline:2px solid var(--theme-accent);outline-offset:3px; }
+[data-theme="light"] .student-maintenance :is(.student-maint-tab.is-active,.student-maint-report-button) { color:#052638; }
+@media(max-width:1250px) { .student-maint-overview { align-items:stretch;flex-wrap:wrap;gap:1rem; }.student-maintenance .student-maint-stats { flex-basis:100%;max-width:none; }.student-maint-report-button { margin-left:auto; }.student-maint-table th:nth-child(1) { width:14%; }.student-maint-table th:nth-child(6) { width:12%; } }
+@media(max-width:800px) { .student-maintenance .student-maint-table { table-layout:auto; }.student-maintenance .student-maint-table td { padding:.5rem; }.student-maint-table .student-maint-reference { max-width:none; }.student-maint-search { flex:1 1 100%;order:3;margin-left:0; }.student-maint-eligibility { flex-wrap:wrap; }.student-maint-eligibility a { margin-left:2.3rem; }.student-maint-footer { gap:.8rem; } }
+@media(max-width:550px) { .student-maint-head { gap:.7rem; }.student-maint-heading-icon>.nav-icon { width:2.7rem;height:2.7rem; }.student-maintenance .student-maint-stats { gap:.5rem; }.student-maintenance .maint-stat { padding:.7rem;display:grid;justify-items:start;gap:.5rem; }.student-maint-stat-icon { width:2.3rem;height:2.3rem; }.student-maint-stat-icon .icon { width:1.5rem;height:1.5rem; }.student-maintenance .maint-stat h3 { font-size:var(--font-caption); }.student-maint-report-button { width:100%; }.student-maint-tab { flex:1;padding:.65rem .55rem;gap:.4rem;font-size:var(--font-small); }.student-maint-sort { margin-left:auto; }.student-maint-select { flex:1;min-width:0; }.student-maint-select select { width:100%; }.student-portal .maint-dialog:has(.student-maint-report) { width:calc(100vw - 1rem); }.student-maint-form-actions>.maint-primary { min-width:0; }.student-maint-preview-notice { font-size:var(--font-caption); } }

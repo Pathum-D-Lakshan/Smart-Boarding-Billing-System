@@ -1,0 +1,10 @@
+{% set balance=tenant.settlement %}
+<section class="jr-detail-section jr-detail-section-wide tn-settlement" aria-label="Issued bill payment balance">
+<h4>{{ icon('bill') }} Payment Balance for Removal Review</h4>
+<p class="tn-balance-label{% if balance.outstanding %} tn-balance-due{% endif %}">{{ balance.label }}</p>
+<dl class="tn-data tn-balance-grid"><div><dt>Issued Bills</dt><dd>LKR {{ '{:,.2f}'.format(balance.total) }}</dd></div><div><dt>Verified / Settled</dt><dd>LKR {{ '{:,.2f}'.format(balance.paid) }}</dd></div><div><dt>Still Payable</dt><dd>LKR {{ '{:,.2f}'.format(balance.outstanding) }}</dd></div></dl>
+{% if balance.pending %}<p class="jr-notice">LKR {{ '{:,.2f}'.format(balance.pending) }} is awaiting payment verification. Uploaded slips are not counted as paid until verified.</p>{% endif %}
+{% if balance.review_count %}<p class="jr-notice">{{ balance.review_count }} payment record(s) need review before being treated as settled.</p>{% endif %}
+<p class="jr-footnote">{{ balance.bill_count }} current issued bill(s) for this Student at your boarding, including earlier stays. Void bills and other boardings are excluded. Unissued or final charges are not included. Ending a stay does not generate, reduce, refund or mark any bill paid.</p>
+{% if balance.rows %}<details><summary>View Issued Bill Balances</summary><div class="jr-table-wrap"><table class="jr-table tn-balance-table"><thead><tr><th>Bill</th><th>Amount (LKR)</th><th>Status</th><th>Still Payable (LKR)</th></tr></thead><tbody>{% for bill in balance.rows %}<tr><td><a href="{{ url_for('owner_bills.details',bill_id=bill.bill_id) }}">{{ bill.bill_reference }}</a></td><td>{{ '{:,.2f}'.format(bill.final_total) }}</td><td>{{ bill.payment_label }}</td><td>{{ '{:,.2f}'.format(bill.outstanding) }}</td></tr>{% endfor %}</tbody></table></div>{% if balance.bill_count>12 %}<p class="jr-footnote">Latest 12 bills shown; totals include all issued bills at this boarding.</p>{% endif %}</details>{% endif %}
+</section>

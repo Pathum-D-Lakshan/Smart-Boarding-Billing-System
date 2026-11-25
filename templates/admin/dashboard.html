@@ -1,0 +1,13 @@
+{% extends 'admin/base.html' %}{% set page_title='Admin Dashboard' %}{% set active_page='dashboard' %}
+{% block admin_content %}
+<header class="admin-heading"><p class="eyebrow">PLATFORM WORKSPACE</p><h2>Admin Dashboard</h2><p>Monitor users, boarding listings and platform activity.</p></header>
+{% include 'admin/_summary.html' %}
+{% if removal_enabled %}<section class="admin-card admin-section-heading"><div><h3>Tenant Removal Requests</h3><p>{{ removal_pending }} Pending Owner request(s)</p></div><a class="admin-button admin-primary" href="{{ url_for('admin_portal.removals') }}">Review Tenant Removal Requests →</a></section>{% endif %}
+{% if appeals_enabled|default(false) %}<section class="admin-card admin-section-heading"><div><h3>Account Reactivation Requests</h3><p>{{ appeals_pending }} Pending · Student and Boarding Owner appeals</p></div><a class="admin-button admin-primary" href="{{ url_for('admin_portal.appeals') }}">Review Reactivation Requests →</a></section>{% endif %}
+<div class="admin-two-columns">
+<section class="admin-card"><div class="admin-section-heading"><h3>Recent Registrations</h3><a href="{{ url_for('admin_portal.users') }}">View Users →</a></div>
+{% if data.recent %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Name</th><th>Role</th><th>Registered</th><th>Status</th></tr></thead><tbody>{% for row in data.recent %}<tr><td>{{ row.full_name }}</td><td>{{ 'Boarding Owner' if row.role=='owner' else 'Student' }}</td><td>{{ row.created_at.strftime('%d %b %Y') }}</td><td><span class="admin-badge" data-state="{{ row.status_label|lower }}">{{ row.status_label }}</span></td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="admin-empty">No Student or Owner registrations yet.</p>{% endif %}</section>
+<section class="admin-card"><div class="admin-section-heading"><h3>Recently Moderated Listings</h3><a href="{{ url_for('admin_portal.listings') }}">View Listings →</a></div>
+{% if data.events %}<ul class="admin-activity">{% for event in data.events %}<li><strong>{{ event.boarding_name }}</strong><span>{{ 'Hidden' if event.action=='listing_hidden' else 'Restored' }} · {{ event.created_at.strftime('%d %b %Y %H:%M') }} UTC</span></li>{% endfor %}</ul>{% else %}<p class="admin-empty">No listing moderation decisions have been recorded.</p>{% endif %}</section></div>
+<p><a class="admin-button" href="{{ url_for('admin_portal.reports') }}">View Reports →</a></p>
+{% endblock %}

@@ -1,0 +1,4 @@
+{% extends payment_layout %}{% set page_title='Payments' %}{% set active_page='payments' %}
+{% block page_styles %}{{ stylesheet('payments.css') }}{% endblock %}
+{% macro content() %}<section class="pay-card pay-empty"><h2>Could not complete this request</h2><p class="pay-error" role="alert">{{ error }}</p><a class="pay-button" href="{{ url_for('owner_payments.overview' if payment_role=='owner' else 'student_payments.history') }}">Check Payment History</a></section>{% endmacro %}
+{% block owner_content %}{{ content() }}{% endblock %}{% block student_content %}{{ content() }}{% endblock %}

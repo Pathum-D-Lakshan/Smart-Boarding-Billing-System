@@ -1,0 +1,3 @@
+{% for notice in account_decisions|default([]) %}
+<section class="owner-message account-decision" role="status" aria-label="Account reactivation decision"><h2>Your Account Has Been Reactivated</h2><p>Your reactivation request has been approved by the Platform Administrator. You can now access your account normally.</p><p>Decision: Approved · {{ notice.decided_at|sri_lanka_time }}</p>{% if notice.decision_note %}<p class="account-decision-note">{{ notice.decision_note }}</p>{% endif %}<form method="post" action="{{ url_for('account_reactivation.acknowledge_decision',request_id=notice.request_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit">Got It</button></form></section>
+{% endfor %}

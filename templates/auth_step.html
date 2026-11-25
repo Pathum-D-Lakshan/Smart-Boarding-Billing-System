@@ -1,14 +1,31 @@
+{% from 'shared/_assets.html' import stylesheet %}
+{% from 'shared/_icons.html' import icon, icon_library %}
+{% set recovery_stage = mode if mode in ('forgot', 'new_password') else 'verify_reset' if mode == 'code' and endpoint == 'reset_password' else none %}
+{% set auth_split = auth_split|default(recovery_stage or ('verify_registration' if mode == 'code' and endpoint == 'verify_email' else none)) %}
+{% set active_auth = 'forgot' if recovery_stage else 'register' if auth_split == 'verify_registration' else auth_split %}
+{% set auth_css_version = 'auth-fullscreen-4' %}
+{% set welcome_copy = {
+    'login': ('Welcome Back', 'Log in to your account to access your dashboard, boardings, bills and more.'),
+    'register': ('Find Your Place', 'Create an account to find a boarding or manage your property in one place.'),
+    'verify_registration': ('Verify Your Email', 'Confirm your email address to finish creating your account.'),
+    'forgot': ('Recover Your Account', 'Use your registered email address to request a password reset code.'),
+    'verify_reset': ('Check Your Email', 'Enter the verification code to continue resetting your password.'),
+    'new_password': ('Set a New Password', 'Choose a new password for your next login.')
+} %}
 {% macro password_field(id, label, new=false, help=false) %}
 <div class="form-group">
     <label for="{{ id }}">{{ label }}</label>
+    {% if auth_split %}<div class="auth-input-icon">{{ icon('lock') }}{% endif %}
     <input type="password" id="{{ id }}" name="{{ id }}"
            autocomplete="{{ 'new-password' if new else 'current-password' }}"
+           {% if auth_split %}placeholder="{{ 'Confirm your password' if id == 'confirm_password' else 'Enter your new password' if new else 'Enter your password' }}"{% endif %}
            {% if new %}minlength="8" maxlength="128"{% endif %}
            {% if help %}
            pattern="(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E]).{8,128}"
            title="Use 8–128 characters and at least one symbol."
            aria-describedby="password-help"
            {% endif %} required>
+    {% if auth_split %}</div>{% endif %}
     {% if help %}
     <p id="password-help" class="auth-message">
         Use at least 8 characters and a symbol like !, @ or #.
@@ -18,15 +35,45 @@
 {% endmacro %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <title>{{ page_title|default(title) }} | Smart Boarding &amp; Billing System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    {{ stylesheet('design-tokens.css', auth_css_version) }}
+    {{ stylesheet('auth.css', auth_css_version) }}
+    {{ stylesheet('themes.css', auth_css_version) }}
+    {% if auth_split %}
+    {{ stylesheet('public-marketplace.css', auth_css_version) }}
+    {{ stylesheet('auth-split.css', auth_css_version) }}
+    {{ stylesheet('auth-motion.css', auth_css_version) }}
+    <script src="{{ url_for('static', filename='js/auth-motion.js', v='4') }}" data-auth-home="{{ url_for('home') }}"></script>
+    {% endif %}
 </head>
-<body>
+<body{% if auth_split %} class="auth-split-page"{% endif %}>
+    {% if auth_split %}
+    <a class="market-skip" href="#main-content">Skip to form</a>
+    {{ icon_library(false) }}
+    {% include 'public/_navigation.html' %}
+    <main class="auth-split">
+        <aside class="auth-visual" aria-labelledby="auth-welcome">
+            <img class="auth-visual-photo" src="{{ url_for('static', filename='images/boarding-hero.webp') }}" width="1536" height="1024" alt="" fetchpriority="high">
+            <div class="auth-visual-copy">
+                <h2 id="auth-welcome">{{ welcome_copy[auth_split][0] }}</h2>
+                <p>{{ welcome_copy[auth_split][1] }}</p>
+                <ul class="auth-visual-features">
+                    <li>{{ icon('bed') }} <span>Manage<br> Boardings</span></li>
+                    <li>{{ icon('bill') }} <span>View Bills<br> &amp; Receipts</span></li>
+                    <li>{{ icon('tool') }} <span>Get<br> Maintenance</span></li>
+                </ul>
+            </div>
+        </aside>
+        <section class="auth-card auth-split-card" id="main-content" tabindex="-1" aria-labelledby="auth-title">
+            <div class="auth-utilities">{% include 'shared/_theme_controls.html' %}</div>
+    {% else %}
     <main class="auth-card">
+        <div class="auth-utilities">{% include 'shared/_theme_controls.html' %}</div>
         <div class="brand">
             {% if show_icon %}
             <svg class="brand-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
@@ -38,11 +85,21 @@
             <p class="brand-name">Smart Boarding</p>
             <p class="brand-subtitle">&amp; Billing System</p>
         </div>
+    {% endif %}
 
         <header class="auth-header">
-            <h1>{{ title }}</h1>
-            <p>{{ subtitle }}</p>
+            <h1 id="auth-title">{% if auth_split %}{{ icon('lock' if recovery_stage else 'mail' if auth_split == 'verify_registration' else 'request' if auth_split == 'register' else 'user') }}{% endif %}{{ title }}</h1>
+            {% if subtitle %}<p>{{ subtitle }}</p>
+            {% elif auth_split == 'login' %}<p>Access your Smart Boarding &amp; Billing System account.</p>{% endif %}
         </header>
+
+        {% if auth_split %}
+        <nav class="auth-mode-nav" aria-label="Account access">
+            <a href="{{ url_for('login', boarding=boarding|default(none)) }}"{% if active_auth == 'login' %} aria-current="page"{% endif %}>{{ icon('logout') }} <span>Login</span></a>
+            <a href="{{ url_for('register', boarding=boarding|default(none)) }}"{% if active_auth == 'register' %} aria-current="{{ 'step' if auth_split == 'verify_registration' else 'page' }}"{% endif %}>{{ icon('request') }} <span>Create Account</span></a>
+            <a href="{{ url_for('forgot_password') }}"{% if active_auth == 'forgot' %} aria-current="{{ 'page' if auth_split == 'forgot' else 'step' }}"{% endif %}>{{ icon('lock') }} <span>Forgot Password</span></a>
+        </nav>
+        {% endif %}
 
         {% if error %}
         <p class="auth-message auth-error" role="alert">{{ error }}</p>
@@ -53,7 +110,13 @@
         {% endfor %}
 
         {% block content %}
-        {% if mode == "dashboard" %}
+        {% if mode in ("dashboard", "logout_error") %}
+        {% if student_portal %}
+        {% if maintenance_navigation_enabled|default(false) %}<p class="auth-footer"><a href="{{ url_for('student_maintenance.history') }}">My Maintenance Requests →</a></p>{% endif %}
+        <p class="auth-footer"><a href="{{ url_for('student_payments.bills') }}">My Bills →</a> · <a href="{{ url_for('student_payments.history') }}">My Payments →</a></p>
+        <p class="auth-footer"><a href="{{ url_for('student_requests.boardings') }}">Browse Published Boardings →</a></p>
+        <p class="auth-footer"><a href="{{ url_for('student_requests.history') }}">My Join Requests →</a></p>
+        {% endif %}
         <form method="post" action="{{ url_for('logout') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="login-button">Log Out</button>
@@ -63,11 +126,14 @@
         <form method="post" action="{{ url_for('forgot_password') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
-                <label for="email">Email address</label>
-                <input type="email" id="email" name="email" autocomplete="email"
-                       maxlength="254" value="{{ email|default('') }}" required>
+                <label for="email">Registered Email Address</label>
+                <div class="auth-input-icon">{{ icon('mail') }}
+                    <input type="email" id="email" name="email" autocomplete="email"
+                           placeholder="Enter your registered email"
+                           maxlength="254" value="{{ email|default('') }}" required>
+                </div>
             </div>
-            <button type="submit" class="login-button">Send reset code</button>
+            <button type="submit" class="login-button">{{ icon('mail') }} Send Reset Code</button>
         </form>
 
         {% elif mode == "code" %}
@@ -85,11 +151,13 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label for="code">8-digit code</label>
+                <div class="auth-input-icon">{{ icon('lock') }}
                 <input type="text" id="code" name="code" inputmode="numeric"
                        autocomplete="one-time-code" pattern="[0-9]{8}" maxlength="8" required>
+                </div>
             </div>
             <button id="verify-code" type="submit" class="login-button" {% if not remaining %}disabled{% endif %}>
-                {{ "Verify and create account" if endpoint == "verify_email" else "Verify code" }}
+                {{ icon('check') }} {{ 'Verify Code' if recovery_stage else 'Verify and create account' }}
             </button>
         </form>
 
@@ -111,123 +179,17 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {{ password_field('password', 'New Password', new=true, help=true) }}
             {{ password_field('confirm_password', 'Confirm Password', new=true) }}
-            <button type="submit" class="login-button">Change Password</button>
+            <button type="submit" class="login-button">{{ icon('lock') }} Reset Password</button>
         </form>
         {% endif %}
 
-        {% if mode != "dashboard" %}
-        <p class="auth-footer"><a href="{{ url_for('login') }}">Back to Log In</a></p>
+        {% if mode not in ("dashboard", "logout_error") %}
+        <p class="auth-footer{% if auth_split %} auth-switch{% endif %}"><a href="{{ url_for('login') }}">{{ 'Back to Login' if auth_split else 'Back to Log In' }}</a></p>
         {% endif %}
         {% endblock %}
+    {% if auth_split %}</section>{% endif %}
     </main>
 
-    <script>
-        // Add a Show/Hide eye button to each password field.
-        for (const field of document.querySelectorAll('input[type="password"]')) {
-            const wrapper = document.createElement("div");
-            wrapper.className = "password-field";
-            field.before(wrapper);
-            wrapper.append(field);
-
-            const button = document.createElement("button");
-            button.type = "button";
-            button.className = "password-toggle";
-            button.setAttribute("aria-controls", field.id);
-            button.setAttribute("aria-label", "Show " + field.labels[0].textContent.trim().toLowerCase());
-            button.setAttribute("aria-pressed", "false");
-            button.title = "Show password";
-            button.innerHTML =
-                '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<path d="M2 12c2.5-4 6-6 10-6s7.5 2 10 6c-2.5 4-6 6-10 6S4.5 16 2 12Z"/>' +
-                '<circle cx="12" cy="12" r="2.5"/>' +
-                '<path class="eye-slash" d="M3 3l18 18" stroke-linecap="round"/>' +
-                '</svg>';
-            wrapper.append(button);
-
-            button.addEventListener("click", () => {
-                const show = field.type === "password";
-                field.type = show ? "text" : "password";
-                button.setAttribute("aria-pressed", String(show));
-                button.title = show ? "Hide password" : "Show password";
-            });
-        }
-
-        // Count down from the remaining time supplied by Flask.
-        const countdown = document.getElementById("otp-countdown");
-        if (countdown) {
-            const deadline = Date.now() + Number(countdown.dataset.seconds) * 1000;
-            const display = document.getElementById("otp-time");
-            const expiredMessage = document.getElementById("otp-expired");
-            const verify = document.getElementById("verify-code");
-            const resend = document.getElementById("resend-code");
-
-            function updateCountdown() {
-                const seconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
-                display.textContent = Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
-                verify.disabled = seconds === 0;
-                resend.disabled = seconds > 0;
-                expiredMessage.hidden = seconds > 0;
-
-                if (seconds === 0) clearInterval(timer);
-            }
-
-            const timer = setInterval(updateCountdown, 250);
-            updateCountdown();
-        }
-
-        // Keep the live duplicate-Gmail check on the registration form.
-        const registerForm = document.querySelector("[data-email-check]");
-        if (registerForm) {
-            const email = registerForm.elements.email;
-            const feedback = document.getElementById("email-feedback");
-            const gmail = /^[a-z0-9]+(?:\.[a-z0-9]+)*(?:\+[a-z0-9._-]+)?@gmail\.com$/i;
-            let timer;
-            let revision = 0;
-
-            function showEmailError(message) {
-                feedback.textContent = message;
-                email.setCustomValidity(message);
-                email.setAttribute("aria-invalid", String(Boolean(message)));
-            }
-
-            email.addEventListener("input", () => {
-                clearTimeout(timer);
-                const current = ++revision;
-                const address = email.value.trim();
-
-                showEmailError("");
-
-                if (!gmail.test(address)) return;
-
-                timer = setTimeout(async () => {
-                    try {
-                        const response = await fetch(registerForm.dataset.emailCheck, {
-                            method: "POST",
-                            body: new URLSearchParams({
-                                email: address,
-                                csrf_token: registerForm.elements.csrf_token.value
-                            })
-                        });
-
-                        if (!response.ok) return;
-
-                        const result = await response.json();
-                        if (current === revision && result.registered) {
-                            showEmailError("That Gmail is already registered.");
-                        }
-                    } catch {
-                        // The server checks the Gmail again when the form is submitted.
-                    }
-                }, 350);
-            });
-
-            email.addEventListener("blur", () => {
-                const address = email.value.trim();
-                if (address && !gmail.test(address)) {
-                    showEmailError("Enter a valid @gmail.com address.");
-                }
-            });
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/auth-forms.js') }}" defer></script>
 </body>
 </html>

@@ -1,0 +1,14 @@
+/* Keep type sizes shared without changing rem-based spacing or the approved palette. */
+:root {
+    --font-body: 1.0625rem;
+    --font-small: .9375rem;
+    --font-caption: .875rem;
+    --font-nav: 1.09375rem;
+    --font-table: 1.03125rem;
+    --font-button: 1.03125rem;
+    --font-input: 1.0625rem;
+    --font-page-title: clamp(1.875rem, 2.3vw, 2rem);
+    --font-section-title: clamp(1.375rem, 1.8vw, 1.5rem);
+    --font-subheading: 1.25rem;
+    --font-metric: 2rem;
+}

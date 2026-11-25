@@ -1,0 +1,8 @@
+{% extends "public/base.html" %}
+{% block title %}Boardings · Smart Boarding{% endblock %}
+{% block content %}
+<section class="market-width market-inner-page">
+    <h1>{{ message }}</h1>
+    <a class="market-button" href="{{ url_for('public_boardings.search') }}">Browse Boardings</a>
+</section>
+{% endblock %}

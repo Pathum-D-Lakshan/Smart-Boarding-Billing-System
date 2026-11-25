@@ -1,0 +1,23 @@
+{% extends "public/base.html" %}
+{% from "public/_listings.html" import cards, search_form %}
+{% block title %}Browse Boardings · Smart Boarding{% endblock %}
+{% block content %}
+<section class="market-width market-inner-page">
+    <a class="market-text-link" href="{{ url_for('home') }}">Home</a>
+    <h1>Browse Boardings</h1>
+    {{ search_form(q) }}
+    {% if error %}
+    <p class="market-empty" role="alert">{{ error }}</p>
+    {% else %}
+    <p class="market-search-summary">{{ total }} {{ 'boarding' if total == 1 else 'boardings' }}{% if q %} matching “{{ q }}”{% endif %}</p>
+    {{ cards(listings, "Try a different boarding name, city or district." if q else "No boardings have been published yet. Check back for new listings.") }}
+    {% if page_count > 1 %}
+    <nav class="market-pages" aria-label="Search result pages">
+        {% if page > 1 %}<a class="market-button" href="{{ url_for('public_boardings.search', q=q, page=page-1) }}">Previous</a>{% endif %}
+        <span>Page {{ page }} of {{ page_count }}</span>
+        {% if page < page_count %}<a class="market-button" href="{{ url_for('public_boardings.search', q=q, page=page+1) }}">Next</a>{% endif %}
+    </nav>
+    {% endif %}
+    {% endif %}
+</section>
+{% endblock %}

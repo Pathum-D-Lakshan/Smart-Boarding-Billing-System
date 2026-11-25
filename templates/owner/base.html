@@ -1,74 +1,27 @@
-{% macro icon(name) -%}
-<svg class="icon" aria-hidden="true" focusable="false">
-    <use href="#icon-{{ name }}"></use>
-</svg>
-{%- endmacro %}
+{% from 'shared/_icons.html' import icon, navigation_icon, icon_library %}
+{% from 'shared/_assets.html' import stylesheet, boarding_photo_assets %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <title>{{ page_title|default('Owner Dashboard') }} | Smart Boarding &amp; Billing System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/owner-dashboard.css') }}">
+    {{ stylesheet('design-tokens.css') }}
+    {{ stylesheet('owner-dashboard.css') }}
     {% block page_styles %}{% endblock %}
+    {{ stylesheet('themes.css') }}
+    {{ boarding_photo_assets() }}
     <script src="{{ url_for('static', filename='js/owner-dashboard.js') }}" defer></script>
     {% block page_scripts %}{% endblock %}
 </head>
 <body class="owner-dashboard">
     <!-- Keep shared controls in one layout for every Owner page. -->
-    <svg class="icon-library" aria-hidden="true" width="0" height="0">
-        <symbol id="icon-home" viewBox="0 0 24 24">
-            <path d="M3 10 12 3l9 7v11h-6v-7H9v7H3z"/>
-        </symbol>
-        <symbol id="icon-user" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0z"/>
-        </symbol>
-        <symbol id="icon-bed" viewBox="0 0 24 24">
-            <path d="M3 19V7m0 9h18v3m0-3v-3a3 3 0 0 0-3-3h-7v6"/>
-            <circle cx="7" cy="12" r="1.5"/>
-        </symbol>
-        <symbol id="icon-layers" viewBox="0 0 24 24">
-            <path d="m12 3 10 5-10 5L2 8zm-9 9 9 5 9-5M3 16l9 5 9-5"/>
-        </symbol>
-        <symbol id="icon-request" viewBox="0 0 24 24">
-            <circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2m3-12v6m-3-3h6"/>
-        </symbol>
-        <symbol id="icon-users" viewBox="0 0 24 24">
-            <circle cx="9" cy="8" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2m1-17a4 4 0 0 1 0 8m2 2a6 6 0 0 1 3 5v2"/>
-        </symbol>
-        <symbol id="icon-bill" viewBox="0 0 24 24">
-            <rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6m-6 4h6m-6 4h4"/>
-        </symbol>
-        <symbol id="icon-payment" viewBox="0 0 24 24">
-            <rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20m-6 5h3"/>
-        </symbol>
-        <symbol id="icon-finance" viewBox="0 0 24 24">
-            <path d="M4 20v-5m5 5v-9m5 9V8m5 12V4"/>
-        </symbol>
-        <symbol id="icon-tool" viewBox="0 0 24 24">
-            <path d="M14 7a5 5 0 0 1 6-5l-3 3 2 2 3-3a5 5 0 0 1-6 6L6 20a2 2 0 0 1-3-3L13 7z"/>
-        </symbol>
-        <symbol id="icon-report" viewBox="0 0 24 24">
-            <path d="M11 3a9 9 0 1 0 10 10H11zM14 2v8h8a8 8 0 0 0-8-8z"/>
-        </symbol>
-        <symbol id="icon-settings" viewBox="0 0 24 24">
-            <path d="M4 7h7m4 0h5M4 17h3m4 0h9"/><circle cx="13" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>
-        </symbol>
-        <symbol id="icon-logout" viewBox="0 0 24 24">
-            <path d="M10 4H4v16h6m-1-8h12m-4-4 4 4-4 4"/>
-        </symbol>
-        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
-        <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
-        <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
-    </svg>
+    {{ icon_library() }}
 
     <!-- Preserve the sidebar order while connecting Owner features. -->
     {% set planned_items = [
-        ('Listings', 'layers'),
-        ('Join Requests', 'request'), ('Tenants', 'users'), ('Monthly Bills', 'bill'),
-        ('Payments', 'payment'), ('Income & Expenses', 'finance'), ('Maintenance', 'tool'),
-        ('Reports', 'report'), ('Settings', 'settings')
     ] %}
     <aside class="owner-sidebar" id="owner-sidebar" aria-label="Owner menu">
         <div class="brand">
@@ -83,27 +36,64 @@
                 <li>
                     <a class="nav-row{% if active_page == 'dashboard' %} nav-current{% endif %}" href="{{ url_for('dashboard', role='owner') }}"
                        {% if active_page == 'dashboard' %}aria-current="page"{% endif %} title="Dashboard">
-                        {{ icon('home') }}<span class="nav-label">Dashboard</span>
+                        {{ navigation_icon('home') }}<span class="nav-label">Dashboard</span>
                     </a>
                 </li>
                 <li>
                     <a class="nav-row{% if active_page == 'boarding' %} nav-current{% endif %}"
                        href="{{ url_for('owner_boarding.profile') }}"
                        {% if active_page == 'boarding' %}aria-current="page"{% endif %} title="Boarding Profile">
-                        {{ icon('user') }}<span class="nav-label">Boarding Profile</span>
+                        {{ navigation_icon('building') }}<span class="nav-label">Boarding Profile</span>
                     </a>
                 </li>
                 <li>
                     <a class="nav-row{% if active_page == 'rooms' %} nav-current{% endif %}"
                        href="{{ url_for('owner_rooms.overview') }}"
                        {% if active_page == 'rooms' %}aria-current="page"{% endif %} title="Rooms &amp; Beds">
-                        {{ icon('bed') }}<span class="nav-label">Rooms &amp; Beds</span>
+                        {{ navigation_icon('bed') }}<span class="nav-label">Rooms &amp; Beds</span>
                     </a>
                 </li>
+                <li>
+                    <a class="nav-row{% if active_page == 'listings' %} nav-current{% endif %}"
+                       href="{{ url_for('owner_listings.overview') }}"
+                       {% if active_page == 'listings' %}aria-current="page"{% endif %} title="Listings">
+                        {{ navigation_icon('layers') }}<span class="nav-label">Listings</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-row{% if active_page == 'join_requests' %} nav-current{% endif %}"
+                       href="{{ url_for('owner_join_requests.overview') }}"
+                       {% if active_page == 'join_requests' %}aria-current="page"{% endif %} title="Join Requests">
+                        {{ navigation_icon('request') }}<span class="nav-label">Join Requests</span>
+                        {% if join_requests_pending_count is defined and join_requests_pending_count %}<span class="nav-status nav-request-count" aria-label="{{ join_requests_pending_count }} pending requests">{{ join_requests_pending_count }}</span>{% endif %}
+                    </a>
+                </li>
+                <li><a class="nav-row{% if active_page == 'tenants' %} nav-current{% endif %}"
+                       href="{{ url_for('owner_tenants.overview') }}" title="Tenants"
+                       {% if active_page == 'tenants' %}aria-current="page"{% endif %}>
+                    {{ navigation_icon('users') }}<span class="nav-label">Tenants</span>
+                </a></li>
+                <li><a class="nav-row{% if active_page == 'bills' %} nav-current{% endif %}" href="{{ url_for('owner_bills.overview') }}" title="Monthly Bills"
+                       {% if active_page == 'bills' %}aria-current="page"{% endif %}>
+                    {{ navigation_icon('bill') }}<span class="nav-label">Monthly Bills</span></a></li>
+                <li><a class="nav-row{% if active_page == 'payments' %} nav-current{% endif %}" href="{{ url_for('owner_payments.overview') }}" title="Payments"
+                       {% if active_page == 'payments' %}aria-current="page"{% endif %}>
+                    {{ navigation_icon('payment') }}<span class="nav-label">Payments</span></a></li>
+                {% if finance_navigation_enabled|default(false) %}<li><a class="nav-row{% if active_page == 'finance' %} nav-current{% endif %}" href="{{ url_for('owner_finance.overview') }}" title="Income &amp; Expenses"
+                       {% if active_page == 'finance' %}aria-current="page"{% endif %}>
+                    {{ navigation_icon('finance') }}<span class="nav-label">Income &amp; Expenses</span></a></li>
+                {% else %}<li><span class="nav-row nav-planned" title="Income &amp; Expenses · Coming soon">{{ navigation_icon('finance') }}<span class="nav-label">Income &amp; Expenses</span><span class="nav-status">Coming soon</span></span></li>{% endif %}
+                {% if maintenance_navigation_enabled|default(false) %}<li><a class="nav-row{% if active_page == 'maintenance' %} nav-current{% endif %}" href="{{ url_for('owner_maintenance.overview') }}" title="Maintenance"
+                       {% if active_page == 'maintenance' %}aria-current="page"{% endif %}>{{ navigation_icon('tool') }}<span class="nav-label">Maintenance</span></a></li>
+                {% else %}<li><span class="nav-row nav-planned" title="Maintenance · Coming soon">{{ navigation_icon('tool') }}<span class="nav-label">Maintenance</span><span class="nav-status">Coming soon</span></span></li>{% endif %}
+                {% if reports_navigation_enabled|default(false) %}<li><a class="nav-row{% if active_page == 'reports' %} nav-current{% endif %}" href="{{ url_for('owner_reports.overview') }}" title="Reports" {% if active_page == 'reports' %}aria-current="page"{% endif %}>{{ navigation_icon('report') }}<span class="nav-label">Reports</span></a></li>
+                {% else %}<li><span class="nav-row nav-planned" title="Reports · Coming soon">{{ navigation_icon('report') }}<span class="nav-label">Reports</span><span class="nav-status">Coming soon</span></span></li>{% endif %}
+                {% if settings_navigation_enabled|default(false) %}<li><a class="nav-row{% if active_page == 'settings' %} nav-current{% endif %}" href="{{ url_for('owner_settings.access') }}" title="Settings" {% if active_page == 'settings' %}aria-current="page"{% endif %}>{{ navigation_icon('settings') }}<span class="nav-label">Settings</span></a></li>
+                {% else %}<li><span class="nav-row nav-planned" title="Settings · Coming soon">{{ navigation_icon('settings') }}<span class="nav-label">Settings</span><span class="nav-status">Coming soon</span></span></li>{% endif %}
                 {% for label, glyph in planned_items %}
                 <li>
                     <span class="nav-row nav-planned" title="{{ label }} · Coming soon">
-                        {{ icon(glyph) }}<span class="nav-label">{{ label }}</span>
+                        {{ navigation_icon(glyph) }}<span class="nav-label">{{ label }}</span>
                         <span class="nav-status">Coming soon</span>
                     </span>
                 </li>
@@ -115,7 +105,7 @@
         <form class="sidebar-footer" id="owner-logout" method="post" action="{{ url_for('logout') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="nav-row logout-button" type="submit" title="Log out">
-                {{ icon('logout') }}<span class="nav-label">Log out</span>
+                {{ navigation_icon('logout') }}<span class="nav-label">Log out</span>
             </button>
         </form>
     </aside>
@@ -127,6 +117,8 @@
             <button class="icon-button" id="sidebar-toggle" type="button" aria-label="Toggle owner menu"
                     aria-controls="owner-sidebar" aria-expanded="true" hidden>{{ icon('menu') }}</button>
             <h1>{{ page_title|default('Owner Dashboard') }}</h1>
+
+            {% include 'shared/_theme_controls.html' %}
 
             <!-- The owner name is supplied by the authenticated Flask route. -->
             <details class="profile">

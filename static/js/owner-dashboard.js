@@ -6,7 +6,8 @@
     const close = document.getElementById("sidebar-close");
     const backdrop = document.getElementById("sidebar-backdrop");
     const mobile = window.matchMedia("(max-width: 800px)");
-    const compactPreferenceKey = "owner-sidebar-compact";
+    const menuRole = dashboard.classList.contains('student-portal') ? 'student' : dashboard.classList.contains('admin-portal') ? 'admin' : 'owner';
+    const compactPreferenceKey = menuRole + "-sidebar-compact";
 
     // Store only the UI preference; navigation still works if storage is blocked.
     try {
@@ -24,7 +25,7 @@
             : (expanded ? "Collapse" : "Expand");
 
         toggle.setAttribute("aria-expanded", String(expanded));
-        toggle.setAttribute("aria-label", action + " owner menu");
+        toggle.setAttribute("aria-label", action + " " + menuRole + " menu");
     }
 
     // Keep keyboard focus in the active area when using the mobile drawer.

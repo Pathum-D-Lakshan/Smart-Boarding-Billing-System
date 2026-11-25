@@ -1,0 +1,30 @@
+{% extends "owner/base.html" %}
+{% set page_title = "Listings" %}
+{% set active_page = "listings" %}
+{% from 'listings/_boarding_details.html' import listing_hero, rent_panels with context %}
+{% block page_styles %}{{ stylesheet('boarding-listings.css') }}{% endblock %}
+{% block owner_content %}
+<nav class="listing-breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('dashboard', role='owner') }}">Owner Portal</a><span aria-hidden="true">/</span><span>Listings</span></nav>
+<div class="listing-page-heading"><h2>Listings</h2><p class="listing-muted">Manage how your boarding appears in public search.</p></div>
+{% if error %}
+<div class="listing-error" role="alert"><p>{{ error }}</p><a href="{{ url_for('owner_listings.overview') }}">Reload Listings</a></div>
+{% elif not listing %}
+<section class="listing-card listing-empty"><span class="listing-empty-icon" aria-hidden="true">🏡</span><h3>Create your Boarding Profile first</h3><p class="listing-muted">Your existing Boarding Profile will become your listing. Add its details to get started.</p><a class="listing-button listing-primary" href="{{ url_for('owner_boarding.create') }}">＋ Create Boarding Profile</a></section>
+{% else %}
+<article class="listing-card">
+    {{ listing_hero(listing, cover_url, visibility) }}
+    <section class="listing-section" aria-labelledby="listing-rent-heading">
+        <div class="listing-section-heading"><h3 id="listing-rent-heading">Room Types &amp; Monthly Rent</h3><a class="listing-link" href="{{ url_for('owner_rooms.overview') }}">Manage Rooms &amp; Beds</a></div>
+        {{ rent_panels(listing) }}
+        <p class="listing-inventory-note">Only Ready rooms and Ready beds with a current saved rate appear here. Tenant occupancy and availability are not yet verified.</p>
+    </section>
+    <footer class="listing-footer">
+        <a class="listing-link listing-edit-link" href="{{ url_for('owner_boarding.edit') }}"><span aria-hidden="true">✏️</span> Edit Boarding Profile</a>
+        <div class="listing-actions">
+            <a class="listing-button listing-primary" href="{{ url_for('owner_listings.preview') }}">Preview Listing</a>
+        </div>
+    </footer>
+    <p class="listing-inventory-note">Publication is managed in <a class="listing-link" href="{{ url_for('owner_boarding.profile') }}">Boarding Profile</a>.</p>
+</article>
+{% endif %}
+{% endblock %}

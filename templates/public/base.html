@@ -1,0 +1,21 @@
+{% from "shared/_icons.html" import icon, icon_library %}
+{% from "shared/_assets.html" import stylesheet, boarding_photo_assets %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="Find and compare published student boarding listings, room options and monthly rental prices.">
+    <title>{% block title %}Smart Boarding &amp; Billing System{% endblock %}</title>
+    {{ stylesheet('public-marketplace.css') }}
+    {{ stylesheet('auth-motion.css') }}
+    {{ boarding_photo_assets() }}
+</head>
+<body>
+    <a class="market-skip" href="#main-content">Skip to content</a>
+    {{ icon_library(false) }}
+    {% include 'public/_navigation.html' %}
+    <main id="main-content" tabindex="-1">{% block content %}{% endblock %}</main>
+</body>
+</html>

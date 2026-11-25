@@ -1,0 +1,46 @@
+{% extends "owner/base.html" %}
+{% set page_title = 'Edit Bed' if bed else 'Add Bed' %}
+{% set active_page = 'rooms' %}
+{% set confirmation_subject = 'bed' %}
+{% block page_styles %}{{ stylesheet('owner-rooms-beds.css') }}{% if bed %}{{ stylesheet('owner-edit-confirm.css') }}{% endif %}{% endblock %}
+{% block page_scripts %}{% if bed %}<script src="{{ url_for('static', filename='js/owner-boarding-confirm.js', v='bed-management-1') }}" defer></script>{% endif %}{% endblock %}
+{% macro field_error(name) %}{% if errors.get(name) %}<p class="rooms-field-error" id="{{ name }}-error" role="alert">{{ errors[name] }}</p>{% endif %}{% endmacro %}
+{% macro error_attributes(name) %}{% if errors.get(name) %}aria-invalid="true" aria-describedby="{{ name }}-error"{% endif %}{% endmacro %}
+{% block owner_content %}
+<nav class="rooms-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('owner_rooms.overview') }}">Rooms &amp; Beds</a><span aria-hidden="true">/</span>
+    <a href="{{ url_for('owner_rooms.details', room_id=room.room_id) }}">{{ room.room_number }}</a><span aria-hidden="true">/</span><span>{{ page_title }}</span>
+</nav>
+<div class="rooms-page-heading"><div><h2>{{ page_title }}</h2><p class="rooms-muted">Registered beds in {{ room.room_number }}: {{ room.bed_count }} / {{ room.capacity }}.</p></div></div>
+<form class="rooms-panel rooms-form" id="{{ 'bed-edit-form' if bed else 'bed-form' }}" method="post"
+      action="{{ url_for('owner_rooms.bed_form', room_id=room.room_id, bed_id=bed.bed_id if bed else none) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="rooms-form-grid">
+        <div class="rooms-field">
+            <label for="bed_label">Bed Label <span class="rooms-required" aria-hidden="true">*</span></label>
+            <input id="bed_label" name="bed_label" required maxlength="50" value="{{ values.get('bed_label', '') }}" {{ error_attributes('bed_label') }}>
+            {{ field_error('bed_label') }}
+        </div>
+        <div class="rooms-field">
+            <label for="operational_status">Condition</label>
+            <select id="operational_status" name="operational_status" required {{ error_attributes('operational_status') }}>
+                {% for status in ('ready', 'maintenance') %}<option value="{{ status }}"{% if values.get('operational_status') == status %} selected{% endif %}>{{ status|capitalize }}</option>{% endfor %}
+            </select>
+            {{ field_error('operational_status') }}
+        </div>
+        {% if room.room_type == 'shared' %}
+        <div class="rooms-field">
+            <label for="monthly_rent">Monthly Rent Per Bed (LKR) <span class="rooms-required" aria-hidden="true">*</span></label>
+            <input id="monthly_rent" name="monthly_rent" type="number" min="0.01" max="99999999.99" step="0.01" required value="{{ values.get('monthly_rent') or '' }}" {{ error_attributes('monthly_rent') }}>
+            {{ field_error('monthly_rent') }}
+        </div>
+        {% endif %}
+    </div>
+    {% if room.room_type == 'private' %}<p class="rooms-notice">This physical bed is included in the private room rent.</p>{% endif %}
+    {% if bed %}{% include 'owner/_edit_password_confirmation.html' %}{% endif %}
+    <div class="rooms-form-actions">
+        <a class="rooms-button rooms-secondary" href="{{ url_for('owner_rooms.details', room_id=room.room_id) }}">Cancel</a>
+        <button class="rooms-button rooms-primary" {% if bed %}id="boarding-save-changes"{% endif %} type="submit">{{ 'Save Changes' if bed else 'Save Bed' }}</button>
+    </div>
+</form>
+{% endblock %}

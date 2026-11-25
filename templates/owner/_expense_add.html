@@ -1,0 +1,9 @@
+<article class="expense-detail"><h2>Add Expense</h2><p>Record an actual boarding expense.</p>
+<p><strong>Accounting Month</strong> {{ accounting_month_label }}</p>
+{% if errors %}<div class="finance-error" role="alert">{% for message in errors.values() %}<p>{{ message }}</p>{% endfor %}</div>{% endif %}
+{% if default_date %}
+<form method="post" action="{{ url_for('owner_finance.create') }}" id="expense-add-form" data-finance-post="add" data-default-date="{{ default_date }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="request_key" value="{{ values.get('request_key') or request_key }}"><input type="hidden" name="view_month" value="{{ view.month }}">
+{% set expense=none %}{% include 'owner/_expense_fields.html' %}
+{% else %}<p class="finance-notice">Recording expenses for this month requires the accounting allocation database update.</p>{% endif %}
+<div class="finance-actions"><button class="finance-button" type="button" data-finance-close hidden>Cancel</button><a class="finance-button" data-finance-fallback href="{{ url_for('owner_finance.overview',month=view.month) }}">Cancel</a>{% if default_date %}<button class="finance-button finance-primary" type="submit">Save Expense</button>{% endif %}</div>
+{% if default_date %}</form>{% endif %}</article>

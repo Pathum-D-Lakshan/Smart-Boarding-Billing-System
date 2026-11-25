@@ -1,0 +1,1 @@
+{% extends 'admin/base.html' %}{% set active_page='users' %}{% set page_title='Review Reactivation Request' %}{% block admin_content %}<p><a href="{{ url_for('admin_portal.appeals') }}">← Reactivation Requests</a></p><article class="admin-card admin-record-page">{% include 'admin/_reactivation_request.html' %}</article>{% endblock %}

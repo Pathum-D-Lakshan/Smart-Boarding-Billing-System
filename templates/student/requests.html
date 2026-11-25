@@ -1,0 +1,12 @@
+{% extends 'student/base.html' %}
+{% set page_title = 'My Join Requests' %}
+{% set active_page = 'requests' %}
+{% block student_content %}
+<div class="student-page-heading"><p class="student-eyebrow">YOUR BOARDING APPLICATIONS</p><h1>My Join Requests</h1><p>Check the Owner's decision and your confirmed tenancy details.</p></div>
+<div class="student-request-list">
+    {% for item in rows %}
+    <article class="student-panel student-request-card"><div><span class="student-status student-status-{{ item.status }}">{{ item.status_label }}</span><h2>{{ item.boarding_name }}</h2><p class="listing-muted">{{ item.city }}, {{ item.district }}</p><p>Requested {{ item.requested_at|join_request_datetime }}</p>{% if item.tenancy_id %}<p class="student-agreement">{{ item.tenancy_phase }} · LKR {{ '{:,.2f}'.format(item.agreed_monthly_rent) }} / {{ item.rent_unit }} / month</p>{% endif %}</div><a class="listing-button" href="{{ url_for('student_requests.details', request_id=item.request_id) }}">View Request →</a></article>
+    {% else %}<section class="student-empty"><span aria-hidden="true">✉️</span><h2>No join requests yet</h2><p>Choose a published boarding to send your first request.</p><a class="listing-button listing-primary" href="{{ url_for('student_requests.boardings') }}">Browse Published Boardings</a></section>{% endfor %}
+</div>
+{% include 'student/_pagination.html' %}
+{% endblock %}

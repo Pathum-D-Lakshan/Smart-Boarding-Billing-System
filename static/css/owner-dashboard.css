@@ -9,17 +9,17 @@
     --text: #f5f8ff;
     --muted: #b3c6de;
     --cyan: #22d3ee;
-    --sidebar-width: 17.5rem;
+    --sidebar-width: 20.5rem;
     margin: 0;
     min-height: 100vh;
     background: radial-gradient(ellipse at top left, #142e55, var(--canvas) 65%) fixed;
     color: var(--text);
-    font: 1rem/1.5 "Segoe UI", system-ui, sans-serif;
+    font: var(--font-body)/1.5 "Segoe UI", system-ui, sans-serif;
 }
 
 .owner-dashboard [hidden] { display: none !important; }
 .owner-dashboard :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
-.owner-dashboard button { font: inherit; cursor: pointer; }
+.owner-dashboard button { font: inherit; font-size: var(--font-button); cursor: pointer; }
 .owner-dashboard h1, .owner-dashboard h2, .owner-dashboard h3, .owner-dashboard p { margin: 0; }
 
 .icon-library { position: absolute; overflow: hidden; }
@@ -29,7 +29,7 @@
     flex: none;
     fill: none;
     stroke: currentColor;
-    stroke-width: 1.75;
+    stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
@@ -81,7 +81,7 @@
 
 .brand-mark { width: 2.8rem; height: 2.8rem; }
 .brand-text strong { display: block; }
-.brand-text small, .profile-panel small { display: block; color: var(--muted); }
+.brand-text small, .profile-panel small { display: block; color: var(--muted); font-size: var(--font-small); }
 .drawer-close { margin-left: auto; }
 
 .nav-list { display: grid; gap: .2rem; margin: 0; padding: 0; list-style: none; }
@@ -89,18 +89,21 @@
     display: flex;
     align-items: center;
     gap: .55rem;
-    min-height: 2.6rem;
-    padding: .5rem .6rem;
+    min-height: 3.125rem;
+    padding: .3125rem .6rem;
     border-radius: .6rem;
-    color: var(--text);
-    font-size: .88rem;
+    color: #fff;
+    font-size: var(--font-nav);
+    font-weight: 600;
     text-decoration: none;
+    line-height: 1.35;
 }
+.nav-label { flex: 1; min-width: 0; }
 
 .nav-row .icon { color: #83def0; }
 .nav-current { background: var(--cyan); color: #081726; font-weight: 700; }
 .nav-current .icon { color: inherit; }
-.nav-planned { color: var(--muted); }
+.nav-planned { color: #fff; }
 .nav-list a:not(.nav-current):hover { background: #203550; }
 .nav-status {
     flex: none;
@@ -108,16 +111,20 @@
     padding: .1rem .35rem;
     border: 1px solid var(--border);
     border-radius: 1rem;
-    font-size: .62rem;
+    font-size: var(--font-caption);
+    font-weight: 500;
+    line-height: 1.4;
     white-space: nowrap;
 }
 
 .sidebar-footer { margin-top: .8rem; padding-top: .8rem; border-top: 1px solid var(--border); }
+.nav-request-count { min-width: 1.3rem; text-align: center; border-color: transparent; background: #c63552; color: #fff; font-weight: 700; }
 .owner-dashboard .logout-button {
     width: 100%;
     border: 0;
     background: transparent;
-    font-size: .88rem;
+    font-size: var(--font-nav);
+    font-weight: 600;
     text-align: left;
 }
 
@@ -126,6 +133,7 @@
 @media (width > 800px) {
     .owner-dashboard[data-sidebar-compact] { --sidebar-width: 4.65rem; }
     [data-sidebar-compact] .brand, [data-sidebar-compact] .nav-row { justify-content: center; }
+    [data-sidebar-compact] .nav-row { padding-inline: 0; }
     [data-sidebar-compact] :is(.brand-text, .nav-label, .nav-status) {
         position: absolute;
         width: 1px;
@@ -138,6 +146,7 @@
 
 /* Header and native account menu */
 .owner-page {
+    min-width: 0;
     max-width: 106rem;
     margin-left: calc(var(--sidebar-width) + 1rem);
     padding: 1rem clamp(1rem, 2vw, 1.75rem);
@@ -165,7 +174,7 @@
     background: var(--panel);
 }
 
-.topbar h1 { font-size: clamp(1.1rem, 2vw, 1.5rem); line-height: 1.2; }
+.topbar h1 { min-width: 0; font-size: var(--font-section-title); line-height: 1.25; overflow-wrap: anywhere; }
 .profile { position: relative; margin-left: auto; }
 .profile summary {
     display: flex;
@@ -209,12 +218,12 @@
 }
 .welcome .eyebrow {
     color: var(--cyan);
-    font-size: .72rem;
+    font-size: var(--font-small);
     font-weight: 700;
     letter-spacing: .12em;
     text-transform: uppercase;
 }
-.welcome h2 { font-size: clamp(1.65rem, 3vw, 2.35rem); line-height: 1.2; margin: .2rem 0; }
+.welcome h2 { font-size: var(--font-page-title); line-height: 1.2; margin: .2rem 0; }
 .welcome p:last-child, .metric-note, .setup-card p { color: var(--muted); }
 
 .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
@@ -225,13 +234,14 @@
     background: linear-gradient(145deg, var(--card), var(--panel));
 }
 .metric-top, .setup-card { display: flex; align-items: center; gap: .8rem; }
+.metric-top > div, .setup-card > div { min-width: 0; overflow-wrap: anywhere; }
 .metric-icon { width: 2.65rem; height: 2.65rem; }
-.metric-card h3 { font-size: .95rem; line-height: 1.3; }
-.metric-card .metric-value { color: var(--cyan); font-size: 1.65rem; line-height: 1.2; }
-.metric-card .metric-note { margin-top: .65rem; font-size: .82rem; }
+.metric-card h3 { font-size: var(--font-body); line-height: 1.3; }
+.metric-card .metric-value { color: var(--cyan); font-size: var(--font-metric); line-height: 1.2; }
+.metric-card .metric-note { margin-top: .65rem; font-size: var(--font-body); }
 .setup-card { margin-top: 1rem; align-items: flex-start; }
-.setup-card h2 { font-size: 1.1rem; }
-.setup-card p { font-size: .9rem; }
+.setup-card h2 { font-size: var(--font-section-title); }
+.setup-card p { font-size: var(--font-body); }
 .owner-link { display: inline-block; margin-top: .6rem; color: var(--cyan); text-underline-offset: .2em; }
 .owner-message {
     margin-top: 1rem !important;
@@ -243,11 +253,20 @@
     overflow-wrap: anywhere;
 }
 .owner-message-error { border-color: #a74a61; background: #3a2030; color: #fecdd3; }
+.account-decision-note { white-space:pre-wrap; }
+.account-decision h2 { font-size:var(--font-section-title);margin:0 0 10px; }
+.account-decision button { min-height:44px;padding:9px 16px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font:600 var(--font-button)/1.4 "Segoe UI",sans-serif;cursor:pointer; }
+.account-decision button:focus-visible { outline:2px solid #22d3ee;outline-offset:3px; }
 .drawer-backdrop { display: none; }
 
 /* Responsive cards and mobile drawer. The menu remains usable without JS. */
 @media (max-width: 1250px) {
     .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Keep header controls available beside larger text on narrow desktop windows. */
+@media (min-width: 801px) and (max-width: 1050px) {
+    .profile-name { display: none; }
 }
 
 @media (max-width: 800px) {
@@ -283,36 +302,31 @@
     scrollbar-color: #3b8499 var(--panel);
 }
 
-/* Sidebar SVG icons — each accent also tints its background tile */
-.owner-sidebar .nav-row > .icon {
+/* Fixed-size tiles keep labels aligned in expanded and icon-only navigation. */
+.nav-icon {
     --icon-accent: var(--cyan);
-    width: 1.65rem;
-    height: 1.65rem;
-    padding: .24rem;
-    border-radius: .45rem;
-    color: var(--icon-accent);
-    background-color: color-mix(in srgb, var(--icon-accent) 18%, transparent);
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid color-mix(in srgb, var(--icon-accent) 28%, transparent);
+    border-radius: .625rem;
+    background: linear-gradient(140deg, color-mix(in srgb, var(--icon-accent) 28%, var(--panel)), color-mix(in srgb, var(--icon-accent) 12%, var(--panel)));
+    box-shadow: inset 0 1px 0 #ffffff0a;
 }
-
-/* Dark home icon on the active cyan row */
-.owner-sidebar .nav-current > .icon {
-    --icon-accent: #081726;
-    background-color: #8eecf7;
-}
-
-/* Match each colour to its existing SVG icon */
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-user"])     { --icon-accent: #c4b5fd; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-bed"])      { --icon-accent: #7dd3fc; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-layers"])   { --icon-accent: #d8b4fe; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-request"])  { --icon-accent: #fbbf24; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-users"])    { --icon-accent: #5eead4; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-bill"])     { --icon-accent: #67e8f9; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-payment"])  { --icon-accent: #6ee7b7; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-finance"])  { --icon-accent: #fde68a; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-tool"])     { --icon-accent: #fca5a5; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-report"])   { --icon-accent: #a5b4fc; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-settings"]) { --icon-accent: #93c5fd; }
-.owner-sidebar .nav-row > .icon:has(> use[href="#icon-logout"])   { --icon-accent: #fda4af; }
-
-/* Keep active icons readable on the cyan selection. */
-.owner-sidebar .nav-row.nav-current > .icon { --icon-accent: #081726; }
+.nav-art { display: block; width: 1.625rem; height: 1.625rem; flex: none; }
+.nav-icon-building { --icon-accent: #c4b5fd; }
+.nav-icon-bed { --icon-accent: #7dd3fc; }
+.nav-icon-layers { --icon-accent: #d8b4fe; }
+.nav-icon-request { --icon-accent: #fbbf24; }
+.nav-icon-users { --icon-accent: #5eead4; }
+.nav-icon-bill { --icon-accent: #67e8f9; }
+.nav-icon-payment { --icon-accent: #6ee7b7; }
+.nav-icon-finance { --icon-accent: #fde68a; }
+.nav-icon-tool { --icon-accent: #fca5a5; }
+.nav-icon-report { --icon-accent: #a5b4fc; }
+.nav-icon-settings { --icon-accent: #93c5fd; }
+.nav-icon-logout { --icon-accent: #fda4af; }
+.nav-list a:not(.nav-current):is(:hover, :focus-visible) .nav-icon { border-color: var(--icon-accent); }
+.nav-row.nav-current .nav-icon { background: #8eecf7; border-color: transparent; box-shadow: none; }

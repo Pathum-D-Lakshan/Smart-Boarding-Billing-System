@@ -2,6 +2,7 @@
 
 import json
 import re
+import unicodedata
 
 from flask import (
     Blueprint, abort, current_app, flash, g, make_response, redirect, render_template,
@@ -10,12 +11,12 @@ from flask import (
 from mysql.connector import Error, errorcode
 from werkzeug.datastructures import MultiDict
 from werkzeug.exceptions import RequestEntityTooLarge
-from werkzeug.security import check_password_hash
 
-from auth_access import load_current_account
+from auth_access import current_password_error, load_current_account
 from auth_email import normalize_email, valid_email
 from boarding_images import InvalidCoverImage, cover_image_path, remove_cover_image, save_cover_image
 from db import get_db_connection
+from admin_security import admin_enabled
 
 
 owner_boarding = Blueprint("owner_boarding", __name__, url_prefix="/owner/boarding")
@@ -32,9 +33,37 @@ FIELD_LABELS = {
     "city": "City/Town", "district": "District", "contact_phone": "Contact Phone",
     "contact_email": "Contact Email", "house_rules": "House Rules",
 }
-REQUIRED_FIELDS = ("boarding_name", "description", "address", "city", "district", "contact_phone")
+REQUIRED_FIELDS = ("boarding_name", "address", "city", "district", "contact_phone")
 TEXT_BYTE_LIMIT = 65_535
+CUSTOM_FACILITY_LIMIT = 60
+CUSTOM_FACILITY_COUNT = 20
+CUSTOM_FACILITIES_TEXT_LIMIT = 2_000
 UNCERTAIN_COMMIT_ERRORS = (2006, 2013, 2055)
+
+
+def valid_custom_facility(label):
+    """Custom amenities are short plain-text labels, never markup or controls."""
+    return (
+        isinstance(label, str) and bool(label.strip())
+        and len(label) <= CUSTOM_FACILITY_LIMIT
+        and not any(char in '<>' or unicodedata.category(char).startswith('C') for char in label)
+    )
+
+
+def visible_facilities(facilities):
+    """Keep existing checkbox order and include safe custom labels on every view."""
+    result = [name for name, _ in FACILITY_OPTIONS if name in facilities]
+    seen = {name.casefold() for name in result}
+    custom_count = 0
+    for label in facilities:
+        if not valid_custom_facility(label):
+            continue
+        label = ' '.join(label.split())
+        if label.casefold() not in seen and custom_count < CUSTOM_FACILITY_COUNT:
+            result.append(label)
+            seen.add(label.casefold())
+            custom_count += 1
+    return result
 
 
 def validate_boarding_form(form):
@@ -64,8 +93,20 @@ def validate_boarding_form(form):
     selected = form.getlist("facilities")
     allowed = {label for label, emoji in FACILITY_OPTIONS}
     if any(value not in allowed for value in selected):
-        errors["facilities"] = "Choose facilities from the available options only."
+        errors["facilities"] = "Choose the available options, or type other amenities in Other Facilities."
     values["facilities"] = [label for label, emoji in FACILITY_OPTIONS if label in selected]
+    # A separate input keeps checkbox tampering distinct from intentional custom text.
+    values["custom_facilities"] = form.get("custom_facilities", "").strip()
+    custom = [line.strip() for line in values["custom_facilities"].splitlines() if line.strip()]
+    if len(values["custom_facilities"]) > CUSTOM_FACILITIES_TEXT_LIMIT or len(custom) > CUSTOM_FACILITY_COUNT:
+        errors["custom_facilities"] = f"Add no more than {CUSTOM_FACILITY_COUNT} other facilities, one per line."
+    elif any(not valid_custom_facility(label) for label in custom):
+        errors["custom_facilities"] = f"Use plain text up to {CUSTOM_FACILITY_LIMIT} characters per facility, without < or >."
+    else:
+        # Canonicalize known names and deduplicate across typed and checked amenities.
+        canonical = {name.casefold(): name for name in allowed}
+        labels = values["facilities"] + [canonical.get(' '.join(label.split()).casefold(), ' '.join(label.split())) for label in custom]
+        values["facilities"] = visible_facilities(labels)
     return values, errors
 
 
@@ -75,14 +116,18 @@ def form_response(*, values=None, errors=None, error=None, status=200,
         "owner/boarding_form.html", values=values or {}, errors=errors or {}, error=error,
         owner_name=g.current_owner["full_name"], facility_options=FACILITY_OPTIONS,
         field_limits=FIELD_LIMITS, text_byte_limit=TEXT_BYTE_LIMIT,
+        custom_facilities_text_limit=CUSTOM_FACILITIES_TEXT_LIMIT,
+        custom_facility_limit=CUSTOM_FACILITY_LIMIT, custom_facility_count=CUSTOM_FACILITY_COUNT,
         form_mode=mode, boarding_status=boarding_status,
         has_cover=has_cover,
     ), status)
 
 
 def profile_response(*, boarding=None, error=None, publish_errors=None, status=200):
+    cover = cover_image_path(boarding.get("cover_image_filename")) if boarding else None
     return make_response(render_template(
         "owner/boarding_profile.html", boarding=boarding, error=error,
+        has_cover=cover is not None and cover.is_file(),
         owner_name=g.current_owner["full_name"] if g.get("current_owner") else "Owner",
         facility_icons=dict(FACILITY_OPTIONS),
         publish_errors=publish_errors or {},
@@ -120,7 +165,7 @@ def find_owner_boarding(owner_id):
         cursor.execute(
             """SELECT boarding_id, owner_id, boarding_name, description, address, city,
                       district, contact_phone, contact_email, facilities, house_rules,
-                      status, created_at, updated_at, cover_image_filename
+                      status, created_at, updated_at, cover_image_filename""" + (", admin_hidden" if admin_enabled() else "") + """
                FROM boardings WHERE owner_id = %s""",
             (owner_id,),
         )
@@ -283,16 +328,14 @@ def edit():
         if request.method == "GET":
             values = {field: boarding[field] or "" for field in FIELD_LABELS}
             values["facilities"] = boarding["facilities"]
+            allowed = {name for name, _ in FACILITY_OPTIONS}
+            values["custom_facilities"] = '\n'.join(name for name in boarding["facilities"] if name not in allowed)
             return form_response(values=values, mode="edit", boarding_status=boarding_status, has_cover=has_cover)
 
         # Read the password separately so it never enters saved or rendered form values.
-        current_password = request.form.get("current_password", "")
-        if not current_password:
-            errors["current_password"] = "Enter your current password to save changes."
-        elif len(current_password) > 128 or not check_password_hash(
-            g.current_owner["password_hash"], current_password
-        ):
-            errors["current_password"] = "Your current password is incorrect. Please try again."
+        password_error = current_password_error(g.current_owner, request.form.get("current_password", ""))
+        if password_error:
+            errors["current_password"] = password_error
         if errors:
             return form_response(values=values, errors=errors, status=400,
                                  mode="edit", boarding_status=boarding_status, has_cover=has_cover)
@@ -357,7 +400,12 @@ def saved_boarding_errors(boarding):
             raise ValueError("Invalid saved facilities")
     except (ValueError, TypeError):
         return {"facilities": "Edit your profile and choose facilities from the available options."}
-    form.setlist("facilities", facilities)
+    allowed = {name for name, _ in FACILITY_OPTIONS}
+    custom = [name for name in facilities if name not in allowed]
+    if any(not valid_custom_facility(name) for name in custom):
+        return {"facilities": "Edit your profile and use short plain-text facility names."}
+    form.setlist("facilities", [name for name in facilities if name in allowed])
+    form["custom_facilities"] = '\n'.join(custom)
     _, errors = validate_boarding_form(form)
     return errors
 

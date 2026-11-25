@@ -1,52 +1,155 @@
 {% extends "owner/base.html" %}
+{% from "shared/_dashboard.html" import banner, metric, panel_heading, money, badge, empty, request_status %}
+{% from "shared/_boarding_photo.html" import boarding_photo %}
 {% set page_title = "Owner Dashboard" %}
 {% set active_page = "dashboard" %}
+{% block page_styles %}{{ stylesheet('dashboard-home.css') }}{% endblock %}
 
 {% block owner_content %}
-            <section class="welcome" aria-labelledby="welcome-title">
-                <p class="eyebrow">Owner workspace</p>
-                <h2 id="welcome-title">Welcome back, {{ owner_name }}</h2>
-                <p>Here's an overview of your boarding and billing operations.</p>
-            </section>
+{% include 'shared/_account_decisions.html' %}
+<div class="dash-home dash-owner">
+    <header class="dash-intro">
+        {{ navigation_icon('home') }}
+        <div><h1>Owner Dashboard</h1><p>Manage your boarding, tenants, bills and payments.</p></div>
+        {% if data and data.month %}<span class="dash-month">{{ icon('clock') }} {{ data.month.strftime('%B %Y') }}</span>{% endif %}
+    </header>
+    {{ banner(owner_name, 'Boarding Owner Workspace', 'See your occupancy, billing and latest requests in one place.') }}
+    {% if data is not defined or data is none %}
+    <section class="dash-panel">{{ empty('info', 'Dashboard details are unavailable', 'Refresh the page to try again.') }}</section>
+    {% else %}
+    {% set boarding = data.boarding %}
+    {% set billing = data.billing %}
+    <section class="dash-metrics" aria-label="Boarding summary">
+        {{ metric('Total Boardings', 'building', 1 if boarding else 0, 'green', url_for('owner_boarding.profile')) }}
+        {{ metric('Total Rooms', 'bed', data.rooms, 'blue', url_for('owner_rooms.overview')) }}
+        {{ metric('Active Tenants', 'users', data.active, 'violet', url_for('owner_tenants.overview')) }}
+        {{ metric('Monthly Income', 'coins', money(billing.received if billing else 0), 'green', url_for('owner_finance.overview')) }}
+    </section>
 
-            <!-- An em dash shows that a metric is awaiting its feature integration. -->
-            {% set metrics = [
-                ('Total Rooms', 'bed', 'Rooms registered in your boarding.' if room_summary is not none else 'Room count is temporarily unavailable.'),
-                ('Occupied Beds', 'users', 'Available when tenancy is connected.'),
-                ('Pending Join Requests', 'request', 'Available when join requests are connected.'),
-                ('Pending Payments', 'payment', 'Available when payments are connected.')
-            ] %}
-            <section class="metric-grid" aria-label="Boarding summary">
-                {% for label, glyph, description in metrics %}
-                <article class="metric-card">
-                    <div class="metric-top">
-                        <span class="metric-icon">{{ icon(glyph) }}</span>
-                        <div>
-                            <h3>{{ label }}</h3>
-                            {% if label == 'Total Rooms' and room_summary is not none %}
-                            <p class="metric-value">{{ room_summary.total_rooms }}</p>
-                            {% else %}<p class="metric-value" aria-hidden="true">&mdash;</p>{% endif %}
-                        </div>
-                    </div>
-                    <p class="metric-note">{{ description }}</p>
-                </article>
+    <div class="dash-grid dash-owner-overview">
+        <section class="dash-panel">
+            {{ panel_heading('My Boarding Overview', 'building', url_for('owner_boarding.profile') if boarding else none, 'View Details') }}
+            {% if boarding %}
+            <div class="dash-property">
+                {{ boarding_photo(url_for('owner_boarding.cover') if boarding.has_cover else none, boarding.boarding_name, 'dash-property-photo') }}
+                <div><h3>{{ boarding.boarding_name }}</h3><p>{{ icon('pin') }} {{ boarding.city }}, {{ boarding.district }}</p>{{ badge(boarding.status|capitalize, 'success' if boarding.status == 'published' else 'warning') }}</div>
+            </div>
+            <dl class="dash-facts">
+                <div><dt>{{ icon('building') }} Rooms</dt><dd>{{ data.rooms }}</dd></div>
+                <div><dt>{{ icon('bed') }} Beds</dt><dd>{{ data.beds }}</dd></div>
+                <div><dt>{{ icon('users') }} Active Tenants</dt><dd>{{ data.active }}</dd></div>
+            </dl>
+            {% else %}
+            {{ empty('building', 'Create your boarding profile', 'Add your boarding to start managing rooms and join requests.', url_for('owner_boarding.create'), 'Create Boarding') }}
+            {% endif %}
+        </section>
+
+        <section class="dash-panel">
+            {{ panel_heading('Room Occupancy', 'report') }}
+            {% if data.occupancy and data.occupancy.units.total %}
+            {% set units = data.occupancy.units %}
+            <div class="dash-occupancy">
+                <div class="dash-ring" style="--dash-percent:{{ units.percent }}%" role="img"
+                     aria-label="{{ units.occupied }} of {{ units.total }} rentable units occupied">
+                    <div><strong>{{ units.percent }}%</strong><small>Occupied</small></div>
+                </div>
+                <dl class="dash-counts">
+                    <div><dt>Occupied units</dt><dd>{{ units.occupied }}</dd></div>
+                    <div><dt>Available units</dt><dd>{{ units.available }}</dd></div>
+                    {% if units.reserved %}<div><dt>Reserved units</dt><dd>{{ units.reserved }}</dd></div>{% endif %}
+                    <div><dt>Total rentable</dt><dd>{{ units.total }}</dd></div>
+                </dl>
+            </div>
+            <p class="dash-muted">Ready, priced inventory. {{ data.occupancy.by_kind.room.total }} private rooms and {{ data.occupancy.by_kind.bed.total }} shared beds.</p>
+            {% else %}{{ empty('bed', 'No rentable units yet', 'Add ready rooms or beds and set their rents.', url_for('owner_rooms.overview'), 'View Rooms & Beds') }}{% endif %}
+        </section>
+
+        <section class="dash-panel">
+            {{ panel_heading('Tenant Summary', 'users') }}
+            <ul class="dash-tenant-metrics">
+                <li><a href="{{ url_for('owner_tenants.overview', status='active') }}">{{ icon('users') }} <span>Active Tenants</span><strong>{{ data.active }}</strong></a></li>
+                <li><a href="{{ url_for('owner_join_requests.overview', status='requested') }}">{{ icon('clock') }} <span>Pending Join Requests</span><strong>{{ data.pending }}</strong></a></li>
+                <li><a href="{{ url_for('owner_tenants.overview') }}">{{ icon('user') }} <span>Former Tenants</span><strong>{{ data.former }}</strong></a></li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="dash-grid dash-owner-operations">
+        <section class="dash-panel">
+            {{ panel_heading('Billing & Payments Overview', 'coins', url_for('owner_bills.history'), 'View Bills') }}
+            {% if billing %}
+            <div class="dash-billing">
+                <figure class="dash-chart">
+                    <figcaption>Last six billing months</figcaption>
+                    <ol class="dash-bar-chart">
+                        {% for row in billing.months %}
+                        <li aria-label="{{ row.month.strftime('%B %Y') }}, billed {{ money(row.billed) }}, received {{ money(row.received) }}"
+                            title="{{ row.month.strftime('%B %Y') }} · Billed {{ money(row.billed) }} · Received {{ money(row.received) }}">
+                            <div class="dash-bar-pair" aria-hidden="true">
+                                <span style="--dash-bar:{{ (100 * row.billed / billing.scale)|round(2) }}%"></span>
+                                <span style="--dash-bar:{{ (100 * row.received / billing.scale)|round(2) }}%"></span>
+                            </div>
+                            <span>{{ row.label }}</span>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                    <div class="dash-legend"><span>Billed amount</span><span>Verified payments received</span></div>
+                    <details class="dash-chart-data"><summary>View chart values</summary>
+                        <dl>{% for row in billing.months %}<div><dt>{{ row.month.strftime('%b %Y') }}</dt><dd>{{ money(row.billed) }} billed · {{ money(row.received) }} received</dd></div>{% endfor %}</dl>
+                    </details>
+                </figure>
+                <dl class="dash-billing-totals">
+                    <div><dt>{{ icon('bill') }} Total Billed ({{ data.month.strftime('%b') }})</dt><dd>{{ money(billing.billed) }}</dd></div>
+                    <div><dt>{{ icon('payment') }} Payments Received</dt><dd>{{ money(billing.received) }}</dd></div>
+                    <div><dt>{{ icon('clock') }} Outstanding ({{ data.month.strftime('%b') }})</dt><dd>{{ money(billing.outstanding) }}</dd></div>
+                </dl>
+            </div>
+            {% else %}{{ empty('bill', 'No billing activity yet', 'Billing totals appear after you set up your boarding.') }}{% endif %}
+        </section>
+        <section class="dash-panel">
+            {{ panel_heading('Maintenance Updates', 'tool', url_for('owner_maintenance.overview')) }}
+            {% if data.maintenance %}
+            <ul class="dash-list">
+                {% for item in data.maintenance %}
+                <li><a class="dash-list-row" href="{{ url_for('owner_maintenance.details', maintenance_id=item.maintenance_id) }}">
+                    <span class="dash-row-icon">{{ icon('tool') }}</span>
+                    <span class="dash-row-text"><strong>{{ item.issue_title }}</strong><small>{{ 'Room ' ~ item.room_label if item.room_label else 'Common area' }}</small></span>
+                    <span class="dash-row-status">{{ badge(item.label, 'success' if item.status == 'resolved' else 'info' if item.status == 'in_progress' else 'warning') }}
+                    <small>{{ item.created_at|join_request_datetime }}</small></span>
+                </a></li>
                 {% endfor %}
-            </section>
+            </ul>
+            {% else %}{{ empty('tool', 'No maintenance requests yet', 'Student requests will appear here.') }}{% endif %}
+        </section>
+    </div>
 
-            <section class="setup-card" aria-labelledby="setup-title">
-                <span class="metric-icon">{{ icon('home') }}</span>
-                <div>
-                    <h2 id="setup-title">Boarding Profile</h2>
-                    <p>View your boarding details and profile status.</p>
-                    <a class="owner-link" href="{{ url_for('owner_boarding.profile') }}">View Boarding Profile &rarr;</a>
-                </div>
-            </section>
-            <section class="setup-card" aria-labelledby="rooms-setup-title">
-                <span class="metric-icon">{{ icon('bed') }}</span>
-                <div>
-                    <h2 id="rooms-setup-title">Rooms &amp; Beds</h2>
-                    <p>View your registered rooms, beds and rental information.</p>
-                    <a class="owner-link" href="{{ url_for('owner_rooms.overview') }}">Manage Rooms &amp; Beds &rarr;</a>
-                </div>
-            </section>
+    <div class="dash-grid dash-owner-review">
+        <section class="dash-panel">
+            {{ panel_heading('Recent Join Requests', 'request', url_for('owner_join_requests.overview'), 'View All', 'Manage Join Requests') }}
+            {% if data.requests %}
+            <ul class="dash-list">
+                {% for item in data.requests %}
+                <li><a class="dash-list-row" href="{{ url_for('owner_join_requests.details', request_id=item.request_id) }}">
+                    <span class="dash-row-icon" aria-hidden="true">{{ item.initials }}</span>
+                    <span class="dash-row-text"><strong>{{ item.student_name }}</strong><small>{{ item.preference }}</small></span>
+                    <small class="dash-row-date">{{ item.requested_at|join_request_datetime }}</small>{{ request_status(item) }}{{ icon('arrow') }}
+                </a></li>
+                {% endfor %}
+            </ul>
+            {% else %}{{ empty('request', 'No join requests yet', 'New applications appear here.') }}{% endif %}
+        </section>
+        <section class="dash-panel">
+            {{ panel_heading('Upcoming Tasks', 'clock') }}
+            {% if data.pending or (billing and (billing.slips or billing.due_count)) or data.open_maintenance %}
+            <ul class="dash-list dash-tasks">
+                {% if data.pending %}<li><a href="{{ url_for('owner_join_requests.overview', status='requested') }}">Review join requests {{ badge(data.pending, 'warning') }}</a></li>{% endif %}
+                {% if billing and billing.slips %}<li><a href="{{ url_for('owner_payments.overview') }}">Verify payment slips {{ badge(billing.slips, 'warning') }}</a></li>{% endif %}
+                {% if billing and billing.due_count %}<li><a href="{{ url_for('owner_bills.history') }}"><span>Follow up on {{ billing.due_count }} outstanding {{ 'bill' if billing.due_count == 1 else 'bills' }}{% if billing.next_due %}<small>Earliest due date {{ billing.next_due.strftime('%d %b %Y') }}</small>{% endif %}</span>{{ icon('arrow') }}</a></li>{% endif %}
+                {% if data.open_maintenance %}<li><a href="{{ url_for('owner_maintenance.overview') }}">Follow up on maintenance {{ badge(data.open_maintenance, 'info') }}</a></li>{% endif %}
+            </ul>
+            {% else %}{{ empty('check', 'You’re all caught up', 'Open requests, bills and maintenance tasks will appear here.') }}{% endif %}
+        </section>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

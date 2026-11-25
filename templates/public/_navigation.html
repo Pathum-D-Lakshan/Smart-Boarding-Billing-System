@@ -1,0 +1,19 @@
+<header class="market-header">
+    <div class="market-width market-header-inner">
+        <a class="market-brand" href="{{ url_for('home') }}">
+            {{ icon('home') }}<span>Smart Boarding &amp; <strong>Billing System</strong></span>
+        </a>
+        <nav class="market-nav" aria-label="Main navigation">
+            <a href="{{ url_for('home') }}"{% if request.endpoint == 'home' %} aria-current="page"{% endif %}>{{ icon('home') }} Home</a>
+            <a href="{{ url_for('public_boardings.search') }}"{% if request.endpoint == 'public_boardings.search' %} aria-current="page"{% endif %}>{{ icon('bed') }} Boardings</a>
+            <a href="{{ url_for('home', _anchor='about') }}">{{ icon('info') }} About</a>
+            <a href="{{ url_for('home', _anchor='contact') }}">{{ icon('phone') }} Contact</a>
+        </nav>
+        {% if not auth_split %}
+        <div class="market-auth">
+            <a class="market-button" href="{{ url_for('login') }}">{{ icon('logout') }} Login</a>
+            <a class="market-button market-primary" href="{{ url_for('register') }}">{{ icon('request') }} Create Account</a>
+        </div>
+        {% endif %}
+    </div>
+</header>

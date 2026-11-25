@@ -1,0 +1,49 @@
+/* Student pages reuse the existing Owner shell, palette, icons and typography. */
+.student-portal-tag { display:inline-block; margin-top:.5rem; padding:.15rem .55rem; border-radius:1rem; background:#123e54; color:#67e8f9; font-size:var(--font-small); font-weight:700; letter-spacing:.04em; }
+.student-portal .student-workspace { min-width:0; padding-block:1.75rem 2.5rem; }
+.student-portal .owner-sidebar a { color:#fff; }
+.student-portal .owner-sidebar .nav-current { color:#051b2b; }
+.student-portal .student-heading-icon { display:flex; gap:1rem; align-items:center; }
+.student-portal .student-heading-icon>.nav-icon { width:3.5rem; height:3.5rem; border-radius:1rem; }
+.student-portal .student-heading-icon .nav-art { width:2.5rem; height:2.5rem; }
+.student-portal .student-page-heading h1 { margin:0 0 .4rem; }
+.student-portal .student-page-heading p { margin:0; }
+.student-portal .student-panel { margin-top:0; padding:1.35rem; }
+.student-portal .student-panel>h2 { display:flex; align-items:center; gap:.6rem; margin:0 0 1.1rem; }
+.student-portal .student-panel>h2>.icon { color:var(--cyan); }
+.student-search { border:1px solid var(--border); border-top-color:var(--cyan); border-radius:1rem; padding:1.2rem; background:var(--panel); }
+.student-search-fields { display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:1rem; }
+.student-search-facilities { border:0; padding:0; margin:1rem 0 0; min-width:0; }
+.student-search-facilities legend { font-weight:600; margin-bottom:.6rem; }
+.student-facility-options { display:flex; gap:.65rem; flex-wrap:wrap; }
+.student-facility-choice { display:flex; align-items:center; gap:.45rem; padding:.45rem .65rem; border:1px solid var(--border); border-radius:.65rem; font-size:var(--font-small); }
+.student-facility-choice input { accent-color:var(--cyan); width:1.1rem; height:1.1rem; }
+.student-search-actions { display:flex; justify-content:flex-end; gap:.7rem; flex-wrap:wrap; margin-top:1rem; }
+.student-result-toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin:1.3rem 0; }
+.student-sort { display:flex; align-items:center; gap:.6rem; }
+.student-sort select { max-width:14rem; }
+.student-portal .student-boarding-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+.student-portal .student-boarding-card { display:flex; flex-direction:column; }
+.student-portal .student-card-body { padding:1rem; display:flex; flex-direction:column; gap:.6rem; flex:1; }
+.student-portal .student-card-body h2 { font-size:var(--font-subheading); margin:0; }
+.student-portal .student-card-body p { margin:0; }
+.student-portal .student-card-cover { aspect-ratio:1.85; }
+.student-card-visual { position:relative; }
+.student-card-visual>.student-status { position:absolute; top:.7rem; right:.7rem; }
+.student-price { color:var(--cyan); font-weight:700; }
+.student-price small { font-weight:400; font-size:var(--font-small); color:var(--muted); }
+.student-card-facilities { display:flex; flex-wrap:wrap; gap:.35rem .65rem; min-height:1.5rem; font-size:var(--font-small); color:var(--muted); }
+.student-card-types { display:flex; flex-wrap:wrap; gap:.4rem; font-size:var(--font-small); }
+.student-card-types span { padding:.1rem .5rem; background:var(--theme-field); border:1px solid var(--border); border-radius:.5rem; }
+.student-card-footer { display:flex; align-items:center; justify-content:space-between; gap:.7rem; margin-top:auto; padding-top:.5rem; }
+.student-card-footer>.listing-button { padding:.55rem .8rem; }
+.student-cover-empty>.icon { width:4rem; height:4rem; color:var(--cyan); }
+.student-public-options { width:100%; border-collapse:collapse; margin:1rem 0; }
+.student-public-options th,.student-public-options td { text-align:left; padding:.85rem; border-bottom:1px solid var(--border); font-size:var(--font-table); }
+.student-public-options th { background:var(--theme-field); }
+.student-public-table { overflow-x:auto; }
+[data-theme="light"] .student-portal-tag { background:#c5edf8; color:#00668a; }
+[data-theme="light"] .student-portal .owner-sidebar .nav-row { color:var(--theme-text); }
+@media(min-width:801px) and (max-width:1250px) { .student-portal .student-boarding-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.student-search-fields { grid-template-columns:1fr 1fr; }.student-search-fields>.student-field:first-child { grid-column:1/-1; } }
+@media(max-width:800px) { .student-portal .student-boarding-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:560px) { .student-search-fields,.student-portal .student-boarding-grid { grid-template-columns:1fr; }.student-portal .student-workspace { padding-block:1.2rem 2rem; }.student-portal .student-panel { padding:1rem; }.student-result-toolbar,.student-sort { align-items:stretch; }.student-sort { width:100%; flex-wrap:wrap; }.student-sort select { max-width:none; }.student-card-footer { flex-wrap:wrap; }.student-search-actions .listing-button { flex:1; } }

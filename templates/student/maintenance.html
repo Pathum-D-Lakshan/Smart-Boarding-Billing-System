@@ -1,0 +1,54 @@
+{% extends 'student/base.html' %}
+{% from 'shared/_icons.html' import icon,navigation_icon %}
+{% set page_title='My Maintenance' %}{% set active_page='maintenance' %}
+{% block page_styles %}{{ stylesheet('maintenance.css') }}{{ stylesheet('student-maintenance.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/maintenance.js',v='student-maintenance-ui-20261110-1') }}" defer></script><script src="{{ url_for('static',filename='js/student-maintenance.js',v='student-maintenance-ui-20261110-1') }}" defer></script>{% endblock %}
+{% block student_content %}
+<section class="student-maintenance" aria-label="My Maintenance">
+    <header class="student-maint-head"><span class="student-maint-heading-icon" aria-hidden="true">{{ navigation_icon('tool') }}</span><div><h2>My Maintenance</h2><p>Report and track maintenance issues related to your boarding.</p></div></header>
+    <div class="student-maint-overview">
+        <div class="maint-stats student-maint-stats" aria-label="Your maintenance summary">
+            {% for key,label,symbol in [('total','Total Requests','bill'),('in_progress','In Progress','clock'),('resolved','Resolved','check')] %}
+            <article class="maint-stat maint-{{ key }}"><span class="student-maint-stat-icon student-maint-stat-{{ key }}" aria-hidden="true">{{ icon(symbol) }}</span><div><h3>{{ label }}</h3><strong>{{ data.summary[key] }}</strong></div></article>
+            {% endfor %}
+        </div>
+        <a class="maint-button maint-primary student-maint-report-button" href="{{ url_for('student_maintenance.new_student',**view) }}" data-maintenance-view>+ Report a New Issue</a>
+    </div>
+    {% if data.eligibility_message %}<aside class="student-maint-eligibility"><span aria-hidden="true">{{ icon('clock') }}</span><div><strong>{{ data.eligibility_message }}</strong><p>You can view the report form and your request history. Submission becomes available when your tenancy is active.</p></div><a href="{{ url_for('student_requests.my_boarding') }}">My Boarding →</a></aside>{% endif %}
+    <nav class="student-maint-tabs" aria-label="Maintenance request views">
+        <a class="student-maint-tab{% if view.tab=='requests' %} is-active{% endif %}" href="{{ url_for('student_maintenance.history',tab='requests') }}"{% if view.tab=='requests' %} aria-current="page"{% endif %}>{{ icon('layers') }}My Requests{% if data.summary.pending %}<span class="student-maint-pending-count" aria-label="{{ data.summary.pending }} pending requests">{{ data.summary.pending }}</span>{% endif %}</a>
+        <a class="student-maint-tab{% if view.tab=='history' %} is-active{% endif %}" href="{{ url_for('student_maintenance.history',tab='history') }}"{% if view.tab=='history' %} aria-current="page"{% endif %}>{{ icon('clock') }}Request History</a>
+    </nav>
+    <section class="student-maint-requests maint-table-wrap" aria-label="Your requests and history">
+        <form method="get" action="{{ url_for('student_maintenance.history') }}" class="student-maint-toolbar" role="search">
+            <input type="hidden" name="tab" value="{{ view.tab }}">
+            <div class="student-maint-select"><label class="student-maint-sr-only" for="maint-status">Status</label><select name="status" id="maint-status"><option value="">All Statuses</option>{% for value,label in statuses.items() if view.tab!='history' or value=='resolved' %}<option value="{{ value }}"{% if view.status==value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            <div class="student-maint-select student-maint-sort"><label class="student-maint-sr-only" for="maint-sort">Sort</label><select name="sort" id="maint-sort"><option value="newest"{% if view.sort=='newest' %} selected{% endif %}>Newest First</option><option value="oldest"{% if view.sort=='oldest' %} selected{% endif %}>Oldest First</option></select></div>
+            <div class="student-maint-search"><label class="student-maint-sr-only" for="maint-search">Search Requests</label>{{ icon('search') }}<input type="search" id="maint-search" name="q" maxlength="150" value="{{ view.q }}" placeholder="Search by request no. or issue..."><button type="submit">Search</button></div>
+            {% if view.q or view.status or view.sort!='newest' %}<a class="student-maint-clear" href="{{ url_for('student_maintenance.history',tab=view.tab) }}">Clear</a>{% endif %}
+        </form>
+        {% if view.tab=='history' %}<p class="student-maint-history-help">Resolved requests and their completed repair updates.</p>{% endif %}
+        <table class="maint-table student-maint-table"><thead><tr>{% for label in ['Request No.','Issue / Title','Location','Reported Date','Status','Actions'] %}<th scope="col">{{ label }}</th>{% endfor %}</tr></thead><tbody>
+            {% for row in data.rows %}<tr>
+                <td data-label="Request No."><span class="student-maint-reference" title="{{ row.maintenance_reference }}">{{ row.maintenance_reference }}</span></td>
+                <td data-label="Issue / Title"><strong>{{ row.issue_title }}</strong></td>
+                <td data-label="Location"><span class="student-maint-location">{{ icon('home' if row.room_label else 'layers') }}{{ 'Room '~row.room_label if row.room_label else 'Common Area' }}</span></td>
+                <td data-label="Reported Date">{{ row.created_at|maintenance_datetime }}</td>
+                <td data-label="Status"><span class="maint-badge maint-{{ row.status }}"><span aria-hidden="true" class="student-maint-status-dot"></span>{{ statuses[row.status] }}</span></td>
+                <td data-label="Actions"><a class="maint-button student-maint-view" href="{{ url_for('student_maintenance.student_details',maintenance_id=row.maintenance_id,**view) }}" data-maintenance-view aria-label="View {{ row.issue_title }}">{{ icon('eye') }}View</a></td>
+            </tr>{% else %}<tr><td colspan="6" class="maint-empty">
+                <span class="student-maint-empty-icon" aria-hidden="true">{{ navigation_icon('tool') }}</span>
+                {% if view.q or view.status %}<strong>No requests match these filters.</strong><p>Try another reference, issue title or status.</p>
+                {% elif view.tab=='history' %}<strong>No resolved requests yet.</strong><p>Completed maintenance requests will appear here.</p>
+                {% else %}<strong>No maintenance requests yet.</strong><p>Report a maintenance issue if something needs to be repaired.</p>{% endif %}
+            </td></tr>{% endfor %}
+        </tbody></table>
+        <footer class="maint-table-footer student-maint-footer"><nav aria-label="Maintenance pages">
+            {% if data.page>1 %}<a class="maint-button" href="{{ url_for('student_maintenance.history',q=view.q,status=view.status,sort=view.sort,tab=view.tab,page=data.page-1) }}" aria-label="Previous page">‹</a>{% endif %}
+            <span class="student-maint-page" aria-current="page">{{ data.page }}</span>
+            {% if data.page<data.page_count %}<a class="maint-button" href="{{ url_for('student_maintenance.history',q=view.q,status=view.status,sort=view.sort,tab=view.tab,page=data.page+1) }}" aria-label="Next page">›</a>{% endif %}
+        </nav><span>{% if data.total %}Showing {{ (data.page-1)*15+1 }}–{{ (data.page-1)*15+data.rows|length }} of {{ data.total }} requests{% else %}0 requests{% endif %}</span></footer>
+    </section>
+</section>
+{% if mode=='create' or item %}<div data-maintenance-initial>{% include 'maintenance/_form.html' if mode=='create' else 'maintenance/_details.html' %}</div>{% endif %}
+{% endblock %}

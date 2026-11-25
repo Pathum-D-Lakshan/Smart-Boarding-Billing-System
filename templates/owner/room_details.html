@@ -1,24 +1,36 @@
 {% extends "owner/base.html" %}
 {% set page_title = "Room Details" %}
 {% set active_page = "rooms" %}
-{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/owner-rooms-beds.css') }}">{% endblock %}
+{% block page_styles %}{{ stylesheet('owner-rooms-beds.css') }}{% endblock %}
 {% block owner_content %}
 <nav class="rooms-breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('owner_rooms.overview') }}">Rooms &amp; Beds</a><span aria-hidden="true">/</span><span>{{ room.room_number }}</span></nav>
-<div class="rooms-page-heading"><div><p class="rooms-eyebrow">Room information</p><h2>{{ room.room_number }} <span class="rooms-badge rooms-type-{{ room.room_type }}">{{ room.room_type|capitalize }}</span></h2></div><a class="rooms-button rooms-outline" href="{{ url_for('owner_rooms.overview') }}">← All Rooms</a></div>
+{% if room.get('has_open_tenancy') %}<p class="rooms-notice">Room details are locked while a tenant is assigned.</p>{% endif %}<div class="rooms-page-heading"><div><p class="rooms-eyebrow">Room information</p><h2>{{ room.room_number }} <span class="rooms-badge rooms-type-{{ room.room_type }}">{{ room.room_type|capitalize }}</span></h2></div><div class="rooms-row-actions"><a class="rooms-button rooms-secondary" href="{{ url_for('owner_rooms.overview') }}">← All Rooms</a>{% if not room.get('has_open_tenancy') %}<a class="rooms-button rooms-primary" href="{{ url_for('owner_rooms.edit', room_id=room.room_id) }}"><span aria-hidden="true">✏️</span> Edit Room</a>{% endif %}</div></div>
 <article class="rooms-panel rooms-details">
-    <div class="rooms-details-heading"><span class="rooms-room-icon rooms-accent-blue" aria-hidden="true">{{ '🛏️' if room.room_type == 'shared' else '🏠' }}</span><div>
-        {% if room.room_type == 'private' %}<p class="rooms-price">{% if room.room_rent is not none %}LKR {{ '{:,.2f}'.format(room.room_rent) }} <span>/ room / month</span>{% else %}Room rent not set{% endif %}</p>
-        {% else %}<p class="rooms-price">LKR {{ '{:,.2f}'.format(room.default_bed_rent) }} <span>/ new bed / month</span></p><p class="rooms-muted">Default for new beds; existing bed rents appear below.</p>{% endif %}
+    <div class="rooms-details-heading"><span class="rooms-room-icon rooms-accent-blue" aria-hidden="true">{{ icon('bed' if room.room_type == 'shared' else 'home') }}</span><div>
+        {% if room.room_type == 'private' %}<p class="rooms-muted">Monthly Rent for the Entire Room (LKR)</p><p class="rooms-price">{% if room.room_rent is not none %}LKR {{ '{:,.2f}'.format(room.room_rent) }} <span>/ room / month</span>{% else %}Room rent not set{% endif %}</p>
+        {% else %}<p class="rooms-muted">Default Monthly Rent per New Bed (LKR)</p><p class="rooms-price">LKR {{ '{:,.2f}'.format(room.default_bed_rent) }} <span>/ new bed / month</span></p><p class="rooms-muted">Changing this default does not change rents already saved on existing beds.</p>{% endif %}
     </div><span class="rooms-badge rooms-condition-{{ room.operational_status }}">{{ room.operational_status|capitalize }}</span></div>
     {% if room.room_type == 'private' %}<p class="rooms-notice">This room is rented as one unit. Physical beds are included in the room rent and are not individually rentable.</p>{% endif %}
-    <dl class="rooms-detail-grid"><div><dt>Capacity</dt><dd>{{ room.capacity }} beds</dd></div><div><dt>Registered Beds</dt><dd>{{ room.bed_count }}</dd></div><div><dt>Floor</dt><dd>{{ room.floor or 'Not provided' }}</dd></div><div><dt>Tenant Occupancy</dt><dd>Not yet tracked</dd></div></dl>
-    <section class="rooms-description"><h3>Description</h3><p>{{ room.description or 'Not provided' }}</p></section>
+    <dl class="rooms-detail-grid"><div><dt>Bed Capacity</dt><dd>{{ room.capacity }} physical beds maximum</dd></div><div><dt>Bed Registration</dt><dd>Registered beds: {{ room.bed_count }} / {{ room.capacity }}</dd></div><div><dt>Floor</dt><dd>{{ room.floor|room_floor_label }}</dd></div><div><dt>Tenant Occupancy</dt><dd>{{ active_assignments|length }} active agreement(s); {{ assignments|length - active_assignments|length }} scheduled reservation(s)</dd></div></dl>
+    {% if assignments %}<section class="rooms-description"><h3>Approved Assignments</h3>{% for assignment in assignments %}<p><a class="rooms-text-link" href="{{ url_for('owner_tenants.details',tenancy_id=assignment.tenancy_id) }}">{{ assignment.student_name }}</a> - {{ assignment.phase }} from {{ assignment.start_date }}{% if assignment.end_date %} until checkout {{ assignment.end_date }}{% endif %}</p>{% endfor %}<p class="rooms-muted">Agreement dates determine eligibility; physical move-in is not independently verified.</p></section>{% endif %}<section class="rooms-description"><h3>Description</h3><p>{{ room.description or 'Not provided' }}</p></section>
     <dl class="rooms-detail-grid rooms-timestamps"><div><dt>Created</dt><dd>{{ room.created_at.strftime('%d %b %Y') }}</dd></div><div><dt>Last Updated</dt><dd>{{ room.updated_at.strftime('%d %b %Y') }}</dd></div></dl>
 </article>
 <section class="rooms-panel rooms-beds-section" aria-labelledby="room-beds-heading">
-    <h3 id="room-beds-heading"><span aria-hidden="true">🛏️</span> Beds in This Room</h3>
-    {% if beds %}<div class="rooms-table-scroll" tabindex="0" role="region" aria-label="Registered beds"><table class="rooms-table"><thead><tr><th scope="col">Bed Label</th><th scope="col">Condition</th><th scope="col">Monthly Rent</th><th scope="col">Tenancy</th></tr></thead><tbody>
-    {% for bed in beds %}<tr><th scope="row">{{ bed.bed_label }}</th><td><span class="rooms-badge rooms-condition-{{ bed.operational_status }}">{{ bed.operational_status|capitalize }}</span></td><td>{% if room.room_type == 'private' %}Included in room rent{% elif bed.monthly_rent is not none %}LKR {{ '{:,.2f}'.format(bed.monthly_rent) }} / bed{% else %}Not set{% endif %}</td><td class="rooms-muted">Not yet tracked</td></tr>{% endfor %}
+    <div class="rooms-page-heading">
+        <h3 id="room-beds-heading"><span aria-hidden="true">🛏️</span> Beds in This Room</h3>
+        {% if room.bed_count < room.capacity %}<a class="rooms-button rooms-primary" href="{{ url_for('owner_rooms.bed_form', room_id=room.room_id) }}">+ Add Bed</a>
+        {% else %}<p class="rooms-muted">Bed capacity reached</p>{% endif %}
+    </div>
+    {% if beds %}<div class="rooms-table-scroll" tabindex="0" role="region" aria-label="Registered beds"><table class="rooms-table"><thead><tr><th scope="col">Bed Label</th><th scope="col">Condition</th><th scope="col">Monthly Rent</th><th scope="col">Tenancy</th><th scope="col">Actions</th></tr></thead><tbody>
+    {% for bed in beds %}
+        <tr>
+            <th scope="row">{{ bed.bed_label }}</th>
+            <td><span class="rooms-badge rooms-condition-{{ bed.operational_status }}">{{ bed.operational_status|capitalize }}</span></td>
+            <td>{% if room.room_type == 'private' %}Included in room rent{% elif bed.monthly_rent is not none %}LKR {{ '{:,.2f}'.format(bed.monthly_rent) }} / bed{% else %}Not set{% endif %}</td>
+            <td>{% set found=namespace(any=false) %}{% for assignment in assignments %}{% if assignment.rent_unit=='room' or assignment.bed_id==bed.bed_id %}{% set found.any=true %}<p><a class="rooms-text-link" href="{{ url_for('owner_tenants.details',tenancy_id=assignment.tenancy_id) }}">{{ assignment.student_name }}</a> - {{ assignment.phase }}{% if assignment.rent_unit=='room' %} (Entire Room){% endif %}</p>{% endif %}{% endfor %}{% if not found.any %}No current assignment{% endif %}</td>
+            <td>{% if found.any %}Locked{% else %}<a class="rooms-button rooms-secondary" href="{{ url_for('owner_rooms.bed_form', room_id=room.room_id, bed_id=bed.bed_id) }}">Edit Bed</a>{% endif %}</td>
+        </tr>
+    {% endfor %}
     </tbody></table></div>{% else %}<div class="rooms-empty rooms-empty-small"><span class="rooms-empty-icon" aria-hidden="true">🛌</span><h4>No beds registered yet</h4><p class="rooms-muted">This room currently has {{ room.bed_count }} registered beds and a capacity of {{ room.capacity }}.</p></div>{% endif %}
 </section>
 {% endblock %}

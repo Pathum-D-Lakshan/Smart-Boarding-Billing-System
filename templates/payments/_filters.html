@@ -1,0 +1,8 @@
+<form method="get" class="pay-card pay-filters">
+<div class="pay-field pay-search"><label for="pay-search">Search Payments</label><input id="pay-search" name="q" maxlength="150" placeholder="Student, bill or transaction/payment reference" value="{{ data.filters.q }}"></div>
+<div class="pay-field"><label for="pay-status">Status</label><select id="pay-status" name="status"><option value="">All Payment History</option>{% for value,label in statuses.items() %}<option value="{{ value }}"{% if data.filters.status==value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="pay-field"><label for="pay-method">Payment Method</label><select id="pay-method" name="method"><option value="">All Methods</option>{% for value,label in methods.items() %}<option value="{{ value }}"{% if data.filters.method==value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="pay-field"><label for="pay-from">From</label><input type="date" id="pay-from" name="from" value="{{ data.filters['from'] }}"></div><div class="pay-field"><label for="pay-to">To</label><input type="date" id="pay-to" name="to" value="{{ data.filters.to }}"></div>
+<div class="pay-field"><label for="pay-sort">Order</label><select id="pay-sort" name="sort"><option value="newest">Newest First</option><option value="oldest"{% if data.filters.sort=='oldest' %} selected{% endif %}>Oldest First</option></select></div>
+<div class="pay-actions"><button class="pay-button pay-primary" type="submit">Search</button><a class="pay-link" href="{{ url_for('owner_payments.overview' if payment_role=='owner' else 'student_payments.history') }}">Clear Filters</a></div>
+</form>

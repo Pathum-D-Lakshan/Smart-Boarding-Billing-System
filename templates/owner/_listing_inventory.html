@@ -1,0 +1,20 @@
+{% macro room_groups(groups) -%}
+{% for room_type, label in [('private', 'Private Rooms'), ('shared', 'Shared Rooms')] %}
+<section class="listing-room-group" aria-label="{{ label }}">
+    <h4>{{ label }}</h4>
+    {% for room in groups[room_type] %}
+    <article class="listing-room-card">
+        <header class="listing-room-header"><h5>{{ room.room_number }}</h5><span class="listing-condition listing-condition-{{ room.operational_status }}">{{ room.operational_status|capitalize }}</span></header>
+        {% if room.visibility_note is defined %}<p class="listing-exclusion-reason">{{ room.visibility_note }}</p>{% endif %}
+        <dl class="listing-room-facts"><div><dt>Floor</dt><dd>{{ room.floor|room_floor_label }}</dd></div><div><dt>Bed Capacity</dt><dd>{{ room.capacity }}</dd></div><div><dt>Registered Beds</dt><dd>{{ room.bed_count }} / {{ room.capacity }}</dd></div></dl>
+        {% if room_type == 'private' %}
+        <p class="listing-room-price">{% if room.monthly_rent is not none %}LKR {{ '{:,.2f}'.format(room.monthly_rent) }} / room / month{% else %}Rent not set{% endif %}</p>
+        {% if room.beds %}<ul class="listing-physical-beds" aria-label="Physical beds in {{ room.room_number }}">{% for bed in room.beds %}<li>{{ bed.bed_label }} <span class="listing-condition listing-condition-{{ bed.operational_status }}">{{ bed.operational_status|capitalize }}</span></li>{% endfor %}</ul><p class="listing-rate-note">Physical beds are included in the whole-room rent.</p>{% endif %}
+        {% elif room.beds %}
+        <ul class="listing-bed-list" aria-label="Registered beds in {{ room.room_number }}">{% for bed in room.beds %}<li><div class="listing-bed-heading"><strong>{{ bed.bed_label }}</strong><span class="listing-condition listing-condition-{{ bed.operational_status }}">{{ bed.operational_status|capitalize }}</span></div><p>{% if bed.monthly_rent is not none %}LKR {{ '{:,.2f}'.format(bed.monthly_rent) }} / bed / month{% else %}Rent not set{% endif %}</p></li>{% endfor %}</ul>
+        {% else %}<p class="listing-muted">No registered beds yet</p>{% endif %}
+    </article>
+    {% else %}<p class="listing-muted listing-room-empty">No {{ room_type }} rooms in this group.</p>{% endfor %}
+</section>
+{% endfor %}
+{%- endmacro %}

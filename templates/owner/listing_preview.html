@@ -1,0 +1,25 @@
+{% extends "owner/base.html" %}
+{% set page_title = "Preview Listing" %}
+{% set active_page = "listings" %}
+{% from 'listings/_boarding_details.html' import boarding_details with context %}
+{% from 'owner/_listing_inventory.html' import room_groups with context %}
+{% block page_styles %}{{ stylesheet('boarding-listings.css') }}{% endblock %}
+{% block owner_content %}
+<nav class="listing-breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('owner_listings.overview') }}">Listings</a><span aria-hidden="true">/</span><span>Preview</span></nav>
+<div class="listing-page-heading listing-preview-heading"><div><h2>Preview Listing</h2><p class="listing-muted">Review the boarding details and rent options that will appear publicly.</p></div><a class="listing-button listing-outline" href="{{ url_for('owner_listings.overview') }}">← Back to Listings</a></div>
+<p class="listing-preview-notice">Owner-only preview. {{ 'This Draft is not public.' if listing.status == 'draft' else 'Public search is not available yet.' }}</p>
+{% call boarding_details(listing, cover_url, visibility) %}
+<section class="listing-section" aria-labelledby="preview-inventory-heading">
+    <h3 id="preview-inventory-heading">Rooms &amp; Beds</h3>
+    <p class="listing-inventory-note">Current saved prices belong to the labelled rooms and beds below. Tenant occupancy and availability are not yet verified.</p>
+    {{ room_groups(inventory.public) }}
+</section>
+{% endcall %}
+{% if inventory.owner_only.private or inventory.owner_only.shared %}
+<section class="listing-card listing-owner-inventory" aria-labelledby="owner-inventory-heading">
+    <div class="listing-section-heading"><h3 id="owner-inventory-heading">Not shown publicly</h3><span class="listing-owner-badge">Owner-only</span></div>
+    <p class="listing-muted">Saved inventory under maintenance or without a current applicable rent is shown here for your review. It is excluded from the public rent options.</p>
+    {{ room_groups(inventory.owner_only) }}
+</section>
+{% endif %}
+{% endblock %}

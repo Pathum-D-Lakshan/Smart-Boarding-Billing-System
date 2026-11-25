@@ -1,0 +1,4 @@
+{% extends 'owner/base.html' %}{% set active_page='finance' %}{% set page_title='Add Expense' %}
+{% block page_styles %}{{ stylesheet('owner-finance.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/owner-finance.js',v='accounting-month-2') }}" defer></script>{% endblock %}
+{% block owner_content %}<div id="finance-live" role="status" hidden></div><div id="finance-workspace"></div><div data-finance-initial>{% include 'owner/_expense_add.html' %}</div>{% endblock %}

@@ -1,0 +1,42 @@
+{% from 'shared/_icons.html' import icon %}
+<article class="jr-detail jr-panel" id="request-details" tabindex="-1" aria-labelledby="jr-detail-title" data-request-id="{{ selected.request_id }}">
+    <header class="jr-detail-header"><h3 id="jr-detail-title">Join Request Details</h3><a class="jr-close" data-jr-close href="{{ url_for('owner_join_requests.overview', **filter_params) }}" aria-label="Close request details">{{ icon('close') }}</a></header>
+    {% if error %}<p class="jr-modal-feedback" role="alert">{{ error }}</p>{% endif %}
+    {% if notice %}<p class="jr-decision-success" role="status">{{ notice }}</p>{% endif %}
+    <div class="jr-detail-body" data-jr-step="details">
+        <div class="jr-detail-student"><span class="jr-avatar jr-avatar-large" aria-hidden="true">{{ selected.initials }}</span><div><strong>{{ selected.student_name }}</strong><small>Student #{{ selected.student_id }} · Request #{{ selected.request_id }}</small></div></div>
+        <div class="jr-detail-reference"><span>Request #{{ selected.request_id }}</span><span class="jr-status jr-status-{{ selected.status }}">{{ selected.status_label }}</span></div>
+        {% if not selected.student_active %}<p class="jr-notice">This student account is inactive.</p>{% endif %}
+        <section class="jr-detail-section"><h4>{{ icon('request') }} Request Overview</h4><dl class="jr-detail-data"><div><dt>Requested On</dt><dd>{{ selected.requested_at|join_request_datetime }}</dd></div>{% if selected.decided_at %}<div><dt>{{ 'Cancelled On' if selected.status == 'cancelled' else 'Decided On' }}</dt><dd>{{ selected.decided_at|join_request_datetime }}</dd></div>{% endif %}</dl></section>
+        <section class="jr-detail-section"><h4>{{ icon('user') }} Student Information</h4><dl class="jr-detail-data"><div><dt>Name</dt><dd>{{ selected.student_name }}</dd></div><div><dt>Email</dt><dd><a href="mailto:{{ selected.student_email }}">{{ selected.student_email }}</a></dd></div>{% if selected.student_phone %}<div><dt>Phone</dt><dd><a href="tel:{{ selected.student_phone }}">{{ selected.student_phone }}</a></dd></div>{% endif %}</dl></section>
+        <section class="jr-detail-section jr-detail-section-wide"><h4>{{ icon('building') }} Boarding Information</h4>
+            <dl class="jr-detail-data">
+                <div><dt>Boarding</dt><dd>{{ selected.boarding_name }}</dd></div>
+                <div><dt>Preference</dt><dd>{{ selected.preference }}</dd></div>
+                <div><dt>Intended Join Date</dt><dd>{{ selected.intended_start_date.strftime('%d %b %Y') }}</dd></div>
+            </dl>
+            <h5>Student Message</h5><p class="jr-student-message">{{ selected.message or 'No message included.' }}</p>
+        </section>
+        {% if selected.status == 'rejected' %}<section class="jr-detail-section jr-detail-section-wide"><h4>{{ icon('close') }} Rejection Reason</h4><p class="jr-saved-reason">{{ selected.rejection_reason or 'No rejection reason was provided.' }}</p></section>{% endif %}
+        {% if tenancy %}
+        <section class="jr-detail-section jr-detail-section-wide jr-tenancy-summary"><h4>{{ icon('check') }} Approved Tenancy · #{{ tenancy.tenancy_id }}</h4>
+            <span class="jr-status jr-status-approved">{{ tenancy.phase }}</span>
+            <dl class="jr-detail-data"><div><dt>Assigned Room</dt><dd>{{ tenancy.room_number }}</dd></div>
+                {% if tenancy.rent_unit == 'bed' %}<div><dt>Assigned Bed</dt><dd>{{ tenancy.bed_label }}</dd></div>{% endif %}
+                <div><dt>Start Date</dt><dd>{{ tenancy.start_date.strftime('%d %b %Y') }}</dd></div>
+                {% if tenancy.end_date %}<div><dt>End Date</dt><dd>{{ tenancy.end_date.strftime('%d %b %Y') }}</dd></div>{% endif %}
+                <div><dt>Agreed Rent</dt><dd>LKR {{ '{:,.2f}'.format(tenancy.agreed_monthly_rent) }} / {{ tenancy.rent_unit }} / month</dd></div></dl>
+            <p class="jr-footnote">{{ 'The unit is reserved for this future tenancy.' if tenancy.phase == 'Scheduled' else 'Agreement status does not confirm physical move-in.' }} Later price changes do not alter this agreed rent.</p>
+            <a class="jr-button{% if tenancy.phase=='Active agreement' %} jr-danger{% endif %}" href="{{ url_for('owner_tenants.details',tenancy_id=tenancy.tenancy_id,manage='request_removal' if tenancy.phase=='Active agreement' else '') }}#tn-manage">{{ 'Request Tenant Removal — Send to Admin' if tenancy.phase=='Active agreement' else 'View Tenancy & Payment Balance' }}</a>
+        </section>
+        {% endif %}
+        {% if selected.status == 'requested' %}
+        {% if approval and approval.blocked %}<p class="jr-notice" id="jr-approval-blocked">{{ approval.blocked }}</p>{% endif %}
+        <div class="jr-detail-actions">{% if approval %}{% if approval.blocked %}<button class="jr-button jr-approve" type="button" disabled aria-describedby="jr-approval-blocked">{{ icon('check') }} Approve</button>{% else %}<button class="jr-button jr-approve" id="jr-approve-open" type="button" hidden>{{ icon('check') }} Approve</button>{% endif %}{% endif %}<button class="jr-button jr-danger" id="jr-reject-open" type="button" hidden>{{ icon('close') }} Reject Request</button></div>
+        {% endif %}
+    </div>
+    {% if selected.status == 'requested' %}
+    {% if approval and not approval.blocked %}{% include 'owner/_join_request_approval.html' %}{% endif %}
+    {% include 'owner/_join_request_rejection.html' %}
+    {% endif %}
+</article>

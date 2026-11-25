@@ -1,0 +1,25 @@
+﻿<article class="pay-detail student-qr-upload" tabindex="-1">
+{% if bill %}
+<div class="student-phone-summary"><span>{{ bill.bill_reference }}</span><strong>LKR {{ '{:,.2f}'.format(bill.final_total) }}</strong></div>
+{% if mobile_result %}
+<section class="student-upload-qr" aria-labelledby="upload-qr-title" data-upload-qr data-expires-seconds="{{ mobile_result.expires_in_seconds }}">
+<h3 id="upload-qr-title">Scan with your phone</h3>
+<figure class="student-upload-qr-code"><img src="{{ mobile_result.qr_data_uri }}" width="320" height="320" alt="Scan QR Code to upload your bank slip securely"></figure>
+<p class="student-upload-qr-expiry" data-qr-expiry-status role="status">Private one-time link · 15:00 remaining</p>
+<p class="pay-help">Scan → Enter site if shown → Take Photo / Choose Gallery → Confirm &amp; Save.</p>
+<div class="pay-actions student-upload-share"><button type="button" class="pay-button" data-bank-copy="secure-mobile-link" data-copy-label="Upload link" data-copy-status="mobile-copy-status">Copy Upload Link</button><form method="post" action="{{ url_for('student_payments.mobile_upload') }}" data-payment-qr><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="bill_id" value="{{ bill.bill_id }}"><button type="submit" class="pay-button">Refresh QR</button></form></div>
+<p id="mobile-copy-status" class="pay-help" role="status"></p>
+<details class="student-phone-help"><summary>More sharing options</summary><a class="pay-link" data-qr-whatsapp href="{{ mobile_result.whatsapp_url }}" target="_blank" rel="noopener noreferrer">Share via WhatsApp</a><p class="pay-help">Select your contact and press Send manually.</p><label for="secure-mobile-link">Keep this upload link private</label><input class="student-bank-number" id="secure-mobile-link" value="{{ mobile_result.upload_url }}" readonly autocomplete="off"></details>
+</section>
+{% else %}
+<h3>Scan QR Code</h3>
+{% if mobile_error %}<p class="pay-notice" role="alert">{{ mobile_error }}</p>{% else %}<p class="pay-help">No WhatsApp phone number is required. Create a fresh private upload link.</p>{% endif %}
+<form method="post" action="{{ url_for('student_payments.mobile_upload') }}" data-payment-qr><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="bill_id" value="{{ bill.bill_id }}"><button type="submit" class="pay-button pay-primary"{% if not bill.transfer_eligible %} disabled{% endif %}>Create QR Code</button></form>
+<a class="pay-link" data-payment-view href="{{ url_for('student_payments.submission',bill_id=bill.bill_id) }}">Upload from Computer</a>
+{% endif %}
+{% else %}
+<h3>Choose your invoice</h3><form action="{{ url_for('student_payments.mobile_upload') }}" method="get" data-pay-bill-select><input type="hidden" name="option_page" value="{{ options.page }}"><div class="pay-field"><label for="mobile-bill">Unpaid invoice</label><select name="bill_id" id="mobile-bill" required><option value="">Select an invoice</option>{% for option in options.rows %}<option value="{{ option.bill_id }}">{{ option.bill_reference }} · LKR {{ '{:,.2f}'.format(option.final_total) }}</option>{% endfor %}</select></div><button class="pay-button" type="submit"{% if not options.total %} disabled{% endif %}>Continue</button></form>
+{% if not options.total %}<p class="pay-help">No unpaid invoice is awaiting a slip. Check My Bills.</p>{% endif %}
+{% if options.page_count>1 %}<nav class="pay-actions" aria-label="Invoice selection pages">{% if options.page>1 %}<a data-payment-view href="{{ url_for('student_payments.mobile_upload',option_page=options.page-1) }}">Previous</a>{% endif %}<span>Page {{ options.page }} of {{ options.page_count }}</span>{% if options.page<options.page_count %}<a data-payment-view href="{{ url_for('student_payments.mobile_upload',option_page=options.page+1) }}">Next</a>{% endif %}</nav>{% endif %}
+{% endif %}
+</article>

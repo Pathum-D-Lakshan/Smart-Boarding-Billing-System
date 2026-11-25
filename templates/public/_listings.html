@@ -1,0 +1,54 @@
+{% from "shared/_icons.html" import icon %}
+{% from "shared/_boarding_photo.html" import boarding_photo %}
+{% macro search_form(q='') %}
+<form class="market-search" action="{{ url_for('public_boardings.search') }}" method="get" role="search">
+    {{ icon('search') }}
+    <label class="market-sr-only" for="public-query">Search by boarding name or location</label>
+    <input id="public-query" type="search" name="q" value="{{ q }}" maxlength="150" placeholder="Search boardings by name or location…">
+    <button class="market-button market-primary" type="submit">Search</button>
+</form>
+{% endmacro %}
+
+{% macro cover_image(listing, css_class, lazy=true) %}
+{{ boarding_photo(url_for('public_boardings.cover', boarding_id=listing.boarding_id) if listing.has_cover else none, listing.boarding_name, css_class, lazy) }}
+{% endmacro %}
+
+{% macro money(amount) %}LKR {{ '{:,.2f}'.format(amount).removesuffix('.00') }}{% endmacro %}
+
+{% macro cards(listings, empty_message) %}
+{% if listings %}
+<div class="market-grid">
+    {% for item in listings %}
+    <article class="market-card">
+        <div class="market-card-media">
+            {{ cover_image(item, 'market-card-cover') }}
+            {% if item.available_beds or item.available_rooms %}
+                <span class="market-badge{% if item.available_rooms and not item.available_beds %} market-badge-private{% endif %}">
+                    {{ icon('users' if item.available_beds else 'home') }}
+                    {{ 'Shared & Private' if item.available_beds and item.available_rooms else 'Shared' if item.available_beds else 'Private' }}
+                </span>
+            {% endif %}
+        </div>
+        <div class="market-card-body">
+            <h3>{{ item.boarding_name }}</h3>
+            <p class="market-location">{{ icon('pin') }} {{ item.city }}, {{ item.district }}</p>
+            <ul class="market-stock" aria-label="Current availability">
+                <li>{{ icon('home') }} {{ item.available_rooms }} private {{ 'room' if item.available_rooms == 1 else 'rooms' }}</li>
+                <li>{{ icon('bed') }} {{ item.available_beds }} shared {{ 'bed' if item.available_beds == 1 else 'beds' }}</li>
+            </ul>
+            <div class="market-card-actions">
+                {% if item.starting_rent is not none %}
+                    <p>From <strong>{{ money(item.starting_rent) }}</strong><small>per {{ item.starting_unit }} / month</small></p>
+                {% else %}
+                    <p>No vacancies right now</p>
+                {% endif %}
+                <a class="market-button market-small" href="{{ url_for('public_boardings.details', boarding_id=item.boarding_id) }}" aria-label="View details for {{ item.boarding_name }}">View Details {{ icon('arrow') }}</a>
+            </div>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="market-empty"><h3>No boardings found</h3><p>{{ empty_message }}</p></div>
+{% endif %}
+{% endmacro %}

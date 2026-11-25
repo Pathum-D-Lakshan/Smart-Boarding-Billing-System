@@ -1,0 +1,32 @@
+{% extends "owner/base.html" %}
+{% set page_title = "Join Requests" %}
+{% set active_page = "join_requests" %}
+{% block page_styles %}{{ stylesheet('owner-join-requests.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/owner-join-requests.js') }}" defer></script>{% endblock %}
+{% block owner_content %}
+<nav class="jr-breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('dashboard', role='owner') }}">Owner Portal</a><span aria-hidden="true">/</span><span>Join Requests</span></nav>
+<div class="jr-page-heading">
+    <div class="jr-title"><span class="jr-heading-icon" aria-hidden="true">{{ icon('request') }}</span><div><p class="jr-eyebrow">Your boarding community</p><h2>Join Requests</h2></div></div>
+    <p>Review and manage student boarding applications.</p>
+</div>
+{% if error and not selected %}<p class="owner-message owner-message-error" role="alert">{{ error }}</p>{% endif %}
+{% if summary is none %}
+<section class="jr-panel jr-empty"><span aria-hidden="true">📨</span><h3>Join Requests are unavailable</h3><p>Please reload this page to try again.</p><a class="jr-button jr-primary" href="{{ url_for('owner_join_requests.overview') }}">Reload Join Requests</a></section>
+{% else %}
+<section class="jr-stats" aria-label="Join request totals">
+    {% for label, key, glyph, tone in [('Total Requests','total','users','blue'),('Pending','pending','clock','amber'),('Approved','approved','check','green'),('Rejected','rejected','close','red')] %}
+    <article class="jr-stat jr-tone-{{ tone }}"><span class="jr-stat-icon">{{ icon(glyph) }}</span><div><h3>{{ label }}</h3><strong data-jr-count="{{ key }}">{{ summary[key] }}</strong></div></article>
+    {% endfor %}
+</section>
+{% if not boarding %}
+<section class="jr-panel jr-empty"><span aria-hidden="true">🏠</span><h3>Create your Boarding Profile first</h3><p>Your boarding's student requests will appear here.</p><a class="jr-button jr-primary" href="{{ url_for('owner_boarding.create') }}">Create Boarding</a></section>
+{% else %}
+{% if boarding.status == 'draft' %}<p class="jr-notice">Your boarding is a Draft. Existing requests remain available to view or reject. Publish your boarding before approving a request.</p>{% endif %}
+<div class="jr-workspace">
+    {% include 'owner/_join_request_results.html' %}
+    {% if selected %}<div id="jr-initial-detail" data-dialog-url="{{ url_for('owner_join_requests.dialog', request_id=selected.request_id, **filter_params) }}">{% include 'owner/_join_request_details.html' %}</div>{% endif %}
+</div>
+{% endif %}
+{% endif %}
+{% include 'owner/_join_request_dialog.html' %}
+{% endblock %}

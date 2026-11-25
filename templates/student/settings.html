@@ -1,0 +1,32 @@
+{% extends 'student/base.html' %}
+{% from 'owner/_settings_password.html' import password_field %}{% from 'owner/_settings_icons.html' import settings_icon %}
+{% from 'shared/_icons.html' import icon %}
+{% set page_title='Settings' %}{% set active_page='settings' %}
+{% block page_styles %}{{ stylesheet('owner-settings.css') }}{{ stylesheet('student-settings.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/owner-settings.js',v='student-settings-20261110-1') }}" defer></script>{% endblock %}
+{% macro account_field(key,label,value,limit,kind='text',required=false) %}<div class="settings-field"><label for="settings-{{ key }}">{{ label }}{% if required %} <span class="settings-required">*</span>{% else %} <span class="settings-muted">(Optional)</span>{% endif %}</label><input id="settings-{{ key }}" name="{{ key }}" type="{{ kind }}" maxlength="{{ limit }}" value="{{ values.get(key,value) or '' }}" autocomplete="{{ 'name' if key=='full_name' else 'tel' }}"{% if required %} required{% endif %}{% if errors.get(key) %} aria-invalid="true" aria-describedby="settings-{{ key }}-error"{% endif %}>{% if errors.get(key) %}<p class="settings-error" id="settings-{{ key }}-error">{{ errors[key] }}</p>{% endif %}</div>{% endmacro %}
+{% block student_content %}<div class="student-settings" id="settings-surface"{% if approved_theme %} data-settings-approved-theme="{{ approved_theme }}"{% endif %}>
+{% if section and section!='error' %}<nav class="settings-breadcrumb" aria-label="Settings navigation"><a href="{{ url_for('student_settings.home') }}" data-settings-theme-cancel>← Back to Settings</a><span>/</span><span>{{ section_title }}</span></nav>{% endif %}
+<header class="settings-heading"><span class="settings-heading-icon" aria-hidden="true">{{ icon('settings') }}</span><div><h2>{{ section_title }}</h2><p>{{ 'Manage your account, security and preferences.' if not section else {'account':'Update your name and phone number.','security':'Change your account password.','appearance':'Choose Light or Dark mode.'}.get(section,'') }}</p></div></header>
+{% if errors.get('form') %}<p class="settings-notice settings-error" role="alert">{{ errors.form }}</p>{% endif %}
+{% if section=='error' %}<a class="settings-button" href="{{ url_for('student_settings.access') }}">Verify Settings Access</a>
+{% elif not section %}
+<div class="settings-cards student-settings-cards">{% for key,title,description in [('account','Account Settings','Update your name and phone number.'),('security','Security Settings','Change your account password.'),('appearance','Appearance','Choose Light or Dark mode.')] %}<a class="settings-card settings-{{ key }}" href="{{ url_for('student_settings.section_page',section=key) }}"><span class="settings-card-icon" aria-hidden="true">{{ settings_icon(key) }}</span><span><h3>{{ title }}</h3><p>{{ description }}</p></span><span class="settings-card-arrow" aria-hidden="true">›</span></a>{% endfor %}</div>
+<p class="settings-help">Access expires five minutes after verification. Opening Settings from the sidebar requires your password again.</p>
+{% else %}<section class="settings-panel"><h3>{{ {'account':'Account Information','security':'Change Password','appearance':'Theme Mode'}[section] }}</h3>
+<form method="post" action="{{ url_for('student_settings.save',section=section) }}" data-settings-post{% if section!='security' %} data-settings-confirm-form{% endif %}{% if section=='appearance' %} data-settings-appearance{% endif %}>
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="revision" value="{{ data.saved.revision }}">
+{% if section=='account' %}
+{{ account_field('full_name','Full Name',data.account.full_name,150,'text',true) }}
+{{ account_field('contact_phone','Phone Number',data.account.contact_phone,20,'tel') }}
+<p class="settings-help">Use 0771234567, 771234567 or +94771234567. Leave blank if you do not want to save a phone number.</p>
+<div class="settings-field"><label for="settings-email">Email Address</label><input id="settings-email" type="email" value="{{ data.account.email }}" readonly autocomplete="email"><small>Your verified login email cannot be changed here.</small></div>
+{% elif section=='security' %}
+{{ password_field('current_password','Current Password',errors) }}{{ password_field('new_password','New Password',errors,8) }}{{ password_field('confirm_password','Confirm New Password',errors,8) }}
+<p class="settings-help">Use 8–128 characters with a symbol. Updating signs you out of all sessions, including Keep Me Signed In.</p>
+{% else %}<div class="settings-theme-options">{% for theme,label in [('dark','Dark Mode'),('light','Light Mode')] %}<label class="settings-theme-card"><input type="radio" name="theme" value="{{ theme }}" data-settings-theme{% if values.get('theme','dark')==theme %} checked{% endif %} required><span aria-hidden="true">{{ settings_icon(theme) }}</span><strong>{{ label }}</strong></label>{% endfor %}</div>
+{% if errors.get('theme') %}<p class="settings-error" role="alert">{{ errors.theme }}</p>{% endif %}<p class="settings-notice">Preview your theme. Save Changes confirms your preference; Cancel restores your saved browser theme. The header toggle stays available.</p><noscript><p class="settings-notice">Enable JavaScript to preview and save the browser theme preference.</p></noscript>
+{% endif %}
+{% if section!='security' %}<section class="settings-confirm" data-settings-confirm data-password-retry="{{ 'true' if errors.get('current_password') else 'false' }}" aria-labelledby="settings-confirm-title"><h3 id="settings-confirm-title">Confirm Changes</h3><p>Enter your current password to save your changes.</p>{{ password_field('current_password','Current Password',errors) }}<div class="settings-actions"><button type="button" class="settings-button" data-settings-confirm-cancel hidden>Cancel</button><button type="submit" class="settings-button settings-primary">Save Changes</button></div></section>{% endif %}
+<div class="settings-actions"><a class="settings-button" href="{{ url_for('student_settings.home') }}" data-settings-theme-cancel>Cancel</a>{% if section=='security' %}<button class="settings-button settings-primary" type="submit">Update Password</button>{% else %}<button class="settings-button settings-primary" type="button" data-settings-open hidden>Save Changes</button>{% endif %}</div>
+</form></section>{% endif %}</div>{% endblock %}

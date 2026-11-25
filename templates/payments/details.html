@@ -1,0 +1,5 @@
+{% extends payment_layout %}{% set page_title='Payment Details' %}{% set active_page='payments' %}
+{% block page_styles %}{{ stylesheet('payments.css') }}{% if payment_role=='student' %}{{ stylesheet('student-finance.css') }}{% endif %}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/payments.js',v='slip-withdrawal-1') }}" defer></script>{% endblock %}
+{% macro content() %}<nav class="pay-breadcrumb"><a href="{{ url_for('owner_payments.overview' if payment_role=='owner' else 'student_payments.history') }}">Payments</a><span>/</span><span>{{ item.payment_reference }}</span></nav><section class="pay-card" data-payment-initial>{% include 'payments/_details.html' %}</section>{% endmacro %}
+{% block owner_content %}{{ content() }}{% endblock %}{% block student_content %}{{ content() }}{% endblock %}

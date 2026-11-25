@@ -1,0 +1,173 @@
+/* Shared theme palette; legacy component styles retain the approved Dark Mode. */
+:root {
+    color-scheme: dark;
+    --theme-page: #0b1120;
+    --theme-sidebar: #101a30;
+    --theme-card: #172338;
+    --theme-field: #0b1729;
+    --theme-text: #f5f8ff;
+    --theme-muted: #b3c6de;
+    --theme-accent: #22d3ee;
+    --theme-link: #67e8f9;
+    --theme-border: #304966;
+    --theme-hover: #203550;
+    --theme-action-bg: #164460;
+    --theme-action-border: #377d9d;
+    --theme-action-ink: #e4f8ff;
+    --theme-shadow: 0 .75rem 2rem #0007;
+}
+:root[data-theme="light"] {
+    color-scheme: light;
+    --theme-page: #eef6ff;
+    --theme-sidebar: #dceeff;
+    --theme-card: #f8fbff;
+    --theme-field: #f4f9ff;
+    --theme-text: #142d50;
+    --theme-muted: #4e6a8d;
+    --theme-accent: #20cbe8;
+    --theme-link: #00668a;
+    --theme-border: #a4c7e8;
+    --theme-hover: #d7eaff;
+    --theme-action-bg: #d5eefb;
+    --theme-action-border: #72adc9;
+    --theme-action-ink: #154963;
+    --theme-shadow: 0 .75rem 2rem #1b4b7814;
+    --theme-success-bg: #e2f6ec;
+    --theme-success-ink: #12623b;
+    --theme-success-border: #82c5a1;
+    --theme-warning-bg: #fff3d1;
+    --theme-warning-ink: #775000;
+    --theme-warning-border: #d5b46b;
+    --theme-danger-bg: #ffedf1;
+    --theme-danger-ink: #a12244;
+    --theme-danger-border: #d99bb0;
+    --theme-info-bg: #e3f3ff;
+    --theme-info-ink: #225375;
+    --theme-info-border: #93c4df;
+    --theme-purple-bg: #eee8fc;
+    --theme-purple-ink: #65429a;
+}
+.theme-toggle { display: inline-grid; place-items: center; flex: none; width: 2.5rem; height: 2.5rem; padding: .5rem; border: 1px solid var(--theme-border); border-radius: .75rem; background: var(--theme-sidebar); color: var(--theme-link); cursor: pointer; }
+.theme-toggle svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.theme-toggle:hover { background: var(--theme-hover); }
+
+/* Give ordinary action buttons a visible fill in both themes. Keep semantic
+   variants responsible for their own primary, approval, and danger colours. */
+[data-theme] :is(.pay-button, .bill-button, .finance-button, .maint-button,
+    .reports-button, .settings-button, .admin-button, .jr-button, .restricted-button,
+    .rooms-button, .boarding-button, .listing-button):where(:not([aria-current],
+    .pay-primary, .pay-verify, .pay-reject, .bill-primary, .finance-primary,
+    .finance-danger, .finance-archive, .maint-primary, .maint-success, .reports-primary,
+    .settings-primary, .admin-primary, .admin-approve, .admin-danger, .jr-primary,
+    .jr-approve, .jr-reject, .jr-danger, .restricted-primary, .rooms-primary,
+    .boarding-button-primary, .boarding-button-publish, .boarding-button-unpublish, .listing-primary)) {
+    background: var(--theme-action-bg);
+    border-color: var(--theme-action-border);
+    color: var(--theme-action-ink);
+}
+.theme-toggle:focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 3px; }
+.theme-moon { display: none; }
+[data-theme="light"] .theme-sun { display: none; }
+[data-theme="light"] .theme-moon { display: block; }
+.topbar > .theme-toggle { margin-left: auto; }
+.topbar > .theme-toggle + .profile { margin-left: 0; }
+.auth-card { position: relative; }
+.auth-utilities { position: absolute; top: .85rem; right: .85rem; }
+.student-account .theme-toggle { margin-right: .15rem; }
+
+/* Group components by role so one palette covers all existing pages. */
+[data-theme="light"] body {
+    color: var(--theme-text);
+    background: radial-gradient(ellipse at top left, #d8ecff, var(--theme-page) 65%) fixed;
+}
+[data-theme="light"] :is(.owner-dashboard, .student-portal) {
+    --canvas: var(--theme-page); --panel: var(--theme-sidebar); --card: var(--theme-card);
+    --border: var(--theme-border); --text: var(--theme-text); --muted: var(--theme-muted); --cyan: var(--theme-link);
+}
+[data-theme="light"] :is(.owner-sidebar, .student-header) { background: linear-gradient(150deg, #dceeff, #d2e9fb); border-color: var(--theme-border); }
+[data-theme="light"] .owner-sidebar .nav-row { color: var(--theme-text); }
+[data-theme="light"] :is(.topbar, .profile-panel, .auth-card, .metric-card, .setup-card, .boarding-panel, .boarding-profile-card, .rooms-panel, .listing-card, .listing-room-card, .jr-panel, .student-boarding-card, .student-panel, .student-empty) { background: var(--theme-card); border-color: var(--theme-border); box-shadow: var(--theme-shadow); }
+[data-theme="light"] :is(.jr-details-modal, .boarding-password-dialog) { background: var(--theme-card); border-color: var(--theme-border); color: var(--theme-text); box-shadow: 0 1.5rem 5rem #142d5033; }
+[data-theme="light"] .jr-details-modal .jr-detail { background: transparent; box-shadow: none; }
+[data-theme="light"] :is(.jr-modal-header, .jr-detail-header, .jr-detail-actions, .rooms-description, .rooms-timestamps, .boarding-section, .boarding-timestamps, .boarding-form-section, .boarding-form-actions, .boarding-profile-actions, .listing-section, .listing-footer, .student-detail-section, .student-form-actions) { border-color: var(--theme-border); }
+[data-theme="light"] :is(.jr-details-modal .jr-detail-actions, .jr-details-modal .jr-dialog-actions) { background: var(--theme-card); }
+[data-theme="light"] :is(.profile-mark, .brand-mark, .metric-icon, .boarding-upload-icon, .boarding-cover-symbol, .jr-heading-icon, .jr-stat-icon, .student-brand > span) { background: #cceef8; border-color: var(--theme-info-border); color: var(--theme-link); }
+[data-theme="light"] :is(.icon-button, .student-logout, .boarding-button-secondary, .rooms-secondary, .listing-outline, .jr-button, .jr-clear, .jr-page-button, .boarding-dialog-actions .boarding-button-secondary) { background: var(--theme-field); border-color: var(--theme-border); color: var(--theme-text); }
+[data-theme="light"] :is(.icon-button:hover, .profile summary:hover, .logout-button:hover, .nav-list a:not(.nav-current):hover, .boarding-button-secondary:hover, .rooms-secondary:hover, .jr-close:hover) { background: var(--theme-hover); }
+[data-theme="light"] :is(.nav-current, .boarding-button-primary, .rooms-primary, .listing-primary, .jr-primary, .login-button, .jr-page-current, .boarding-dialog-actions .boarding-button-primary) { color: #102b45; background: var(--theme-accent); border-color: var(--theme-accent); }
+[data-theme="light"] :is(.boarding-button-primary:hover, .rooms-primary:hover, .listing-primary:hover, .login-button:hover:not(:disabled)) { background: #71dff1; }
+[data-theme="light"] .nav-current .nav-icon { background: #b9f0fa; }
+[data-theme="light"] .nav-icon-building { --icon-accent: #7342ad; }
+[data-theme="light"] .nav-icon-bed { --icon-accent: #176f9e; }
+[data-theme="light"] .nav-icon-layers { --icon-accent: #8546a5; }
+[data-theme="light"] .nav-icon-request { --icon-accent: #946400; }
+[data-theme="light"] .nav-icon-users { --icon-accent: #087b78; }
+[data-theme="light"] .nav-icon-bill { --icon-accent: #096d89; }
+[data-theme="light"] .nav-icon-payment { --icon-accent: #14734d; }
+[data-theme="light"] .nav-icon-finance { --icon-accent: #826219; }
+[data-theme="light"] .nav-icon-tool { --icon-accent: #ad4353; }
+[data-theme="light"] .nav-icon-report { --icon-accent: #5555a6; }
+[data-theme="light"] .nav-icon-settings { --icon-accent: #34679a; }
+[data-theme="light"] .nav-icon-logout { --icon-accent: #a34060; }
+[data-theme="light"] :is(.owner-link, .boarding-profile-contact dt, .listing-link, .listing-breadcrumb a, .rooms-text-link, .rooms-breadcrumb a, .jr-breadcrumb a, .jr-detail-data a, .auth-footer a, .auth-footer a:visited, .register-text, .password-toggle, .owner-password-toggle, .student-portal a, .student-header nav a[aria-current], .theme-toggle) { color: var(--theme-link); }
+[data-theme="light"] :is(.jr-outline, .jr-view, .rooms-outline, .boarding-button-edit, .listing-outline, .student-portal .listing-button:not(.listing-primary)) { color: var(--theme-link); background: var(--theme-info-bg); border-color: var(--theme-info-border); }
+[data-theme="light"] :is(.student-brand strong, .jr-table th, .listing-room-group > h4, .jr-detail-student strong, .boarding-profile-description, .student-field input, .student-field textarea, .student-field select) { color: var(--theme-text); }
+[data-theme="light"] :is(.auth-header p, .brand-subtitle, .auth-footer, .student-header nav a, .student-page-heading > p, .student-brand small, .student-help, .student-detail-grid dt, .jr-footnote, .jr-date, .jr-cell-index, .jr-student-cell small, .jr-detail-student small, .jr-detail-data dt, .jr-detail-section h5, .jr-table td[data-label]::before) { color: var(--theme-muted); }
+[data-theme="light"] .student-eyebrow { color: var(--theme-link)!important; }
+[data-theme="light"] :is(.student-portal .listing-primary) { color: #102b45; }
+[data-theme="light"] :is(.boarding-field input, .boarding-field textarea, .boarding-facility-option, .rooms-filters input, .rooms-filters select, .rooms-field input, .rooms-field select, .rooms-field textarea, .form-group input, .form-group select, .form-group select option, .owner-password-control input, .jr-filters input, .jr-filters select, .jr-reject-dialog textarea, .jr-approval-fields input, .jr-approval-fields select, .student-field input, .student-field textarea, .student-field select) { background: var(--theme-field); border-color: var(--theme-border); color: var(--theme-text); color-scheme: light; }
+[data-theme="light"] :is(input, textarea)::placeholder { color: var(--theme-muted); }
+[data-theme="light"] .form-group select:invalid { color: var(--theme-muted); }
+[data-theme="light"] :is(.boarding-cover-placeholder, .listing-cover-placeholder, .student-cover-empty, .boarding-cover-photo, .listing-cover, .boarding-empty-icon, .rooms-empty-icon, .jr-empty > span) { background: linear-gradient(145deg, #e0f3ff, #eef7ff); border-color: var(--theme-info-border); color: var(--theme-muted); }
+[data-theme="light"] :is(.boarding-facilities li, .boarding-profile-card .boarding-facilities li, .listing-facilities li, .listing-rent-panel, .listing-room-card, .jr-student-message, .jr-saved-reason) { background: var(--theme-field); border-color: var(--theme-border); }
+[data-theme="light"] :is(.boarding-facility-option:has(input:checked), .boarding-field input[type="file"]::file-selector-button) { background: var(--theme-info-bg); color: var(--theme-link); }
+[data-theme="light"] :is(.rooms-type-private, .listing-rent-icon-private) { background: var(--theme-purple-bg); color: var(--theme-purple-ink); border-color: #baa7d7; }
+[data-theme="light"] :is(.rooms-type-shared, .listing-rent-icon-shared) { background: var(--theme-info-bg); color: var(--theme-info-ink); border-color: var(--theme-info-border); }
+[data-theme="light"] :is(.owner-message, .boarding-status-published, .rooms-condition-ready, .listing-status-published, .listing-condition-ready, .jr-status-approved, .jr-decision-success, .student-status-approved, .student-success) { background: var(--theme-success-bg); color: var(--theme-success-ink); border-color: var(--theme-success-border); }
+[data-theme="light"] :is(.boarding-status-draft, .rooms-condition-maintenance, .listing-status-draft, .listing-condition-maintenance, .listing-owner-badge, .jr-status-requested, .student-status-requested, .boarding-button-unpublish) { background: var(--theme-warning-bg); color: var(--theme-warning-ink); border-color: var(--theme-warning-border); }
+[data-theme="light"] :is(.owner-message-error, .boarding-error-summary, .rooms-error-summary, .listing-error, .jr-status-rejected, .jr-modal-feedback, .student-status-rejected, .student-error) { background: var(--theme-danger-bg); color: var(--theme-danger-ink); border-color: var(--theme-danger-border); }
+[data-theme="light"] :is(.boarding-required, .boarding-field-error, .rooms-required, .rooms-field-error, .jr-field-error, .jr-reject-dialog label span, .auth-error, .student-field-error, .student-required, .boarding-password-dialog .boarding-field-error, .boarding-password-dialog .rooms-field-error) { color: var(--theme-danger-ink); }
+[data-theme="light"] :is(.auth-success, .student-agreement) { color: var(--theme-success-ink); }
+[data-theme="light"] :is(.rooms-notice, .listing-preview-notice, .jr-notice, .student-notice) { background: var(--theme-info-bg); color: var(--theme-info-ink); border-color: var(--theme-info-border); }
+[data-theme="light"] .student-success { background: var(--theme-success-bg); color: var(--theme-success-ink); border-color: var(--theme-success-border); }
+[data-theme="light"] .student-error { background: var(--theme-danger-bg); color: var(--theme-danger-ink); border-color: var(--theme-danger-border); }
+[data-theme="light"] :is(.jr-status-cancelled, .student-status-cancelled) { background: #e7eef7; color: #415873; border-color: #b6c7da; }
+[data-theme="light"] :is(.jr-approve, .boarding-button-publish) { background: #087343; color: #fff; border-color: #087343; }
+[data-theme="light"] .jr-danger { background: #ab2947; color: #fff; border-color: #ab2947; }
+[data-theme="light"] .jr-detail-section h4 { background: var(--theme-info-bg); color: var(--theme-info-ink); }
+[data-theme="light"] .jr-table th { background: #e3f0fc; }
+[data-theme="light"] :is(.jr-table td, .rooms-table td, .rooms-table th, .listing-bed-list > li) { border-color: var(--theme-border); }
+[data-theme="light"] .jr-table tbody tr:nth-child(even) { background: #eaf4fd; }
+[data-theme="light"] :is(.jr-table tbody tr:hover, .jr-table .jr-row-selected) { background: #d8edf9; }
+[data-theme="light"] .jr-avatar { background: linear-gradient(140deg, #c6e9f6, #d8def9); color: #234a78; border-color: #91b7da; }
+[data-theme="light"] .jr-stat { --jr-accent: #2379ae; }
+[data-theme="light"] .jr-tone-amber { --jr-accent: #946400; }
+[data-theme="light"] .jr-tone-green { --jr-accent: #157348; }
+[data-theme="light"] .jr-tone-red { --jr-accent: #ab2947; }
+[data-theme="light"] .jr-agreed-rent { background: var(--theme-success-bg); border-color: var(--theme-success-border); }
+[data-theme="light"] :is(.jr-agreed-rent output, .jr-agreed-rent > span) { color: var(--theme-success-ink); }
+[data-theme="light"] :is(.jr-approve-dialog .jr-dialog-icon, .boarding-dialog-icon) { background: var(--theme-success-bg); color: var(--theme-success-ink); border-color: var(--theme-success-border); }
+[data-theme="light"] .jr-dialog-icon { background: var(--theme-danger-bg); color: var(--theme-danger-ink); border-color: var(--theme-danger-border); }
+[data-theme="light"] :is(.owner-password-toggle:hover, .password-toggle:hover) { background: var(--theme-hover); }
+[data-theme="light"] :is(.resend-button, .otp-countdown, .boarding-dialog-close, .jr-close) { color: var(--theme-link); }
+[data-theme="light"] .nav-request-count { background: #b52e4f; color: #fff; border-color: transparent; }
+[data-theme="light"] .login-preference-note { color: var(--theme-muted); }
+[data-theme="light"] :is(.brand-icon, .jr-cell-with-icon .icon) { color: var(--theme-link); }
+[data-theme="light"] :is(a, button, input, select, textarea):focus-visible { outline-color: var(--theme-link); }
+[data-theme="light"] .login-preferences input { accent-color: var(--theme-link); }
+[data-theme="light"] .student-header nav a[aria-current] { border-color: var(--theme-link); }
+[data-theme="light"] :is(input, textarea, select)[aria-invalid="true"] { border-color: var(--theme-danger-ink); }
+[data-theme="light"] .rooms-accent-purple { background: #e9e4f9; color: #65429a; }
+[data-theme="light"] .rooms-accent-blue { background: #d7edf9; color: #176f9e; }
+[data-theme="light"] .rooms-accent-green { background: #d9f1e7; color: #157348; }
+[data-theme="light"] .rooms-accent-amber { background: #fff0cc; color: #876000; }
+[data-theme="light"] :is(.rooms-stat-icon, .rooms-room-icon) .icon { color: inherit; }
+[data-theme="light"] input:-webkit-autofill { -webkit-text-fill-color: var(--theme-text); box-shadow: 0 0 0 1000px var(--theme-field) inset; }
+@media (max-width: 650px) {
+    .theme-toggle { width: 2.75rem; height: 2.75rem; }
+    .topbar { display: grid; grid-template-columns: 2.65rem minmax(0, 1fr) 2.75rem auto; gap: .5rem; }
+    .topbar > .theme-toggle { margin-left: 0; }
+    .topbar h1 { min-width: 0; overflow-wrap: anywhere; }
+    [data-theme="light"] .jr-table tr { background: var(--theme-card); border-color: var(--theme-border); }
+    [data-theme="light"] .jr-table td.jr-student-cell { border-color: var(--theme-border); }
+}

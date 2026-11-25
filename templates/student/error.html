@@ -1,0 +1,5 @@
+{% extends 'student/base.html' %}
+{% set page_title = 'Request Unavailable' %}
+{% block student_content %}
+<section class="student-panel"><h1>Could not complete this request</h1><p class="student-notice student-error" role="alert">{{ error }}</p><a class="listing-button" href="{{ url_for('student_requests.history') }}">My Join Requests</a><a class="listing-button" href="{{ url_for('student_requests.boardings') }}">Published Boardings</a></section>
+{% endblock %}

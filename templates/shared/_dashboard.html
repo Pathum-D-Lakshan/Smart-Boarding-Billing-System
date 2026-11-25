@@ -1,0 +1,45 @@
+{% from 'shared/_icons.html' import icon %}
+{% macro money(value) -%}LKR {{ '{:,.2f}'.format(value) }}{%- endmacro %}
+
+{% macro banner(name, workspace, description, action_url=none, action_label='') %}
+<section class="dash-banner" aria-labelledby="dash-welcome">
+    <img src="{{ url_for('static', filename='images/boarding-hero.webp') }}" width="1536" height="1024" alt="" fetchpriority="high">
+    <div class="dash-banner-copy">
+        <p class="dash-eyebrow">{{ workspace }}</p>
+        <h2 id="dash-welcome">Welcome back, <span>{{ name }}!</span></h2>
+        <p>{{ description }}</p>
+        {% if action_url %}<a class="dash-button dash-primary" href="{{ action_url }}">{{ action_label }} {{ icon('arrow') }}</a>{% endif %}
+    </div>
+</section>
+{% endmacro %}
+
+{% macro metric(label, glyph, value, tone='cyan', href=none) %}
+<article class="dash-metric dash-metric-{{ tone }}">
+    <span class="dash-metric-icon">{{ icon(glyph) }}</span>
+    <div>
+        <h2>{% if href %}<a href="{{ href }}">{{ label }}</a>{% else %}{{ label }}{% endif %}</h2>
+        <p class="metric-value">{{ value }}</p>
+    </div>
+</article>
+{% endmacro %}
+
+{% macro panel_heading(label, glyph, href=none, anchor='View All', link_label=none) %}
+<header class="dash-panel-title">
+    <h2>{{ icon(glyph) }} {{ label }}</h2>
+    {% if href %}<a class="dash-link" href="{{ href }}"{% if link_label %} aria-label="{{ link_label }}"{% endif %}>{{ anchor }} {{ icon('arrow') }}</a>{% endif %}
+</header>
+{% endmacro %}
+
+{% macro badge(label, tone='neutral') -%}<span class="dash-badge dash-badge-{{ tone }}">{{ label }}</span>{%- endmacro %}
+
+{% macro empty(glyph, title, text, url=none, action='') %}
+<div class="dash-empty">
+    <span class="dash-empty-icon">{{ icon(glyph) }}</span>
+    <div><p><strong>{{ title }}</strong></p><p>{{ text }}</p>
+    {% if url %}<a class="dash-button" href="{{ url }}">{{ action }} {{ icon('arrow') }}</a>{% endif %}</div>
+</div>
+{% endmacro %}
+
+{% macro request_status(request) -%}
+{{ badge(request.status_label, {'requested':'warning','approved':'success','rejected':'danger'}.get(request.status,'neutral')) }}
+{%- endmacro %}

@@ -1,0 +1,8 @@
+{# One version invalidates old styles across layouts and their feature pages. #}
+{% macro stylesheet(filename, version='payment-withdrawal-1') -%}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/' ~ filename, v=version) }}">
+{%- endmacro %}
+{% macro boarding_photo_assets() -%}
+{{ stylesheet('boarding-photo.css') }}
+<script src="{{ url_for('static', filename='js/boarding-photo.js', v='1') }}" defer></script>
+{%- endmacro %}

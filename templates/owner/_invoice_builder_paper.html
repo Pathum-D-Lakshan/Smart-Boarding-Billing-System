@@ -1,0 +1,1 @@
+{% if data.invoice %}{% set invoice=data.invoice %}{% include 'shared/_invoice_paper.html' %}{% else %}<div class="invoice-paper invoice-paper-placeholder"><h3>{{ 'Already issued' if data.issued_bill else 'No eligible students for the selected billing month.' }}</h3>{% for message in data.messages %}<p>{{ message }}</p>{% endfor %}</div>{% endif %}

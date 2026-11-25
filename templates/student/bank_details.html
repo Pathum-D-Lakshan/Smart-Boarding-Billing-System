@@ -1,0 +1,4 @@
+{% extends 'student/base.html' %}{% set page_title='Bank Details' %}{% set active_page='payments' %}
+{% block page_styles %}{{ stylesheet('payments.css') }}{{ stylesheet('student-finance.css') }}{{ stylesheet('student-payment-flow.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/payments.js',v='payment-clean-2') }}" defer></script>{% endblock %}
+{% block student_content %}<section class="pay-card" data-payment-initial>{% include 'student/_mobile_bank_details.html' %}</section>{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'owner/base.html' %}{% set page_title='Payments' %}{% set active_page='payments' %}
+{% block page_styles %}{{ stylesheet('payments.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/payments.js',v='payments-20261109-1') }}" defer></script>{% endblock %}
+{% block owner_content %}
+<nav class="pay-breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('dashboard',role='owner') }}">Owner Portal</a><span>/</span><span>Payments</span></nav>
+<header class="pay-heading"><div><h2>Payments</h2><p>Review student payments, verify bank transfers and manage receipts.</p></div><a class="pay-button pay-primary" data-payment-view href="{{ url_for('owner_payments.cash') }}">+ Record Cash Payment</a></header>
+<section class="pay-stat-grid" aria-label="Payment summary">{% for key,label,glyph,tone in [('pending','Pending Verification','clock','pending'),('verified','Verified Payments','check','success'),('rejected','Rejected Payments','close','danger'),('collected','Total Collected','payment','info')] %}<article class="pay-stat pay-tone-{{ tone }}"><span class="pay-stat-icon">{{ icon(glyph) }}</span><div><p>{{ label }}</p><strong>{{ 'LKR {:,.2f}'.format(data.summary[key]) if key=='collected' else data.summary[key] }}</strong></div></article>{% endfor %}</section>
+<p class="pay-help">Summary uses the reporting date range and payment method. Reviewed records use decision date; pending records use submission date. Only verified amounts count as collected. Zero-balance settlements collect no money.</p>
+<nav class="pay-tabs" aria-label="Payment status tabs">{% for value,label in [('submitted','Pending Verification'),('verified','Verified'),('rejected','Rejected'),('','All Payment History')] %}{% set params=dict(data.filters) %}{% if value=='submitted' or not (params['from'] or params.to) %}{% set _=params.pop('from') %}{% set _=params.pop('to') %}{% endif %}{% set _=params.update(status=value,page='1') %}<a href="{{ url_for('owner_payments.overview',**params) }}"{% if data.filters.status==value %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</nav>
+{% include 'payments/_filters.html' %}{% include 'payments/_results.html' %}
+{% endblock %}

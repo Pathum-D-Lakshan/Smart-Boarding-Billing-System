@@ -1,0 +1,20 @@
+﻿<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Upload Bank Slip · Smart Boarding</title><link rel="stylesheet" href="{{ url_for('static',filename='css/mobile-payment-slip.css',v='slip-preview-1') }}"><script src="{{ url_for('static',filename='js/mobile-payment-slip.js',v='slip-preview-1') }}" defer></script></head>
+<body><main class="slip-card"><p class="slip-brand">SMART BOARDING &amp; BILLING SYSTEM</p><h1>Upload Bank Slip</h1><p id="slip-status" role="status">{{ initial_error or 'Opening your secure upload link…' }}</p><noscript>JavaScript is required. Use My Payments on your computer if it is unavailable.</noscript>
+<section id="slip-content" hidden>
+<div class="slip-summary"><strong id="slip-boarding"></strong><span id="slip-invoice"></span><span id="slip-student"></span><b id="slip-amount"></b></div>
+<p class="slip-help">Private one-time link · valid for 15 minutes after creation.</p>
+<p id="slip-bank-pending" class="slip-help" hidden>Your Owner has not published bank details. If you already paid using details they gave you, upload your slip below. Contact your Owner for bank details before making a new transfer.</p>
+<section id="slip-live-camera" hidden aria-label="Bank slip camera"><video id="slip-video" autoplay muted playsinline aria-label="Live rear camera preview"></video><button id="slip-capture" class="slip-button" type="button">Take Photo</button></section>
+<p id="slip-camera-status" class="slip-help" role="status"></p>
+<div class="slip-actions"><button id="slip-open-camera" class="slip-button" type="button">Take Photo</button><label class="slip-button secondary" for="slip-gallery">Choose from Gallery</label><input id="slip-gallery" class="slip-file" type="file" accept="image/jpeg,image/png,application/pdf"></div>
+<label class="slip-help slip-native-camera" for="slip-camera">Use Phone Camera instead</label><input id="slip-camera" class="slip-file" type="file" accept="image/jpeg,image/png" capture="environment">
+<p class="slip-help" id="slip-limit">JPG, PNG or static PDF · Maximum 5 MB.</p>
+<figure id="slip-preview" hidden><img id="slip-photo" alt="Selected bank slip preview"><figcaption id="slip-filename"></figcaption></figure>
+<p id="slip-file-error" class="slip-error" role="alert"></p><p id="slip-review" class="slip-help" hidden>Review your photo. Nothing is submitted yet.</p>
+<form id="slip-form">
+<div class="slip-transfer-fields"><div><label for="slip-date">Payment Date *</label><input id="slip-date" name="payment_date" type="date" min="2000-01-01" required></div><div><label for="slip-reference">Transaction Reference (Optional)</label><input id="slip-reference" name="transaction_reference" maxlength="100" autocomplete="off" placeholder="Bank transfer ID, if available"></div></div>
+<div id="slip-confirm-actions" class="slip-confirm-actions" hidden><button id="slip-delete" class="slip-button slip-delete" type="button"><span aria-hidden="true">🗑️</span> Delete Slip</button><button id="slip-save" class="slip-button" type="submit" disabled>Confirm &amp; Save</button></div>
+<p class="slip-help">To remove a submitted slip before the Owner reviews it, sign in and open My Payments.</p>
+</form></section>
+<section id="slip-success" hidden><h2>Payment Slip Submitted Successfully</h2><strong class="slip-badge">Pending Verification</strong><p>Your slip has been sent to your Owner. Check My Payments on your computer.</p><p class="slip-help">This is not a paid receipt. Please do not transfer the same payment again.</p></section>
+</main></body></html>

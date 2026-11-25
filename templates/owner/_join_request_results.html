@@ -1,0 +1,35 @@
+{% from 'shared/_icons.html' import icon %}
+<section class="jr-results" id="jr-results" tabindex="-1" aria-label="Student requests">
+        <form class="jr-filters" id="jr-filter-form" action="{{ url_for('owner_join_requests.overview') }}" method="get" role="search">
+            <div class="jr-search"><label class="jr-sr-only" for="jr-search">Search by student name</label><span aria-hidden="true">{{ icon('search') }}</span><input id="jr-search" name="q" type="search" maxlength="150" value="{{ filters.search }}" placeholder="Search by student name…"></div>
+            <div><label class="jr-sr-only" for="jr-status">Request status</label><select id="jr-status" name="status"><option value="">All Statuses</option>{% for value, label in request_statuses.items() %}<option value="{{ value }}"{% if filters.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            <div><label class="jr-sr-only" for="jr-sort">Sort requests</label><select id="jr-sort" name="sort"><option value="newest"{% if filters.sort == 'newest' %} selected{% endif %}>↓ Newest First</option><option value="oldest"{% if filters.sort == 'oldest' %} selected{% endif %}>↑ Oldest First</option></select></div>
+            <button class="jr-button jr-outline" type="submit">Search</button>
+            <a class="jr-button jr-clear" href="{{ url_for('owner_join_requests.overview') }}">{{ icon('close') }} Clear</a>
+        </form>
+        {% if rows %}
+        <div class="jr-panel jr-table-wrap">
+            <table class="jr-table">
+                <caption class="jr-sr-only">Student boarding requests for {{ boarding.boarding_name }}</caption>
+                <thead><tr><th scope="col">#</th><th scope="col">Student</th><th scope="col">Requested For</th><th scope="col">Preference</th><th scope="col">Request Date</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+                <tbody>{% for row in rows %}
+                <tr{% if selected and selected.request_id == row.request_id %} class="jr-row-selected"{% endif %}>
+                    <td class="jr-cell-index" data-label="Request">#{{ row.request_id }}</td>
+                    <td class="jr-student-cell"><span class="jr-avatar" aria-hidden="true">{{ row.initials }}</span><span><strong>{{ row.student_name }}</strong><small>Student #{{ row.student_id }}</small></span></td>
+                    <td data-label="Requested For"><span class="jr-cell-with-icon">{{ icon('home') }}<span>{{ row.boarding_name }}</span></span></td>
+                    <td data-label="Preference"><span class="jr-cell-with-icon">{{ icon('bed') }}<span>{{ row.preference }}</span></span></td>
+                    <td data-label="Request Date" class="jr-date">{{ row.requested_at|join_request_datetime }}</td>
+                    <td data-label="Status"><span class="jr-status jr-status-{{ row.status }}">{{ row.status_label }}</span></td>
+                    <td><a class="jr-button jr-view" data-jr-view aria-haspopup="dialog" data-dialog-url="{{ url_for('owner_join_requests.dialog', request_id=row.request_id, **filter_params) }}" href="{{ url_for('owner_join_requests.details', request_id=row.request_id, **filter_params) }}#request-details" aria-label="View request {{ row.request_id }} from {{ row.student_name }}">{{ icon('eye') }} View</a></td>
+                </tr>{% endfor %}</tbody>
+            </table>
+        </div>
+        <nav class="jr-pagination" aria-label="Request pages">
+            <p>Showing {{ first_row }}–{{ last_row }} of {{ filtered_total }} request{{ '' if filtered_total == 1 else 's' }}{% if filters.search or filters.status %} matching your filters{% endif %}</p>
+            <div>{% if page > 1 %}<a class="jr-page-button" href="{{ url_for('owner_join_requests.overview', **filters.params(page=page-1)) }}" aria-label="Previous page">‹</a>{% endif %}<span class="jr-page-current" aria-current="page">{{ page }} / {{ page_count }}</span>{% if page < page_count %}<a class="jr-page-button" href="{{ url_for('owner_join_requests.overview', **filters.params(page=page+1)) }}" aria-label="Next page">›</a>{% endif %}</div>
+        </nav>
+        {% else %}
+        <section class="jr-panel jr-empty"><span aria-hidden="true">{{ '🔎' if filters.search or filters.status else '📨' }}</span><h3>{{ 'No matching requests' if filters.search or filters.status else 'No join requests yet' }}</h3><p>{{ 'Try another name or clear your filters.' if filters.search or filters.status else 'Student requests for your boarding will appear here when they are submitted.' }}</p>{% if filters.search or filters.status %}<a class="jr-button jr-outline" href="{{ url_for('owner_join_requests.overview') }}">Clear Filters</a>{% endif %}</section>
+        {% endif %}
+        <p class="jr-footnote">Times shown in Sri Lanka time (UTC+05:30).{% if summary.cancelled %} Total includes {{ summary.cancelled }} cancelled request{{ '' if summary.cancelled == 1 else 's' }}.{% endif %}</p>
+    </section>

@@ -1,0 +1,14 @@
+/* Animate the form on arrival and move the hero only when coming from Home. */
+@media (prefers-reduced-motion: no-preference) {
+    .auth-enter .auth-split-card { animation: enter-auth-panel 460ms cubic-bezier(.22, .61, .36, 1) both; }
+    .auth-enter-from-home .auth-visual-photo { animation: move-auth-photo 460ms ease-out both; }
+}
+
+@keyframes enter-auth-panel {
+    from { opacity: 0; translate: min(12vw, 6rem) 0; }
+    to { opacity: 1; translate: 0 0; }
+}
+@keyframes move-auth-photo {
+    from { opacity: .72; transform: translateX(8%) scale(1.1); }
+    to { opacity: 1; transform: none; }
+}

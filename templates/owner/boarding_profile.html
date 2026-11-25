@@ -1,9 +1,10 @@
 {% extends "owner/base.html" %}
 {% set page_title = "Boarding Profile" %}
+{% from 'shared/_boarding_photo.html' import boarding_photo %}
 {% set active_page = "boarding" %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/owner-boarding-profile.css') }}">
+{{ stylesheet('owner-boarding-profile.css') }}
 {% endblock %}
 
 {% block owner_content %}
@@ -31,15 +32,9 @@
 </div>
 {% endif %}
 <article class="boarding-panel boarding-profile-card" aria-labelledby="boarding-name">
+    {% if boarding.admin_hidden|default(false) %}<p class="owner-message owner-message-error" role="status">Hidden by Platform Admin. Your profile and existing agreements are preserved. Editing or republishing does not remove this moderation block.</p>{% endif %}
     <div class="boarding-profile-hero">
-        {% if boarding.cover_image_filename %}
-        <img class="boarding-cover-photo" src="{{ url_for('owner_boarding.cover') }}" alt="Cover photo of {{ boarding.boarding_name }}">
-        {% else %}
-        <div class="boarding-cover-placeholder" role="img" aria-label="No cover photo added">
-            <span class="boarding-cover-symbol" aria-hidden="true">{{ icon('home') }}</span>
-            <span>No cover photo</span>
-        </div>
-        {% endif %}
+        {{ boarding_photo(url_for('owner_boarding.cover') if has_cover else none, boarding.boarding_name, 'boarding-cover-photo') }}
         <div class="boarding-profile-summary">
             <header class="boarding-profile-heading">
                 <span class="boarding-status boarding-status-{{ boarding.status }}">
@@ -49,7 +44,7 @@
                 {% if boarding.status == 'draft' %}<p class="boarding-draft-note">Saved and unpublished</p>{% endif %}
                 {% if boarding.status == 'published' %}<p class="boarding-draft-note">Marked as Published. Public student search is not available yet.</p>{% endif %}
             </header>
-            <p class="boarding-text boarding-profile-description">{{ boarding.description }}</p>
+            {% if boarding.description and boarding.description|trim %}<p class="boarding-text boarding-profile-description">{{ boarding.description }}</p>{% endif %}
 
             <dl class="boarding-profile-contact">
                 <div><dt><span aria-hidden="true">📍</span><span class="boarding-sr-only">Address</span></dt>
@@ -71,10 +66,12 @@
         {% else %}<p class="boarding-muted">None selected</p>{% endif %}
     </section>
 
+    {% if boarding.house_rules and boarding.house_rules|trim %}
     <section class="boarding-section" aria-labelledby="rules-title">
         <h3 id="rules-title"><span aria-hidden="true">📋</span> House Rules</h3>
-        <p class="boarding-text">{{ boarding.house_rules or 'Not provided' }}</p>
+        <p class="boarding-text">{{ boarding.house_rules }}</p>
     </section>
+    {% endif %}
 
     <dl class="boarding-details boarding-timestamps">
         <div><dt>Created</dt><dd>{{ boarding.created_at.strftime('%d %b %Y') }}</dd></div>

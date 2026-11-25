@@ -1,0 +1,32 @@
+{% from 'shared/_icons.html' import icon, navigation_icon, icon_library %}
+{% from 'shared/_assets.html' import stylesheet, boarding_photo_assets %}
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <script src="{{ url_for('static',filename='js/theme.js') }}"></script>
+    <title>{{ page_title|default('Admin Portal') }} | Smart Boarding &amp; Billing System</title>
+    {{ stylesheet('design-tokens.css') }}{{ stylesheet('owner-dashboard.css') }}{{ stylesheet('themes.css') }}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/admin-portal.css',v='admin-20261114-1') }}">
+    {{ boarding_photo_assets() }}
+    <script src="{{ url_for('static',filename='js/owner-dashboard.js',v='admin-20261114-1') }}" defer></script>
+    <script src="{{ url_for('static',filename='js/admin-portal.js',v='admin-20261114-1') }}" defer></script>
+</head>
+<body class="owner-dashboard admin-portal">
+{{ icon_library() }}
+<aside class="owner-sidebar" id="owner-sidebar" aria-label="Admin menu">
+    <div class="brand"><span class="brand-mark admin-shield" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 2 28 7v9c0 7-7 12-12 14C11 28 4 23 4 16V7Z" fill="#22d3ee"/><path d="m10 16 4 4 8-9" fill="none" stroke="#102b45" stroke-width="3"/></svg></span><span class="brand-text"><strong>Smart Boarding</strong><small>&amp; Billing System</small><span class="admin-brand-label">ADMIN PORTAL</span></span><button class="icon-button drawer-close" id="sidebar-close" type="button" aria-label="Close admin menu" hidden>{{ icon('close') }}</button></div>
+    <nav aria-label="Admin navigation"><ul class="nav-list">
+    {% for key,label,glyph in [('dashboard','Dashboard','home'),('users','Manage Users','users'),('listings','Boarding Listings','layers'),('reports','Platform Reports','report')] %}
+        <li><a class="nav-row{% if active_page==key %} nav-current{% endif %}" href="{{ url_for('admin_portal.'+key) }}" {% if active_page==key %}aria-current="page"{% endif %} title="{{ label }}">{{ navigation_icon(glyph) }}<span class="nav-label">{{ label }}</span></a></li>
+    {% endfor %}</ul></nav>
+    <form class="sidebar-footer" id="admin-logout" method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="nav-row logout-button" type="submit" title="Log out">{{ navigation_icon('logout') }}<span class="nav-label">Log out</span></button></form>
+</aside>
+<div class="drawer-backdrop" id="sidebar-backdrop" aria-hidden="true" hidden></div>
+<div class="owner-page" id="owner-page"><a class="skip-link" href="#owner-content">Skip to page content</a>
+    <header class="topbar"><button class="icon-button" id="sidebar-toggle" type="button" aria-label="Toggle admin menu" aria-controls="owner-sidebar" aria-expanded="true" hidden>{{ icon('menu') }}</button><h1>{{ page_title|default('Admin Portal') }}</h1>{% include 'shared/_theme_controls.html' %}
+    <details class="profile"><summary aria-label="Account menu for {{ admin_name }}"><span class="profile-mark">{{ icon('user') }}</span><span class="profile-name">{{ admin_name }}</span>{{ icon('chevron') }}</summary><div class="profile-panel"><strong>{{ admin_name }}</strong><small>Platform Admin</small><button class="nav-row logout-button" form="admin-logout" type="submit">{{ icon('logout') }}<span>Log out</span></button></div></details></header>
+    <main id="owner-content" tabindex="-1">{% for category,message in get_flashed_messages(with_categories=true) %}<p class="owner-message{% if category=='error' %} owner-message-error{% endif %}" role="{{ 'alert' if category=='error' else 'status' }}">{{ message }}</p>{% endfor %}{% block admin_content %}{% endblock %}</main>
+</div>
+<dialog class="admin-dialog" id="admin-dialog" aria-label="Administrative record details"><div class="admin-dialog-top"><strong>Admin workspace</strong><button type="button" class="admin-button" data-admin-close aria-label="Close details">{{ icon('close') }}</button></div><div id="admin-dialog-content" aria-live="polite"></div></dialog>
+</body></html>

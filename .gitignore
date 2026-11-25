@@ -10,6 +10,9 @@ venv/
 # Python Cache
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
 
 # Private uploaded files
 uploads/
@@ -20,6 +23,37 @@ instance/
 
 # Editor settings
 .vscode/
+.idea/
 
-# Logs
+# Logs and temporary files
 *.log
+*.tmp
+*.temp
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Local backups, captured keys and downloaded tools
+backups/
+*.bak
+*.backup
+*.dump
+*.sql.gz
+*.sql.bz2
+*.zip
+*.7z
+*.exe
+*.pem
+*.key
+*.pfx
+*.ppk
+.ssh/
+id_rsa
+id_ed25519
+id_ecdsa
+
+# Local QA and disposable schema setup
+/tests/
+/db_test.py
+/database/*_test.sql
+/database/*_test_db.sql

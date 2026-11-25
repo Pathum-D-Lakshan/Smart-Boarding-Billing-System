@@ -1,0 +1,21 @@
+{% extends 'student/base.html' %}
+{% set page_title = 'Join Request Details' %}
+{% set active_page = 'requests' %}
+{% block student_content %}
+<a class="student-back" href="{{ url_for('student_requests.history') }}">← My Join Requests</a>
+<div class="student-page-heading"><h1>Join Request Details</h1><p>Request #{{ item.request_id }}</p></div>
+<article class="student-panel">
+    <span class="student-status student-status-{{ item.status }}">{{ item.status_label }}</span><h2>{{ item.boarding_name }}</h2><p class="listing-muted">📍 {{ item.city }}, {{ item.district }}</p>
+    <dl class="student-detail-grid"><div><dt>Room Preference</dt><dd>{{ item.preferred_room_number or 'Any suitable room' }}{% if item.preferred_room_type %} · {{ item.preferred_room_type|capitalize }}{% endif %}</dd></div><div><dt>Intended Start Date</dt><dd>{{ item.intended_start_date.strftime('%d %b %Y') }}</dd></div><div><dt>Requested On</dt><dd>{{ item.requested_at|join_request_datetime }}</dd></div>{% if item.decided_at %}<div><dt>Decided On</dt><dd>{{ item.decided_at|join_request_datetime }}</dd></div>{% endif %}</dl>
+    {% if item.message %}<section class="student-detail-section"><h3>Your Message</h3><p class="student-preserve-lines">{{ item.message }}</p></section>{% endif %}
+    {% if item.status == 'requested' %}<p class="student-notice">Awaiting the Owner's decision. Your request does not reserve a room or bed. No payment has been recorded.</p>{% endif %}
+    {% if item.status == 'rejected' %}<section class="student-detail-section"><h3>Owner's Decision</h3><p class="student-preserve-lines">{{ item.rejection_reason or 'The Owner did not provide a rejection reason.' }}</p></section>{% endif %}
+    {% if item.tenancy_id %}
+    <section class="student-detail-section"><h3>🔑 Confirmed Tenancy</h3><p class="student-agreement">{{ item.tenancy_phase }}</p>
+        <dl class="student-detail-grid"><div><dt>Assigned Room</dt><dd>{{ item.room_number }} · {{ 'Shared' if item.rent_unit == 'bed' else 'Private · Entire Room' }}</dd></div>{% if item.rent_unit == 'bed' %}<div><dt>Assigned Bed</dt><dd>{{ item.bed_label }}</dd></div>{% endif %}<div><dt>Tenancy Start Date</dt><dd>{{ item.start_date.strftime('%d %b %Y') }}</dd></div><div><dt>Agreed Monthly Rent</dt><dd><strong>LKR {{ '{:,.2f}'.format(item.agreed_monthly_rent) }}</strong> / {{ item.rent_unit }} / month</dd></div>{% if item.end_date %}<div><dt>Tenancy End Date</dt><dd>{{ item.end_date.strftime('%d %b %Y') }}</dd></div>{% endif %}</dl>
+        <p class="student-help">This is your saved agreement. Approval does not confirm payment or physical move-in.</p>
+    </section>
+    {% elif item.status == 'approved' %}<p class="student-notice">The request is approved, but tenancy details are unavailable. Please contact the Owner.</p>{% endif %}
+    <a class="listing-button" href="{{ url_for('student_requests.details', request_id=item.request_id) }}">Refresh Status</a>
+</article>
+{% endblock %}

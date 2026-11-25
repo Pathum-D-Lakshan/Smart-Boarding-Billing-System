@@ -1,0 +1,114 @@
+/* Neutral surfaces, shared typography and restrained accents in both themes. */
+.bill-breadcrumb,.bill-actions,.bill-section-heading,.bill-page-heading { display:flex; flex-wrap:wrap; align-items:center; gap:.8rem; }
+.bill-breadcrumb { margin:1.5rem 0; color:var(--muted); font-size:var(--font-small); }
+.bill-breadcrumb a,.bill-text-link,.bill-pagination a { color:var(--cyan); text-underline-offset:.2em; }
+.bill-page-heading { justify-content:space-between; margin-bottom:1.5rem; }
+.bill-page-heading h2 { font-size:var(--font-page-title); line-height:1.25; margin:.25rem 0; }
+.bill-page-heading p,.bill-muted { color:var(--muted); }
+.bill-eyebrow { color:var(--cyan)!important; font-size:var(--font-small); text-transform:uppercase; letter-spacing:.1em; font-weight:600; }
+.bill-card { min-width:0; margin:1rem 0; padding:clamp(1rem,2vw,1.5rem); border:1px solid var(--border); border-radius:1rem; background:var(--theme-card); overflow-wrap:anywhere; }
+.bill-card h3,.bill-invoice h3 { font-size:var(--font-section-title); line-height:1.3; margin-bottom:.8rem; }
+.bill-card h3 .icon { margin-right:.3rem; color:var(--cyan); vertical-align:middle; }
+.bill-section-heading { justify-content:space-between; margin-bottom:.8rem; }
+.bill-section-heading h3 { margin-bottom:0; }
+.bill-help,.bill-field small { display:block; margin:.65rem 0 0!important; color:var(--muted); font-size:var(--font-small); line-height:1.6; }
+.bill-period-form { display:flex; flex-wrap:wrap; gap:1rem; align-items:end; }
+.bill-period-form .bill-field { flex:1 1 12rem; }
+.bill-field { min-width:0; display:grid; gap:.45rem; margin:.85rem 0; }
+.bill-field label { font-weight:600; }
+.bill-field :is(input,select,textarea) { box-sizing:border-box; width:100%; min-width:0; min-height:2.9rem; padding:.7rem .8rem; border:1px solid var(--border); border-radius:.65rem; background:var(--theme-field); color:var(--text); font:inherit; font-size:var(--font-input); }
+.bill-field textarea { resize:vertical; min-height:6rem; }
+.bill-field select[multiple] { min-height:9rem; }
+.bill-form-grid,.bill-config-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.bill-config-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.bill-config { margin:0; display:flex; flex-direction:column; align-items:stretch; }
+.bill-config>.bill-modal-source { margin-top:auto; padding-top:1rem; }
+.bill-compact-data { display:grid; gap:.6rem; margin:.5rem 0 1rem; }
+.bill-compact-data>div { display:flex; justify-content:space-between; flex-wrap:wrap; gap:.6rem; }
+.bill-compact-data dt { color:var(--muted); font-size:var(--font-small); }
+.bill-compact-data dd { margin:0; font-weight:600; }
+.bill-eligibility { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; margin:1.2rem 0; }
+.bill-stat { display:flex; align-items:center; gap:.8rem; min-width:0; padding:1rem; border:1px solid var(--border); border-radius:.9rem; background:var(--theme-card); }
+.bill-stat>div { min-width:0; }
+.bill-stat strong { font-size:var(--font-metric); line-height:1.2; }
+.bill-stat p { color:var(--muted); font-size:var(--font-small); }
+.bill-stat-icon { display:grid; place-items:center; flex:none; width:2.7rem; height:2.7rem; background:color-mix(in srgb,var(--theme-link) 12%,var(--theme-card)); color:var(--cyan); border-radius:.75rem; }
+.bill-button { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; min-height:2.9rem; padding:.65rem 1rem; border:1px solid var(--border); border-radius:.65rem; color:var(--text); background:var(--theme-field); font:inherit; font-size:var(--font-button); font-weight:600; text-decoration:none; cursor:pointer; }
+.bill-button:hover { filter:brightness(1.12); }
+.bill-primary { background:var(--theme-accent); border-color:var(--theme-accent); color:#082536; }
+.bill-secondary { color:var(--cyan); }
+.bill-small { min-height:2.5rem; padding:.4rem .7rem; }
+.bill-button:disabled { opacity:.55; cursor:not-allowed; }
+.bill-rule-list { display:grid; gap:.8rem; padding:0; margin:.5rem 0 1rem; list-style:none; }
+.bill-rule-list li { padding-bottom:.8rem; border-bottom:1px solid var(--border); }
+.bill-rule-list p,.bill-rule-list small { font-size:var(--font-small); color:var(--muted); }
+.bill-rule-list form { margin-top:.5rem; }
+.bill-badge { display:inline-flex; max-width:100%; padding:.25rem .65rem; border:1px solid var(--border); border-radius:2rem; color:var(--cyan); font-size:var(--font-small); }
+.bill-notice { margin:1rem 0; padding:.9rem 1rem; border:1px solid var(--border); border-left:3px solid var(--theme-accent); border-radius:.65rem; background:var(--theme-field); color:var(--text); }
+.bill-error { color:var(--theme-danger-ink,#fecdd3); }
+.bill-table-scroll { max-width:100%; overflow-x:auto; }
+.bill-table { width:100%; border-collapse:collapse; font-size:var(--font-table); text-align:left; }
+.bill-table :is(th,td) { padding:.9rem .65rem; vertical-align:top; border-bottom:1px solid var(--border); line-height:1.5; }
+.bill-table thead th { font-weight:600; color:var(--text); }
+.bill-table small,.bill-select small { display:block; margin-top:.2rem; color:var(--muted); font-size:var(--font-small); }
+.bill-select { display:flex; align-items:flex-start; gap:.6rem; }
+.bill-select input,.bill-confirm-check input { flex:none; width:1.1rem; height:1.1rem; margin:.3rem 0; accent-color:var(--theme-link); }
+.bill-selection-summary { display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem; padding:1.2rem 0; }
+.bill-selection-summary>div { display:grid; gap:.3rem; }
+.bill-selection-summary span { color:var(--muted); font-size:var(--font-small); }
+.bill-total { color:var(--cyan); font-weight:700; }
+.bill-generation>p { margin-bottom:1rem; }
+.bill-confirm-check { display:flex; gap:.65rem; margin:1rem 0; }
+.bill-compact summary,.bill-calculation summary { cursor:pointer; color:var(--cyan); }
+.bill-calculation>div { width:min(23rem,100%); padding:.8rem 0; overflow-wrap:anywhere; }
+.bill-reasons { display:grid; gap:.75rem; padding-left:1.2rem; }
+.bill-dialog { width:min(58.75rem,calc(100vw - 2rem)); max-width:none; max-height:calc(100dvh - 2rem); margin:auto; padding:0; border:1px solid var(--border); border-radius:1rem; background:var(--theme-card); color:var(--text); box-shadow:var(--theme-shadow); overflow:auto; }
+.bill-dialog::backdrop { background:#030b18b8; backdrop-filter:blur(4px); }
+.bill-dialog-header { position:sticky; top:0; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.75rem 1.2rem; border-bottom:1px solid var(--border); background:var(--theme-card); z-index:1; }
+.bill-dialog-header h2 { font-size:var(--font-section-title); line-height:1.3; }
+.bill-dialog-close { display:grid; place-items:center; width:2.75rem; height:2.75rem; padding:0; flex:none; }
+.bill-modal-body,.bill-dialog-content { min-width:0; padding:clamp(1rem,3vw,1.6rem); }
+.bill-dialog-content>.bill-modal-body { padding:0; }
+.bill-modal-body h3 { font-size:var(--font-section-title); }
+.bill-modal-source>summary { list-style:none; }
+.bill-modal-source>summary::-webkit-details-marker { display:none; }
+.bill-password { position:relative; }
+.bill-password input { padding-right:3.5rem; }
+.bill-eye { position:absolute; inset:0 .25rem 0 auto; display:grid; place-items:center; width:2.8rem; min-height:2.8rem; padding:.5rem; border:0; border-radius:.5rem; background:transparent; color:var(--cyan); }
+.bill-password input[aria-invalid] { border-color:var(--theme-danger-ink,#fb7185); }
+.bill-pagination { display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem; margin-top:1rem; color:var(--muted); font-size:var(--font-small); }
+.bill-pagination>div { display:flex; gap:1rem; }
+.bill-invoice { overflow-wrap:anywhere; }
+.bill-invoice h2 { font-size:var(--font-page-title); }
+.bill-invoice-header,.bill-invoice-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem; margin-bottom:1.5rem; padding-bottom:1.2rem; border-bottom:1px solid var(--border); }
+.bill-invoice-meta dl { margin:0; display:grid; gap:.6rem; }
+.bill-invoice-meta dt { color:var(--muted); font-size:var(--font-small); }
+.bill-invoice-meta dd { margin:0; }
+.bill-empty { display:grid; justify-items:center; gap:.65rem; padding:2rem .5rem; text-align:center; }
+.owner-dashboard[data-bill-dialog-open] { overflow:hidden; }
+@media(max-width:1250px) { .bill-config-grid { grid-template-columns:minmax(0,1fr); }.bill-eligibility { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:750px) {
+    .bill-form-grid,.bill-invoice-header,.bill-invoice-meta { grid-template-columns:minmax(0,1fr); }
+    .bill-period-form .bill-field { flex-basis:100%; }
+    .bill-page-heading>.bill-button { width:100%; }
+    .bill-table,.bill-table tbody { display:block; }
+    .bill-table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+    .bill-table tbody tr { display:block; margin:.8rem 0; padding:.65rem; border:1px solid var(--border); border-radius:.7rem; }
+    .bill-table tbody :is(td,th) { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.5rem; border:0; padding:.45rem; }
+    .bill-table td[data-label]::before { content:attr(data-label); color:var(--muted); font-size:var(--font-small); }
+    .bill-table small { width:100%; }
+    .bill-dialog { width:calc(100vw - 1rem); max-height:calc(100dvh - 1rem); }
+    .bill-actions .bill-button { flex:1 1 10rem; }
+}
+@media print {
+    @page { size:A4; margin:15mm; }
+    :root { color-scheme:light; }
+    .owner-sidebar,.topbar,.skip-link,.owner-message,.bill-no-print { display:none!important; }
+    body.owner-dashboard { background:#fff!important; color:#111!important; font-size:11pt; }
+    .owner-page { margin:0!important; padding:0!important; max-width:none; }
+    .bill-card { border:0; padding:0; background:#fff!important; color:#111; }
+    .bill-table { display:table; }.bill-table tbody { display:table-row-group; }.bill-table thead { position:static; display:table-header-group; width:auto; height:auto; clip-path:none; }
+    .bill-table tbody tr { display:table-row; border:0; }.bill-table :is(td,th) { display:table-cell!important; color:#111!important; border-bottom:1px solid #ccc; }
+    .bill-table td[data-label]::before { display:none; }.bill-help,.bill-total,.bill-badge,.bill-invoice-meta dt { color:#333!important; }
+    .bill-invoice-header,.bill-invoice-meta { break-inside:avoid; }.bill-table tr { break-inside:avoid; }
+}

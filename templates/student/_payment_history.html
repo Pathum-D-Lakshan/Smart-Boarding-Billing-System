@@ -1,0 +1,17 @@
+﻿<section class="pay-card student-payment-history" aria-labelledby="student-payment-history-title">
+{% from 'student/_withdraw_payment.html' import withdraw_payment_button %}
+<header class="student-payment-panel-heading"><h2 id="student-payment-history-title"><span class="student-section-number" aria-hidden="true">4</span> Payment History</h2><span class="pay-help">{{ data.total }} record(s)</span></header>
+<form class="pay-filters" method="get" action="{{ url_for('student_payments.history') }}">
+{% if mobile_bill %}<input type="hidden" name="bill_id" value="{{ mobile_bill.bill_id }}">{% endif %}
+<div class="pay-field pay-search"><label for="payment-history-search">Search invoices or payments</label><input id="payment-history-search" name="q" type="search" maxlength="150" value="{{ data.filters.q }}" placeholder="Invoice or payment reference"></div>
+<div class="pay-field"><label for="payment-history-status">Status</label><select id="payment-history-status" name="status"><option value="">All Statuses</option>{% for key,label in statuses.items() %}<option value="{{ key }}"{% if data.filters.status==key %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><button class="pay-button pay-primary" type="submit">Search</button><a class="pay-button" href="{{ url_for('student_payments.history') }}">Clear</a>
+</form>
+{% if data.rows %}<div class="pay-table-scroll" tabindex="0" role="region" aria-label="Payment history"><table class="pay-table"><thead><tr><th scope="col">Invoice Number</th><th scope="col">Submitted Date</th><th scope="col">Amount (LKR)</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead><tbody>
+{% for item in data.rows %}<tr><th scope="row">{{ item.bill_reference }}<small>{{ item.period_start.strftime('%b %Y') }}</small></th><td data-label="Submitted Date">{{ item.submitted_at|join_request_datetime }}</td><td data-label="Amount">{{ '{:,.2f}'.format(item.amount) }}</td><td data-label="Status"><span class="pay-status pay-{{ item.status }}">{{ statuses[item.status] }}</span></td><td><div class="pay-actions">
+<a class="pay-button pay-small" data-payment-view href="{{ url_for('student_payments.details',payment_id=item.payment_id) }}">View Slip / Details</a>
+{% if item.status=='submitted' and item.method=='bank_transfer' and item.submitted_by==item.student_id %}{{ withdraw_payment_button(item.payment_id) }}{% endif %}
+{% if item.receipt_id and item.status=='verified' %}<a class="pay-link" href="{{ url_for('payment_documents.receipt',receipt_id=item.receipt_id) }}">View Receipt</a>{% endif %}
+</div></td></tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="pay-empty"><h3>No payments match these filters</h3><p class="pay-help">Your submitted slips and verified receipts will appear here.</p></div>{% endif %}
+<nav class="pay-pagination" aria-label="Payment history pages"><span>Page {{ data.page }} of {{ data.page_count }}</span><div>{% set params=dict(data.filters) %}{% set _=params.pop('page',none) %}{% if mobile_bill %}{% set _=params.update(bill_id=mobile_bill.bill_id) %}{% endif %}{% if data.page>1 %}<a href="{{ url_for('student_payments.history',page=data.page-1,**params) }}">Previous</a>{% endif %}{% if data.page<data.page_count %}<a href="{{ url_for('student_payments.history',page=data.page+1,**params) }}">Next</a>{% endif %}</div></nav>
+</section>

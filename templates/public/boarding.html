@@ -1,0 +1,43 @@
+{% extends "public/base.html" %}
+{% from "public/_listings.html" import cover_image, money %}
+{% block title %}{{ listing.boarding_name }} · Smart Boarding{% endblock %}
+{% block content %}
+<article class="market-width market-inner-page">
+    <a class="market-text-link" href="{{ url_for('public_boardings.search') }}">Back to Boardings</a>
+    <header class="market-detail-header">
+        {{ cover_image(listing, 'market-detail-cover', false) }}
+        <div>
+            <h1>{{ listing.boarding_name }}</h1>
+            <p class="market-location">{{ icon('pin') }} {{ listing.city }}, {{ listing.district }}</p>
+            {% if listing.description %}<p class="market-description">{{ listing.description }}</p>{% endif %}
+            {% if room_options %}
+            <a class="market-button market-primary" href="{{ url_for('login', boarding=listing.boarding_id) }}">{{ icon('request') }} Request to Join</a>
+            <p class="market-detail-note">Sign in as a Student or <a class="market-text-link" href="{{ url_for('register', boarding=listing.boarding_id) }}">create an account</a> to send a request. The Boarding Owner confirms the assignment.</p>
+            {% else %}
+            <p class="market-detail-note">No rooms or beds are currently available for a join request.</p>
+            {% endif %}
+        </div>
+    </header>
+    <div class="market-detail-sections">
+        <section class="market-panel">
+            <h2>Rooms &amp; Beds</h2>
+            {% if room_options %}
+            <ul class="market-rooms">
+                {% for room in room_options %}
+                <li>
+                    <strong>{{ 'Shared Room' if room.room_type == 'shared' else 'Private Room' }}</strong>
+                    <span>{{ room.available_count }} {{ ('bed' if room.available_count == 1 else 'beds') if room.room_type == 'shared' else 'entire room' }} available</span>
+                    <span>{{ money(room.minimum_rent) }}{% if room.maximum_rent != room.minimum_rent %} – {{ money(room.maximum_rent) }}{% endif %} / {{ 'bed' if room.room_type == 'shared' else 'room' }} / month</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}<p>Check back for updated availability.</p>{% endif %}
+        </section>
+        <section class="market-panel">
+            <h2>Facilities</h2>
+            {% if listing.facilities %}<ul class="market-facilities">{% for facility in listing.facilities %}<li>{{ facility }}</li>{% endfor %}</ul>
+            {% else %}<p>The Boarding Owner has not listed any facilities yet.</p>{% endif %}
+        </section>
+    </div>
+</article>
+{% endblock %}

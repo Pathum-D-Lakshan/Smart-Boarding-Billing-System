@@ -1,0 +1,31 @@
+{% from 'maintenance/_fields.html' import field,hidden_fields,priority with context %}
+{% from 'shared/_icons.html' import navigation_icon %}
+<section class="maint-detail student-maint-report" tabindex="-1">
+    <header class="student-maint-form-heading"><span aria-hidden="true">{{ navigation_icon('tool') }}</span><div><h2>Report a Maintenance Issue</h2><p>Tell your boarding owner about a problem that needs attention.</p></div></header>
+    {% if errors.get('form') %}<p class="maint-notice maint-error" role="alert">{{ errors.form }}</p>{% endif %}
+    {% if not tenancy %}<aside class="student-maint-preview-notice"><strong>You need an active boarding to report maintenance issues.</strong><p>This is a preview of the report form. You can submit once your tenancy is active.</p><a href="{{ url_for('student_requests.my_boarding') }}">View My Boarding →</a></aside>
+    {% else %}<p class="student-maint-report-context">{{ tenancy.boarding_name }} <span>New request · Pending</span></p>{% endif %}
+    <form method="post" action="{{ url_for('student_maintenance.create_student') }}"{% if maintenance_photos_enabled %} enctype="multipart/form-data"{% endif %} data-maintenance-post>
+        {{ hidden_fields(view) }}<input type="hidden" name="request_key" value="{{ values.get('request_key') or request_key }}">
+        {# Preview never relaxes the existing server-side active-tenancy requirement. #}
+        <fieldset class="student-maint-fields"{% if not tenancy %} disabled{% endif %}><legend class="student-maint-sr-only">Maintenance issue details</legend>
+            {{ field('issue_title','Issue Title',values,errors,true,150,false,'e.g. Bathroom tap is leaking') }}
+            <div class="maint-grid">
+                <div class="maint-field"><label for="maint-location">Location <span class="maint-required">*</span></label><select id="maint-location" name="location" required{% if errors.get('location') %} aria-invalid="true" aria-describedby="maint-location-error"{% endif %}><option value="room"{% if values.get('location','room')=='room' %} selected{% endif %}>{{ 'My Assigned Room '~tenancy.room_number if tenancy else 'My Assigned Room (after move-in)' }}</option><option value="common"{% if values.get('location')=='common' %} selected{% endif %}>Common Area</option></select>{% if errors.get('location') %}<p class="maint-error" id="maint-location-error">{{ errors.location }}</p>{% endif %}</div>
+                {{ priority(values,priorities,errors) }}
+            </div>
+            {{ field('description','Description',values,errors,true,1000,true,'Describe the problem clearly...') }}
+            {% if maintenance_photos_enabled %}
+            <div class="maint-field"><label for="maint-photo">Attach Photo <span class="maint-muted">(Optional)</span></label>
+                <div class="student-maint-upload{% if errors.get('photo') %} has-error{% endif %}" data-maintenance-upload>
+                    <input type="file" name="photo" id="maint-photo" accept="image/jpeg,image/png,.jpg,.jpeg,.png" data-maintenance-photo aria-describedby="maint-photo-help maint-photo-client-error{% if errors.get('photo') %} maint-photo-error{% endif %}"{% if errors.get('photo') %} aria-invalid="true"{% endif %}>
+                    <svg class="student-maint-upload-art" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M15 35H12a9 9 0 0 1-1-18 13 13 0 0 1 25-1 10 10 0 0 1 0 19h-3M24 39V20m-7 7 7-7 7 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <strong data-maintenance-photo-label aria-live="polite">Click to upload a photo</strong><span>or drag and drop</span><small id="maint-photo-help">JPG, JPEG or PNG · Max 5 MB · One photo</small>
+                </div>
+                <p class="maint-error" id="maint-photo-client-error" data-maintenance-photo-error role="alert" hidden></p>
+                {% if errors.get('photo') %}<p id="maint-photo-error" class="maint-error" role="alert">{{ errors.photo }}</p>{% endif %}
+            </div>{% endif %}
+        </fieldset>
+        <div class="maint-actions student-maint-form-actions"><a class="maint-button" href="{{ url_for('student_maintenance.history',**view) }}" data-maintenance-close>Cancel</a><button class="maint-button maint-primary" type="submit"{% if not tenancy %} disabled title="An active boarding is required to submit"{% endif %}><span aria-hidden="true">↗</span> Submit Request</button></div>
+    </form>
+</section>

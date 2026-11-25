@@ -1,0 +1,29 @@
+{% extends 'owner/base.html' %}
+{% set page_title = 'Tenants' %}
+{% set active_page = 'tenants' %}
+{% block page_styles %}
+{{ stylesheet('owner-join-requests.css') }}
+{{ stylesheet('owner-edit-confirm.css') }}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/owner-tenants.css',v='removal-status-20261114-1') }}">
+{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/owner-tenants.js', v='removal-status-20261114-1') }}" defer></script>{% endblock %}
+{% block owner_content %}
+<nav class="jr-breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('dashboard',role='owner') }}">Owner Portal</a><span aria-hidden="true">/</span><span>Tenants</span></nav>
+<section class="jr-page-heading"><div class="jr-title"><span class="nav-icon nav-icon-users" aria-hidden="true"><svg class="nav-art" focusable="false"><use href="#nav-art-users"></use></svg></span><h2>Tenants</h2></div><p>Manage your current and past boarding tenants.</p></section>
+{% if error and not data %}<p class="jr-notice" role="alert">{{ error }}</p>{% endif %}
+{% if data %}
+<section class="jr-stats" aria-label="Tenancy summary">
+{% for key,label,glyph,tone in [('active','Active Tenants','users','green'),('scheduled','Scheduled Tenants','clock',''),('moving_out','Moving Out Soon','logout','amber'),('moved_out','Moved Out','check','')] %}
+<article class="jr-stat jr-tone-{{ tone }}"><span class="jr-stat-icon">{{ icon(glyph) }}</span><div><h3>{{ label }}</h3><strong data-tn-count="{{ key }}">{{ data.summary[key] }}</strong></div></article>
+{% endfor %}
+</section>
+<p class="jr-footnote">Active agreements have started and have not ended. Scheduled agreements start in the future. Moving Out Soon is included in Active and has checkout within 30 days. Moved Out agreements have ended.</p>
+{% include 'owner/_tenant_results.html' %}
+{% if data.selected %}<div id="tn-initial-detail" data-dialog-url="{{ url_for('owner_tenants.dialog',tenancy_id=data.selected.tenancy_id,**filters.params()) }}">{% include 'owner/_tenant_details.html' %}</div>{% endif %}
+<dialog class="jr-details-modal" id="tn-dialog" aria-labelledby="tn-modal-title">
+    <header class="jr-modal-header"><div><p class="jr-modal-eyebrow">Owner workspace</p><h2 id="tn-modal-title">Tenant Details</h2></div><button class="jr-close" id="tn-close" type="button" aria-label="Close tenant details">{{ icon('close') }}</button></header>
+    <div class="jr-modal-content"><p id="tn-feedback" class="jr-modal-feedback" role="alert" tabindex="-1" hidden></p><div id="tn-content"></div><div class="jr-modal-tools" id="tn-recovery" hidden><button class="jr-button" type="button" id="tn-refresh">Refresh Tenant</button><a class="jr-button" href="{{ url_for('login') }}" id="tn-login" hidden>Log In Again</a></div></div>
+    <p class="jr-sr-only" id="tn-live" role="status" aria-live="polite"></p>
+</dialog>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,4 @@
+{% extends 'owner/base.html' %}{% set page_title='Archive Expense' if action=='archive' else 'Edit Expense' %}{% set active_page='finance' %}
+{% block page_styles %}{{ stylesheet('owner-finance.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/owner-finance.js',v='accounting-month-2') }}" defer></script>{% endblock %}
+{% block owner_content %}<nav class="finance-breadcrumb"><a href="{{ url_for('owner_finance.overview',month=view.month) }}">Income &amp; Expenses</a><span>/</span><span>{{ page_title }}</span></nav><section class="finance-panel" data-finance-initial>{% include 'owner/_expense_form.html' %}</section><div id="finance-live" class="finance-notice" role="status" aria-live="polite" hidden></div><div class="finance-recovery" id="finance-recovery" hidden><p>Could not confirm the operation.</p><button class="finance-button" type="button" id="finance-refresh">Refresh Saved Values</button></div>{% endblock %}

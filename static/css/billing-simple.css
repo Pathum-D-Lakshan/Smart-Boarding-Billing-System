@@ -1,0 +1,8 @@
+.billing-source-grid,.billing-preview-summary,.billing-invoice-meta { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1rem 0; }
+.billing-source-grid>div,.billing-preview-summary>div { padding:1rem;border:1px solid var(--theme-border);border-radius:.7rem;background:var(--theme-field);min-width:0; }
+.billing-preview-summary { grid-template-columns:repeat(4,minmax(0,1fr)); }.billing-preview-summary strong { display:block;margin-top:.5rem;overflow-wrap:anywhere; }.billing-invoice-meta dt { color:var(--theme-muted); }.billing-invoice-meta dd { margin:.3rem 0 0;font-weight:600; }
+.billing-dialog { width:min(54rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);margin:auto;padding:0;border:1px solid var(--theme-border);border-radius:1rem;color:var(--theme-text);background:var(--theme-card);box-shadow:var(--theme-shadow);overflow:auto; }
+.billing-dialog::backdrop { background:#030b18b8;backdrop-filter:blur(4px); }.billing-dialog>header { display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.4rem;position:sticky;top:0;background:var(--theme-card);border-bottom:1px solid var(--theme-border); }.billing-dialog-body { padding:1.5rem; }.billing-grand-total { font-size:1.25rem;font-weight:700;padding:1rem;border-radius:.7rem;background:var(--theme-hover);margin:1rem 0; }.billing-confirm { max-width:34rem; }
+body:has(.billing-dialog[open]) { overflow:hidden; }
+@media(max-width:950px) { .billing-preview-summary { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:560px) { .billing-source-grid,.billing-preview-summary,.billing-invoice-meta { grid-template-columns:1fr; }.billing-dialog { width:calc(100vw - 1rem);max-height:calc(100dvh - 1rem); }.billing-dialog-body { padding:1rem; } }

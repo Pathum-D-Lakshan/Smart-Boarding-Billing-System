@@ -1,0 +1,11 @@
+<form class="pay-detail" tabindex="-1" method="post" action="{{ url_for('student_payments.withdraw', payment_id=item.payment_id) }}" data-payment-post>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="confirm_withdrawal" value="yes">
+    <p><strong>Are you sure you want to delete this payment submission?</strong></p>
+    <p>{{ item.bill_reference }} · LKR {{ '{:,.2f}'.format(item.amount) }}</p>
+    <p class="pay-help">The slip will leave the Owner’s review list. You can upload a replacement.</p>
+    <div class="pay-actions">
+        <a class="pay-button" href="{{ url_for('student_payments.history', bill_id=item.bill_id) }}" data-pay-close>Cancel</a>
+        <button class="pay-button pay-reject" type="submit">Yes, Delete</button>
+    </div>
+</form>

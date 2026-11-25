@@ -5,10 +5,10 @@
     if (!roomType || !rentLabel || !rentHint) return;
     function updateRentUnit() {
         const isPrivate = roomType.value === "private";
-        rentLabel.textContent = isPrivate ? "Monthly Rent per Room (LKR)" : "Monthly Rent per Bed (LKR)";
+        rentLabel.textContent = isPrivate ? "Monthly Rent for the Entire Room (LKR)" : "Default Monthly Rent per New Bed (LKR)";
         rentHint.textContent = isPrivate
             ? "Private: one monthly price for the full room. Physical beds are not separately rentable."
-            : "Shared: this is the default rent for new beds. Each registered bed has its own rent.";
+            : "Shared: this is the default rent for new beds. Changing this default does not change rents already saved on existing beds.";
     }
     roomType.addEventListener("change", updateRentUnit);
     updateRentUnit();

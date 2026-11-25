@@ -1,0 +1,10 @@
+{% extends 'student/base.html' %}
+{% set page_title='Delete Submission' %}
+{% set active_page='payments' %}
+{% block page_styles %}{{ stylesheet('payments.css') }}{% endblock %}
+{% block student_content %}
+<section class="pay-card">
+    <h2>Delete Submission</h2>
+    {% include 'student/_confirm_withdrawal.html' %}
+</section>
+{% endblock %}

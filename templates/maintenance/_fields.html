@@ -1,0 +1,12 @@
+{% macro field(name,label,values,errors,required=false,limit=150,area=false,placeholder='') -%}
+<div class="maint-field"><label for="maint-{{ name }}">{{ label }}{% if required %} <span class="maint-required">*</span>{% endif %}</label>
+{% if area %}<textarea id="maint-{{ name }}" name="{{ name }}" maxlength="{{ limit }}" rows="5" placeholder="{{ placeholder }}"{% if required %} required{% endif %}{% if errors.get(name) %} aria-invalid="true" aria-describedby="maint-{{ name }}-error"{% endif %}>{{ values.get(name,'') or '' }}</textarea>{% else %}<input id="maint-{{ name }}" name="{{ name }}" maxlength="{{ limit }}" value="{{ values.get(name,'') or '' }}" placeholder="{{ placeholder }}"{% if required %} required{% endif %}{% if errors.get(name) %} aria-invalid="true" aria-describedby="maint-{{ name }}-error"{% endif %}>{% endif %}
+{% if errors.get(name) %}<p class="maint-error" id="maint-{{ name }}-error">{{ errors[name] }}</p>{% endif %}</div>
+{%- endmacro %}
+{% macro hidden_fields(view) -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="view_status" value="{{ view.status }}">{% for key in ('q','sort','page') %}<input type="hidden" name="{{ key }}" value="{{ view[key] }}">{% endfor %}
+{% if view.tab is defined %}<input type="hidden" name="tab" value="{{ view.tab }}">{% endif %}
+{%- endmacro %}
+{% macro priority(values,priorities,errors) -%}
+<div class="maint-field"><label for="maint-priority">Priority <span class="maint-required">*</span></label><select name="priority" id="maint-priority" required{% if errors.get('priority') %} aria-invalid="true" aria-describedby="maint-priority-error"{% endif %}>{% for value,label in priorities.items() %}<option value="{{ value }}"{% if values.get('priority','medium')==value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>{% if errors.get('priority') %}<p class="maint-error" id="maint-priority-error">{{ errors.priority }}</p>{% endif %}</div>
+{%- endmacro %}

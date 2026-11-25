@@ -1,11 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Smart Boarding System</title>
-</head>
-<body>
-    <h1>Smart Boarding System</h1>
-    <p>Welcome to our boarding platform.</p>
-</body>
-</html>
+{% extends "public/base.html" %}
+{% from "public/_listings.html" import cards, search_form %}
+{% block content %}
+<section class="market-hero">
+    <img class="market-hero-photo" src="{{ url_for('static', filename='images/boarding-hero.webp') }}" alt="" fetchpriority="high">
+    <div class="market-hero-content market-width">
+        <span class="market-hero-label">{{ icon('bed') }} Find Your Ideal Boarding</span>
+        <h1>Discover Comfortable<br class="market-wide-break"> Boardings for <em>Students</em></h1>
+        <p>A simple way to find, compare and request to join boardings that match your needs.</p>
+        {{ search_form() }}
+        <ul class="market-steps" aria-label="How it works">
+            <li>{{ icon('pin') }} <span>Find<br>Boardings</span></li>
+            <li>{{ icon('bed') }} <span>View<br>Details</span></li>
+            <li>{{ icon('confirmed') }} <span>Request<br>to Join</span></li>
+        </ul>
+    </div>
+</section>
+<section class="market-width market-listings" aria-labelledby="available-title">
+    <header class="market-list-heading">
+        {{ icon('bed') }}
+        <div><h2 id="available-title">Available Boardings</h2><p>Explore registered boardings and find a place that suits you.</p></div>
+        <a class="market-text-link" href="{{ url_for('public_boardings.search') }}">View All Boardings {{ icon('arrow') }}</a>
+    </header>
+    {% if unavailable %}
+        <div class="market-empty"><h3>Listings are temporarily unavailable</h3><p>Please try again shortly.</p></div>
+    {% else %}
+        {{ cards(listings, "No boardings have been published yet. Check back for new listings.") }}
+    {% endif %}
+</section>
+<div class="market-width market-information">
+    <section id="about">
+        <h2>About</h2>
+        <p>Smart Boarding &amp; Billing System helps students compare places to stay. Boarding Owners manage listings, join requests and monthly billing in one place.</p>
+    </section>
+    <section id="contact">
+        <h2>Contact</h2>
+        <p>To reach a Boarding Owner about a stay, open their listing and sign in as a Student to send a join request with your message.</p>
+        <a class="market-text-link" href="{{ url_for('public_boardings.search') }}">Find a boarding</a>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,2 @@
+{% extends 'admin/base.html' %}{% set page_title='Admin Portal' %}
+{% block admin_content %}<section class="admin-card"><h2>Could not complete this operation</h2><p class="admin-errors" role="alert">{{ error }}</p><a class="admin-button" href="{{ url_for('admin_portal.dashboard') }}">Back to Dashboard</a></section>{% endblock %}

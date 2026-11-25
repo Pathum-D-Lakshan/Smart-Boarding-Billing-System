@@ -1,0 +1,33 @@
+﻿<article class="pay-detail" tabindex="-1" aria-labelledby="student-transfer-title">
+<h2 id="student-transfer-title">Upload from Computer</h2>
+{% if not bill %}
+<form method="get" action="{{ url_for('student_payments.new_submission') }}" data-pay-bill-select><div class="pay-field"><label for="student-transfer-bill">Unpaid invoice</label><select id="student-transfer-bill" name="bill_id" required><option value="">Choose an invoice</option>{% for choice in options.rows %}<option value="{{ choice.bill_id }}">{{ choice.bill_reference }} · LKR {{ '{:,.2f}'.format(choice.final_total) }}</option>{% endfor %}</select></div><button class="pay-button" type="submit">Continue</button></form>
+{% if options.page_count>1 %}<nav class="pay-pagination" aria-label="Eligible bill pages">{% if options.page>1 %}<a data-payment-view href="{{ url_for('student_payments.new_submission',option_page=options.page-1) }}">Previous bills</a>{% endif %}<span>Page {{ options.page }} of {{ options.page_count }}</span>{% if options.page<options.page_count %}<a data-payment-view href="{{ url_for('student_payments.new_submission',option_page=options.page+1) }}">More bills</a>{% endif %}</nav>{% endif %}
+{% endif %}
+{% if errors %}<p class="pay-error" role="alert">{{ errors.values()|join(' ') }}{% if errors.slip %} Select the file again before submitting.{% endif %}</p>{% endif %}
+{% if bill %}
+<div class="pay-notice"><strong>{{ bill.bill_reference }}</strong><p>{{ bill.period_start.strftime('%B %Y') }} · LKR {{ '{:,.2f}'.format(bill.final_total) }}</p></div>
+{% if bill.transfer_eligible %}
+{% if not bill.bank_instructions %}<p class="pay-notice">Your Owner has not published bank details. If you already paid using details they gave you, upload the slip here. Contact your Owner for bank details before making a new transfer.</p>{% endif %}
+<form method="post" action="{{ url_for('student_payments.submit',bill_id=bill.bill_id) }}" enctype="multipart/form-data" data-payment-post>
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="request_key" value="{{ values.get('request_key') or request_key }}"><input type="hidden" name="amount" value="{{ '%.2f'|format(bill.final_total) }}">
+<fieldset class="pay-transfer-fields"><legend class="pay-help">Bank transfer evidence</legend>
+<div class="pay-field"><label for="transfer-date">Payment Date *</label><input id="transfer-date" name="payment_date" type="date" min="2000-01-01" max="{{ today }}" value="{{ values.get('payment_date') or today }}" required{% if errors.payment_date %} aria-invalid="true"{% endif %}>{% if errors.payment_date %}<small class="pay-error">{{ errors.payment_date }}</small>{% endif %}</div>
+<div class="pay-field"><label for="transfer-reference">Transaction Reference / Transfer ID *</label><input id="transfer-reference" name="transaction_reference" maxlength="100" value="{{ values.get('transaction_reference','') }}" autocomplete="off" required{% if errors.transaction_reference %} aria-invalid="true"{% endif %}>{% if errors.transaction_reference %}<small class="pay-error">{{ errors.transaction_reference }}</small>{% endif %}</div>
+<div class="pay-field">
+<label for="transfer-slip">Choose Bank Slip *</label>
+<input id="transfer-slip" name="slip" type="file" accept=".jpg,.jpeg,.png,.pdf" data-pay-file data-max-bytes="{{ (limit_mb*1024*1024)|int }}" aria-describedby="slip-help slip-file-error" required{% if errors.slip %} aria-invalid="true"{% endif %}>
+<small id="slip-help">JPG, PNG or static PDF · Up to {{ '{:g}'.format(limit_mb) }} MB. To replace your file, use the file picker again before submitting.</small>
+<output class="pay-help" data-pay-file-name for="transfer-slip" aria-live="polite" hidden></output>
+<img class="pay-slip-preview" data-pay-file-preview alt="Selected bank slip preview" hidden>
+<small id="slip-file-error" class="pay-error" data-pay-file-error role="status"></small>
+<button class="pay-button pay-reject" type="button" data-pay-file-remove hidden><span aria-hidden="true">🗑️</span> Delete Slip</button>
+</div>
+<p class="pay-help">Submitting sends your slip for Owner verification. Your invoice is not marked Paid yet.</p>
+<div class="pay-actions"><button class="pay-button pay-primary" type="submit">Confirm &amp; Submit</button></div></fieldset>
+</form>
+{% elif bill.active_payment %}<p class="pay-notice">{{ 'Pending Verification' if bill.active_payment.status=='submitted' else 'Payment already verified.' }}</p><a class="pay-button" data-payment-view href="{{ url_for('student_payments.details',payment_id=bill.active_payment.payment_id) }}">View Payment</a>
+{% else %}<p class="pay-notice">This invoice does not require a new payment slip.</p>{% endif %}
+{% elif not options.total %}<p class="pay-notice">No eligible unpaid invoices are available. Check My Bills.</p>{% endif %}
+<div class="pay-actions"><button type="button" class="pay-button" data-pay-close hidden>Cancel</button><a class="pay-link" href="{{ url_for('student_payments.history') }}">My Payments</a></div>
+</article>

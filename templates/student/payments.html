@@ -1,0 +1,47 @@
+﻿{% extends 'student/base.html' %}
+{% set page_title='My Payments' %}{% set active_page='payments' %}
+{% from 'student/_withdraw_payment.html' import withdraw_payment_button %}
+{% block page_styles %}{{ stylesheet('invoice-paper.css') }}{{ stylesheet('payments.css') }}{{ stylesheet('student-finance.css') }}{{ stylesheet('student-payment-flow.css') }}{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static',filename='js/payments.js',v='slip-withdrawal-1') }}" defer></script>{% endblock %}
+{% block student_content %}
+{% include 'student/_payment_approvals.html' %}
+<header class="pay-heading"><div class="student-heading-icon">{{ navigation_icon('payment') }}<div><h1>My Payments</h1><p>Your invoice, transfer details and payment history.</p></div></div></header>
+{% if options.total>1 or (options.total and not mobile_bill) %}
+<form method="get" action="{{ url_for('student_payments.history') }}" class="student-payment-selector pay-card">
+<input type="hidden" name="option_page" value="{{ options.page }}"><div class="pay-field"><label for="payments-invoice">Choose your invoice</label><select id="payments-invoice" name="bill_id" required><option value="">Select an unpaid invoice</option>{% for choice in options.rows %}<option value="{{ choice.bill_id }}"{% if mobile_bill and mobile_bill.bill_id==choice.bill_id %} selected{% endif %}>{{ choice.bill_reference }} · {{ choice.period_start.strftime('%b %Y') }} · LKR {{ '{:,.2f}'.format(choice.final_total) }}</option>{% endfor %}</select></div><button class="pay-button" type="submit">View Invoice</button></form>
+{% endif %}
+{% if options.page_count>1 %}<nav class="pay-actions" aria-label="Invoice pages">{% if options.page>1 %}<a class="pay-link" href="{{ url_for('student_payments.history',option_page=options.page-1) }}">Previous invoices</a>{% endif %}<span class="pay-help">Page {{ options.page }} of {{ options.page_count }}</span>{% if options.page<options.page_count %}<a class="pay-link" href="{{ url_for('student_payments.history',option_page=options.page+1) }}">More invoices</a>{% endif %}</nav>{% endif %}
+{% if mobile_bill %}{% set bill=mobile_bill %}
+<section class="pay-card student-bill-summary" aria-labelledby="payment-invoice-title">
+<header class="student-payment-panel-heading"><h2 id="payment-invoice-title"><span class="student-section-number" aria-hidden="true">1</span> Your Bill</h2><span class="pay-status pay-{{ bill.bill_tone }}">{{ bill.bill_status }}</span></header>
+<dl class="student-bill-facts"><div><dt>Invoice Number</dt><dd>{{ bill.bill_reference }}</dd></div><div><dt>Billing Month</dt><dd>{{ bill.period_start.strftime('%B %Y') }}</dd></div><div><dt>Due Date</dt><dd>{{ bill.due_date.strftime('%d %b %Y') }}</dd></div><div class="student-bill-amount"><dt>Total Amount Due</dt><dd>LKR {{ '{:,.2f}'.format(bill.final_total) }}</dd></div></dl>
+<a class="pay-button" data-payment-view href="{{ url_for('student_payments.bill_details',bill_id=bill.bill_id) }}">View Full Invoice</a>
+</section>
+<section class="pay-card" aria-labelledby="payment-bank-title">
+<header class="student-payment-panel-heading"><h2 id="payment-bank-title"><span class="student-section-number" aria-hidden="true">2</span> Bank Transfer Details</h2></header>
+{% if bill.bank_instructions %}{% set bank=bill.bank_instructions %}
+<p class="student-bank-brief"><strong>{{ bank.bank_name }}</strong><span>{{ bank.account_holder }}</span><span>{{ bank.account_number }}</span></p>
+<div class="pay-actions"><a class="pay-button" data-payment-view href="{{ url_for('student_payments.bank_details',bill_id=bill.bill_id) }}">View Bank Details</a><button class="pay-button" type="button" data-bank-copy="payment-bank-account" data-copy-label="Account number" data-copy-status="account-copy-status">Copy Account Number</button></div>
+<input id="payment-bank-account" class="student-copy-source" value="{{ bank.account_number }}" readonly tabindex="-1" aria-label="Account number for copying"><p id="account-copy-status" class="pay-help" role="status"></p>
+{% elif bill.transfer_eligible %}
+<p class="student-payment-message">Owner bank details have not been saved yet. Ask your Owner for their account details before making a new transfer. If you already paid, you can upload your slip below.</p>
+<a class="pay-button" data-payment-view href="{{ url_for('student_payments.bank_details',bill_id=bill.bill_id) }}">View Bank Details</a>
+{% else %}<p class="pay-help">No new transfer is required. Your payment details are available in the history below.</p>{% endif %}
+</section>
+<section class="pay-card" aria-labelledby="payment-upload-title">
+<header class="student-payment-panel-heading"><h2 id="payment-upload-title"><span class="student-section-number" aria-hidden="true">3</span> Upload Payment Slip</h2></header>
+{% if bill.transfer_eligible %}
+<p class="pay-help">Already transferred? Choose how to upload your bank slip.</p>
+<div class="student-upload-options">
+{% if config.MOBILE_SLIP_ENABLED %}<form method="post" action="{{ url_for('student_payments.mobile_upload') }}" data-payment-qr><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="bill_id" value="{{ bill.bill_id }}"><button class="pay-button pay-primary" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h6v6H3zm12 0h6v6h-6zM3 15h6v6H3zm12 0h2v2h-2zm4 0h2v6h-6v-2h4zM3 11h2v2H3zm8-8h2v10H7v-2h4zm0 12h2v6h-2z" fill="currentColor"/></svg>Scan QR Code</button><span class="pay-help">Use your phone camera</span></form>{% endif %}
+<div><a class="pay-button" data-payment-view href="{{ url_for('student_payments.submission',bill_id=bill.bill_id) }}">Upload from Computer</a><span class="pay-help">Choose a saved photo or PDF on your computer or phone</span></div>
+</div>
+{% elif bill.active_payment %}
+<p class="pay-help">{% if bill.active_payment.status=='submitted' %}Pending Verification. You can replace your slip before the Owner reviews it.{% else %}Payment verified. Your receipt is available in Payment History.{% endif %}</p>
+<div class="pay-actions"><a class="pay-button" data-payment-view href="{{ url_for('student_payments.details',payment_id=bill.active_payment.payment_id) }}">View Submitted Slip</a>
+{% if bill.active_payment.status=='submitted' and bill.active_payment.method=='bank_transfer' and bill.active_payment.submitted_by==bill.student_id %}{{ withdraw_payment_button(bill.active_payment.payment_id) }}{% endif %}</div>
+{% else %}<p class="pay-help">This invoice does not require a new slip.</p>{% endif %}
+</section>
+{% else %}<section class="pay-card"><h2>{{ 'Choose an invoice above' if options.total else 'No unpaid invoice to submit' }}</h2><p class="pay-help">Issued invoices are available in My Bills. Submitted payments appear below.</p><a class="pay-button" href="{{ url_for('student_payments.bills') }}">Open My Bills</a></section>{% endif %}
+{% include 'student/_payment_history.html' %}
+{% endblock %}

@@ -1,0 +1,7 @@
+{% if data.payment_approvals %}
+<section class="student-notice student-success" aria-label="Payment approval messages">
+    {% for approval in data.payment_approvals %}
+    <p><strong>Payment Approved.</strong> Your Owner verified LKR {{ '{:,.2f}'.format(approval.amount) }} for {{ approval.bill_reference }} on {{ approval.decided_at|join_request_datetime }}. <a href="{{ url_for('payment_documents.receipt', receipt_id=approval.receipt_id) }}">View Receipt</a></p>
+    {% endfor %}
+</section>
+{% endif %}

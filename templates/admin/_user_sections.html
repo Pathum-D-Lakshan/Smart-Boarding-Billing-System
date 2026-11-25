@@ -1,0 +1,5 @@
+<nav class="admin-actions admin-tabs" aria-label="Manage Users sections">
+<a class="admin-button{% if user_section=='all' %} admin-primary{% endif %}" href="{{ url_for('admin_portal.users') }}">All Users</a>
+{% if appeals_enabled|default(false) %}<a class="admin-button{% if user_section=='appeals' %} admin-primary{% endif %}" href="{{ url_for('admin_portal.appeals') }}">Reactivation Requests{% if appeals_pending is defined %} · {{ appeals_pending }}{% endif %}</a>{% endif %}
+{% if removal_enabled %}<a class="admin-button{% if user_section=='removals' %} admin-primary{% endif %}" href="{{ url_for('admin_portal.removals') }}">Tenant Removal Requests</a>{% endif %}
+</nav>

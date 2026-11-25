@@ -1,0 +1,114 @@
+{% extends 'student/base.html' %}
+{% from "shared/_dashboard.html" import banner, metric, panel_heading, money, badge, empty, request_status %}
+{% from "shared/_boarding_photo.html" import boarding_photo %}
+{% set page_title = 'Student Dashboard' %}
+{% set active_page = 'dashboard' %}
+{% block page_styles %}{{ stylesheet('dashboard-home.css') }}{% endblock %}
+
+{% block student_content %}
+{% include 'shared/_account_decisions.html' %}
+{% include 'student/_payment_approvals.html' %}
+{% set tenure_url = url_for('student_requests.my_boarding') %}
+{% set search_url = url_for('student_requests.boardings') %}
+{% set state = data.state if data else 'review' %}
+{% set tenancy = data.tenancy if data else none %}
+{% set states = {'new':('No boarding','neutral'), 'pending':('Pending','warning'), 'review':('Needs review','warning'), 'previous':('Moved out','neutral'), 'scheduled':('Scheduled','info'), 'active':('Active','success')} %}
+<div class="dash-home dash-student">
+    {{ banner(student_name, 'Your Student Workspace', 'Explore available boardings, manage your stay, view bills and track payments.',
+        tenure_url if state == 'active' else search_url, 'View My Boarding' if state == 'active' else 'Find Boarding') }}
+    {% if data is none %}
+    <section class="dash-panel">{{ empty('info', 'Dashboard details are unavailable', 'Refresh the page to try again.') }}</section>
+    {% else %}
+    <section class="dash-metrics" aria-label="Student summary">
+        {{ metric('My Boarding Status', 'bed', states[state][0], 'cyan', tenure_url) }}
+        {{ metric('Pending Join Requests', 'request', data.pending|default(0), 'blue', url_for('student_requests.history')) }}
+        {{ metric('Unpaid Bills', 'bill', data.unpaid|default(0), 'violet', url_for('student_payments.bills')) }}
+        {{ metric('Total Verified Payments', 'payment', money(data.verified|default(0)), 'green', url_for('student_payments.history')) }}
+    </section>
+    <div class="dash-grid dash-student-row">
+        <section class="dash-panel" data-student-state="{{ state }}">
+            {{ panel_heading('My Boarding Overview', 'bed') }}
+            {% if tenancy and state in ('active', 'scheduled') %}
+            <div class="dash-property">
+                {{ boarding_photo(url_for('student_requests.my_boarding_cover', tenancy_id=tenancy.tenancy_id) if tenancy.has_cover else none, tenancy.boarding_name, 'dash-property-photo') }}
+                <div>
+                    <h3>{{ tenancy.boarding_name }}</h3><p>{{ icon('pin') }} {{ tenancy.city }}, {{ tenancy.district }}</p>
+                    {{ badge(*states[state]) }}
+                    {% if state == 'scheduled' %}<p>Your Boarding is Scheduled</p>{% endif %}
+                </div>
+            </div>
+            <dl class="dash-facts">
+                <div><dt>{{ icon('home') }} Assigned Room</dt><dd>{{ tenancy.room_number }}</dd>{% if tenancy.rent_unit == 'bed' %}<dd><small>Assigned Bed {{ tenancy.bed_label }}</small></dd>{% endif %}</div>
+                <div><dt>{{ icon('coins') }} Agreed Monthly Rent</dt><dd>{{ money(tenancy.agreed_monthly_rent) }} <small>/ {{ 'bed' if tenancy.rent_unit == 'bed' else 'entire room' }}</small></dd></div>
+                <div><dt>{{ icon('clock') }} Tenancy Start Date</dt><dd>{{ tenancy.start_date.strftime('%d %b %Y') }}</dd></div>
+            </dl>
+            <a class="dash-button" href="{{ tenure_url }}">View My Boarding Details {{ icon('arrow') }}</a>
+            {% elif state == 'pending' and data.pending_request %}
+                {{ empty('clock', 'Join Request Pending', data.pending_request.boarding_name ~ ' · Awaiting the Owner’s decision.', url_for('student_requests.details', request_id=data.pending_request.request_id), 'View My Join Request') }}
+            {% elif state == 'review' %}
+                {{ empty('info', 'Your boarding status needs review', 'Please contact the Owner and review your request history.', url_for('student_requests.history'), 'View My Join Requests') }}
+            {% elif tenancy and state == 'previous' %}
+                {{ empty('bed', 'Previous Boarding', tenancy.boarding_name ~ ' · Your tenancy has ended.', url_for('student_requests.my_boarding', tenancy_id=tenancy.tenancy_id), 'View Previous Agreement') }}
+            {% else %}
+                {{ empty('bed', "You haven't joined a boarding yet.", 'Explore available boardings and send a join request.', search_url, 'Find Boarding') }}
+            {% endif %}
+        </section>
+        <section class="dash-panel dash-payment-panel">
+            {{ panel_heading('Payment Summary', 'payment', url_for('student_payments.bills'), 'View Bills') }}
+            {% if data.bill %}
+            {% set bill = data.bill %}
+            {% set paid = bill.receipt_id %}
+            <div class="dash-current-bill">
+                <span class="dash-bill-icon">{{ icon('payment') }}</span>
+                <div><p>{{ bill.period_start.strftime('%B %Y') }} Bill</p><strong>{{ money(bill.final_total) }}</strong>
+                <p class="dash-muted">{{ icon('clock') }} Due {{ bill.due_date.strftime('%d %b %Y') }}</p></div>
+                <div class="dash-bill-action">
+                    {{ badge(bill.payment_status, 'success' if paid else 'warning' if bill.active_status == 'submitted' else 'danger' if bill.payment_status == 'Overdue' else 'info') }}
+                    {% if bill.can_submit %}
+                    <a class="dash-button dash-primary" href="{{ url_for('student_payments.history', bill_id=bill.bill_id) }}">View Bill &amp; Pay {{ icon('arrow') }}</a>
+                    {% elif paid %}
+                    <a class="dash-button" href="{{ url_for('payment_documents.receipt', receipt_id=paid) }}">View Receipt {{ icon('arrow') }}</a>
+                    {% else %}
+                    <a class="dash-button" href="{{ url_for('student_payments.bill_details', bill_id=bill.bill_id) }}">View Bill {{ icon('arrow') }}</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}{{ empty('bill', 'No issued bills yet', 'Your bill will appear when the Boarding Owner issues it.') }}{% endif %}
+        </section>
+    </div>
+    <div class="dash-grid dash-student-row">
+        <section class="dash-panel">
+            {{ panel_heading('Recent Join Requests', 'request', url_for('student_requests.history')) }}
+            {% if data.requests %}
+            <ul class="dash-list">
+                {% for item in data.requests %}
+                <li><a class="dash-list-row" href="{{ url_for('student_requests.details', request_id=item.request_id) }}">
+                    {{ boarding_photo(url_for('student_requests.cover', boarding_id=item.boarding_id) if item.has_cover else none, item.boarding_name, 'dash-request-photo', lazy=true) }}
+                    <span class="dash-row-text"><strong>{{ item.boarding_name }}</strong><small>{{ item.city }}, {{ item.district }}</small></span>
+                    <small class="dash-row-date">{{ item.requested_at|join_request_datetime }}</small>{{ request_status(item) }}{{ icon('arrow') }}
+                </a></li>
+                {% endfor %}
+            </ul>
+            {% else %}{{ empty('request', 'No join requests yet.', 'Your recent applications will appear here.') }}{% endif %}
+        </section>
+        <section class="dash-panel">
+            {{ panel_heading('Notifications & Updates', 'info') }}
+            {% if data.updates %}
+            <ul class="dash-list dash-updates">
+                {% for item in data.updates %}
+                {% if item.kind == 'bill' %}{% set href = url_for('student_payments.bill_details', bill_id=item.item_id) %}{% set label = 'New bill' %}
+                {% elif item.kind == 'payment' %}{% set href = url_for('student_payments.details', payment_id=item.item_id) %}{% set label = 'Payment ' ~ item.status_label|lower %}
+                {% elif item.kind == 'request' %}{% set href = url_for('student_requests.details', request_id=item.item_id) %}{% set label = 'Join request · ' ~ item.status_label %}
+                {% else %}{% set href = url_for('student_maintenance.student_details', maintenance_id=item.item_id) %}{% set label = 'Maintenance · ' ~ item.status_label %}{% endif %}
+                <li><a class="dash-list-row" href="{{ href }}"><span class="dash-update-dot" aria-hidden="true"></span>
+                    <span class="dash-row-text"><strong>{{ label }}</strong><small>{{ item.label }}</small></span>
+                    <small class="dash-row-date">{{ item.event_at|join_request_datetime }}</small>{{ icon('arrow') }}
+                </a></li>
+                {% endfor %}
+            </ul>
+            {% else %}{{ empty('info', 'No updates yet', 'Billing, payment and request updates will appear here.') }}{% endif %}
+        </section>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

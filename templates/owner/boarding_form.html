@@ -4,7 +4,8 @@
 {% set editing = form_mode == 'edit' %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/owner-boarding-profile.css') }}">
+{{ stylesheet('owner-boarding-profile.css') }}
+{% if editing %}{{ stylesheet('owner-edit-confirm.css') }}{% endif %}
 {% endblock %}
 
 {% block page_scripts %}
@@ -38,9 +39,9 @@
     <p>{{ 'Update your boarding details and confirm with your current password.' if editing else 'Add your boarding details. Your profile will be saved as a Draft.' }}</p>
 </section>
 
-{% if error %}<p class="owner-message owner-message-error" role="alert">{{ error }}</p>{% endif %}
+{% if error %}<p class="owner-message owner-message-error" id="boarding-save-error" tabindex="-1" role="alert">{{ error }}</p>{% endif %}
 {% if errors %}
-<div class="boarding-error-summary" role="alert" aria-labelledby="form-error-title">
+<div class="boarding-error-summary" id="boarding-form-errors" tabindex="-1" role="alert" aria-labelledby="form-error-title">
     <h3 id="form-error-title">Please check the highlighted fields</h3>
     <ul>{% for name, message in errors.items() %}<li><a href="#{{ name }}">{{ message }}</a></li>{% endfor %}</ul>
 </div>
@@ -57,11 +58,11 @@
         <legend><span aria-hidden="true">🏠</span> Basic Boarding Information</legend>
         {{ input_field('boarding_name', 'Boarding Name', required=true) }}
         <div class="boarding-field">
-            <label for="description">Description <span class="boarding-required" aria-hidden="true">*</span></label>
-            <textarea id="description" name="description" rows="5" required maxlength="{{ text_byte_limit }}"
+            <label for="description">Description <span class="boarding-optional">(Optional)</span></label>
+            <textarea id="description" name="description" rows="5" maxlength="{{ text_byte_limit }}"
                       aria-invalid="{{ 'true' if errors.get('description') else 'false' }}"
                       aria-describedby="description-hint{% if errors.get('description') %} description-error{% endif %}">{{ values.get('description', '') }}</textarea>
-            <p class="boarding-hint" id="description-hint">Describe your boarding and what residents can expect.</p>
+            <p class="boarding-hint" id="description-hint">Describe your boarding, or leave this empty to hide it on your profile.</p>
             {{ field_error('description') }}
         </div>
     </fieldset>
@@ -114,6 +115,15 @@
             {% endfor %}
         </div>
         {{ field_error('facilities') }}
+        <div class="boarding-field boarding-custom-facilities">
+            <label for="custom_facilities">Other Facilities <span class="boarding-optional">(Optional)</span></label>
+            <textarea id="custom_facilities" name="custom_facilities" rows="3" maxlength="{{ custom_facilities_text_limit }}"
+                      placeholder="Hot Water&#10;Attached Bathroom"
+                      aria-invalid="{{ 'true' if errors.get('custom_facilities') else 'false' }}"
+                      aria-describedby="custom_facilities-hint{% if errors.get('custom_facilities') %} custom_facilities-error{% endif %}">{{ values.get('custom_facilities', '') }}</textarea>
+            <p class="boarding-hint" id="custom_facilities-hint">Type one facility per line, up to {{ custom_facility_count }} facilities and {{ custom_facility_limit }} characters each. Repeated names are saved only once.</p>
+            {{ field_error('custom_facilities') }}
+        </div>
     </fieldset>
 
     <fieldset class="boarding-form-section">
@@ -123,35 +133,13 @@
             <textarea id="house_rules" name="house_rules" rows="5" maxlength="{{ text_byte_limit }}"
                       aria-invalid="{{ 'true' if errors.get('house_rules') else 'false' }}"
                       aria-describedby="house_rules-hint{% if errors.get('house_rules') %} house_rules-error{% endif %}">{{ values.get('house_rules', '') }}</textarea>
-            <p class="boarding-hint" id="house_rules-hint">Add rules on separate lines so they are easy to read.</p>
+            <p class="boarding-hint" id="house_rules-hint">Add rules on separate lines, or leave this empty to hide this section.</p>
             {{ field_error('house_rules') }}
         </div>
     </fieldset>
 
     {% if editing %}
-    <!-- Open inline without JS; enhancement moves confirmation into a modal. -->
-    <dialog class="boarding-password-dialog" id="boarding-password-dialog" open
-            aria-labelledby="password-dialog-title" aria-describedby="password-dialog-description"
-            data-password-error="{{ 'true' if errors.get('current_password') and errors|length == 1 else 'false' }}">
-        <div class="boarding-dialog-heading">
-            <span class="boarding-dialog-icon" aria-hidden="true">{{ icon('user') }}</span>
-            <h3 id="password-dialog-title">Confirm your changes</h3>
-            <button class="boarding-dialog-close" type="button" data-password-cancel aria-label="Close password confirmation" hidden>&times;</button>
-        </div>
-        <p class="boarding-hint" id="password-dialog-description">Enter your current login password to save the changes to your boarding profile.</p>
-        <div class="boarding-field">
-            <label for="current_password">Current Password <span class="boarding-required" aria-hidden="true">*</span></label>
-            <input id="current_password" name="current_password" type="password" autocomplete="current-password"
-                   required maxlength="128" aria-invalid="{{ 'true' if errors.get('current_password') else 'false' }}"
-                   aria-describedby="current_password-hint{% if errors.get('current_password') %} current_password-error{% endif %}">
-            <p class="boarding-hint" id="current_password-hint">Your password is used only to confirm this update.</p>
-            {{ field_error('current_password') }}
-        </div>
-        <div class="boarding-dialog-actions">
-            <button class="boarding-button boarding-button-secondary" type="button" data-password-cancel hidden>Cancel</button>
-            <button class="boarding-button boarding-button-primary" type="submit" id="boarding-confirm-save" hidden>Confirm &amp; Save</button>
-        </div>
-    </dialog>
+    {% include 'owner/_edit_password_confirmation.html' %}
     {% endif %}
 
     <div class="boarding-form-actions">

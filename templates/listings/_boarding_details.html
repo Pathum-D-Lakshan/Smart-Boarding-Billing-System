@@ -1,0 +1,42 @@
+{% from "shared/_boarding_photo.html" import boarding_photo %}
+{% macro listing_hero(listing, cover_url, visibility) -%}
+<div class="listing-hero">
+    {{ boarding_photo(cover_url, listing.boarding_name, 'listing-cover') }}
+    <div class="listing-summary">
+        <span class="listing-status listing-status-{{ listing.status }}">{{ listing.status|capitalize }}</span>
+        <h3>{{ listing.boarding_name }}</h3>
+        <p class="listing-location"><span aria-hidden="true">📍</span> {{ listing.city }}, {{ listing.district }}</p>
+        <p class="listing-muted">{{ visibility }}</p>
+        <ul class="listing-facilities" aria-label="Facilities and amenities">
+            {% for facility in listing.facilities %}<li><span aria-hidden="true">{{ facility_icons.get(facility, '') }}</span> {{ facility }}</li>
+            {% else %}<li class="listing-facilities-empty">No facilities selected yet</li>{% endfor %}
+        </ul>
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro rent_panels(listing) -%}
+<div class="listing-rent-grid">
+    {% for room_type, label, emoji, unit in [('shared', 'Shared Room', '🛏️', 'bed'), ('private', 'Private Room', '🏠', 'room')] %}
+    {% set options = listing.rent_options[room_type] %}
+    <section class="listing-rent-panel" aria-label="{{ label }} monthly rent">
+        <span class="listing-rent-icon listing-rent-icon-{{ room_type }}" aria-hidden="true">{{ emoji }}</span>
+        <div class="listing-rent-content">
+            <h4>{{ label }}</h4>
+            {% if options %}
+            <p class="listing-price">{% if options|length > 1 %}<span class="listing-from">From</span> {% endif %}<strong>LKR {{ '{:,.2f}'.format(options[0]) }}</strong> <span>/ {{ unit }} / month</span></p>
+            {% else %}<p class="listing-muted">No saved rent options yet</p>{% endif %}
+            <p class="listing-rate-note">{{ 'Saved rent on registered beds; new-bed defaults are separate.' if room_type == 'shared' else 'One price for the entire room, including its physical beds.' }}</p>
+        </div>
+    </section>
+    {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro boarding_details(listing, cover_url, visibility) -%}
+<article class="listing-card">
+    {{ listing_hero(listing, cover_url, visibility) }}
+    {% if listing.description and listing.description|trim %}<section class="listing-section"><h3>About this boarding</h3><p class="listing-description">{{ listing.description }}</p></section>{% endif %}
+    {% if caller is defined %}{{ caller() }}{% endif %}
+</article>
+{%- endmacro %}
